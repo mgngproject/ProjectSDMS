@@ -27,13 +27,15 @@ Versi ini dibangun dengan **Next.js + Supabase** dan di-deploy ke **Vercel**. Ve
 
 ## 2. Fitur
 
+Logikanya mengikuti versi Laravel.
+
 * **Login & hak akses** — admin hanya melihat dan mengelola data kategorinya; Super Admin melihat semua.
-* **Dashboard** — jumlah karyawan aktif, kontrak yang habis ≤ 90 hari, terminate, dan grafik per kategori.
-* **Data Karyawan** — tambah, ubah, hapus, cari, export Excel.
-* **Kontrak** — riwayat kontrak per karyawan; kontrak baru otomatis menutup kontrak aktif sebelumnya.
-* **Data Diri** — data pribadi dan pendidikan (jenjang 1 dan 2).
-* **Monitoring** — checklist proses karyawan; status menjadi `Selesai` bila semua item tercentang.
-* **Terminate** — proses pemberhentian dan daftar karyawan terminate.
+* **Dashboard** — penunjuk bulan; karyawan aktif, masuk, kontrak habis, dan berkas belum lengkap; grafik masuk dan habis per bulan, pendidikan, 10 kampus teratas, dan per kategori; daftar kontrak habis ≤ 60 hari; filter kategori untuk Super Admin.
+* **Data Karyawan** — tambah (otomatis membuat Kontrak 1, data diri, dan monitoring), ubah, hapus, hapus massal, cari, filter masuk/habis per bulan dan tahun, masa kerja dan masa kontrak, export Excel.
+* **Kontrak** — riwayat per karyawan (tambah, ubah, hapus). Kontrak yang lewat otomatis selesai, kontrak aktif baru menutup yang lama, dan data karyawan ikut disinkronkan.
+* **Data Diri** — daftar dengan filter jenjang, ubah (KTP 16 digit dan unik), export Excel.
+* **Monitoring** — 10 kotak centang dan 3 isian (usulan remunerasi, SP, SKEP); status `Selesai` hanya bila semuanya lengkap, catatan menampilkan yang kurang; filter bulan dan status.
+* **Terminate** — terminate dari karyawan, tambah langsung, ubah, hapus, hapus massal, filter, export Excel.
 
 ## 3. Kategori dan Role
 
@@ -66,7 +68,7 @@ src/
 ├── lib/                       # klien Supabase, auth, format tanggal
 └── middleware.ts              # menyegarkan sesi dan mengarahkan ke /login
 supabase/
-├── migrations/0001_init.sql   # tabel, trigger, RLS
+├── migrations/                # 0001 tabel+RLS, 0002 hak akses, 0003 logika kontrak/monitoring
 └── seed.sql                   # daftar kategori
 scripts/create-users.mjs       # membuat akun awal
 legacy-laravel/                # kode Laravel lama (acuan)
@@ -79,7 +81,7 @@ Prasyarat: Node.js 20+ dan project Supabase.
 ### a. Siapkan Supabase
 
 1. Buat project di [supabase.com](https://supabase.com).
-2. Buka **SQL Editor**, jalankan isi `supabase/migrations/0001_init.sql`, lalu `supabase/migrations/0002_grants.sql`, lalu `supabase/seed.sql`.
+2. Buka **SQL Editor**, jalankan berurutan: `supabase/migrations/0001_init.sql`, `0002_grants.sql`, `0003_parity_laravel.sql`, lalu `supabase/seed.sql`.
 3. Ambil `Project URL`, `anon key`, dan `service_role key` dari **Project Settings → API**.
 
 ### b. Konfigurasi dan jalankan
@@ -142,7 +144,7 @@ Buat Pull Request ke `main` dan minta review sebelum merge.
 
 * Import Excel (karyawan, data diri, kontrak, terminate) dan export PDF.
 * Upload foto karyawan (rencana: Supabase Storage).
-* Hapus massal, edit kontrak, dan edit data terminate.
+* Kolom khusus per kategori (PIC) — menyusul setelah daftar kolomnya ditentukan.
 * Perpindahan data dari MySQL lama ke Supabase.
 
 Kode acuannya ada di `legacy-laravel/app/`.

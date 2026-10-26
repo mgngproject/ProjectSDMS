@@ -1,9 +1,10 @@
 import { notFound } from "next/navigation";
+import Flash from "@/components/Flash";
 import KaryawanForm from "@/components/KaryawanForm";
 import { getProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import type { Karyawan } from "@/lib/types";
-import { terminateKaryawan, updateKaryawan } from "../../actions";
+import { updateKaryawan } from "../../actions";
 
 export default async function EditKaryawanPage({
   params,
@@ -24,31 +25,19 @@ export default async function EditKaryawanPage({
   if (!karyawan) notFound();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <h1 className="text-xl font-bold">Ubah Karyawan</h1>
+      <Flash error={error} />
       <KaryawanForm
+        mode="ubah"
         action={updateKaryawan.bind(null, Number(id))}
+        batal="/karyawan"
         kategori={kategori ?? []}
         isSuperAdmin={profile.role === "superadmin"}
         kategoriAdmin={profile.kategori?.nama}
         karyawan={karyawan as Karyawan}
-        error={error}
       />
-
-      <form action={terminateKaryawan.bind(null, Number(id))} className="max-w-3xl space-y-3 rounded bg-white p-4 shadow-sm">
-        <h2 className="font-semibold">Terminate Karyawan</h2>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div>
-            <label className="label" htmlFor="tanggal_keluar">Tanggal Keluar</label>
-            <input className="input" id="tanggal_keluar" name="tanggal_keluar" type="date" required />
-          </div>
-          <div>
-            <label className="label" htmlFor="alasan_keluar">Alasan</label>
-            <input className="input" id="alasan_keluar" name="alasan_keluar" />
-          </div>
-        </div>
-        <button className="btn-danger" type="submit">Terminate</button>
-      </form>
+      <p className="text-sm text-gray-500">Tanggal kontrak diatur lewat menu Kontrak.</p>
     </div>
   );
 }

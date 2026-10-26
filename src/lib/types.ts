@@ -32,3 +32,36 @@ export type Karyawan = {
   alasan_keluar: string | null;
   kategori?: { nama: string } | null;
 };
+
+export type Kontrak = {
+  id: number;
+  karyawan_id: number;
+  kontrak_ke: string;
+  np: string | null;
+  awal_kontrak: string | null;
+  akhir_kontrak: string | null;
+  penilaian: string | null;
+  folder_link: string | null;
+  status: "aktif" | "selesai" | "terminate";
+};
+
+export type DataDiri = {
+  id: number;
+  karyawan_id: number;
+  ktp: string | null;
+  tempat_lahir: string | null;
+  tanggal_lahir: string | null;
+  alamat: string | null;
+  rt: string | null;
+  rw: string | null;
+  kelurahan: string | null;
+  kecamatan: string | null;
+  kabupaten: string | null;
+  provinsi: string | null;
+  jenjang_1: string | null;
+  jurusan_1: string | null;
+  kampus_1: string | null;
+  jenjang_2: string | null;
+  jurusan_2: string | null;
+  kampus_2: string | null;
+};
