@@ -1,398 +1,65 @@
-# SDMS — Sistem Dashboard Rekrutmen (Next.js + Supabase)
+# [Start Bootstrap - SB Admin 2](https://startbootstrap.com/theme/sb-admin-2/)
 
-SDMS (Sistem Dashboard Rekrutmen) adalah website untuk mengelola data karyawan dan administrasi kontrak secara terpusat, dengan pembatasan akses per kategori pengguna.
+[SB Admin 2](https://startbootstrap.com/theme/sb-admin-2/) is an open source admin dashboard theme for [Bootstrap](https://getbootstrap.com/) created by [Start Bootstrap](https://startbootstrap.com/).
 
-> **Status:** prototype. Versi sebelumnya dibangun dengan Laravel + MySQL. Versi ini dibangun ulang dengan Next.js + Supabase, dengan fitur dan aturan akses yang sama sebagai acuan.
->
-> Bagian bertanda **[KONFIRMASI]** adalah asumsi yang perlu dicek sebelum dianggap final.
+For the legacy Bootstrap 3 version of this theme, you can view the [last stable release](https://github.com/StartBootstrap/startbootstrap-sb-admin-2/releases/tag/v3.3.7%2B1) of SB Admin 2 for Bootstrap 3.
 
----
+## Preview
 
-## 1. Tech Stack
+[![SB Admin 2 Preview](https://assets.startbootstrap.com/img/screenshots/themes/sb-admin-2.png)](https://startbootstrap.github.io/startbootstrap-sb-admin-2/)
 
-| Komponen          | Teknologi                                      |
-| ----------------- | ---------------------------------------------- |
-| Framework         | Next.js (App Router) + TypeScript              |
-| Database          | PostgreSQL (Supabase)                          |
-| Autentikasi       | Supabase Auth                                  |
-| Hak akses data    | Row Level Security (RLS) Supabase              |
-| Styling           | Tailwind CSS                                   |
-| Hosting           | Vercel                                         |
-| Version Control   | Git & GitHub                                   |
-| Alat pengembangan | Claude Code                                    |
+**[Launch Live Preview](https://startbootstrap.github.io/startbootstrap-sb-admin-2/)**
 
-Perbandingan dengan versi sebelumnya:
+## Status
 
-| Aspek          | Versi lama (Laravel)       | Versi baru                  |
-| -------------- | -------------------------- | --------------------------- |
-| Bahasa         | PHP 8.3                    | TypeScript                  |
-| Database       | MySQL (`db_sdms`)          | PostgreSQL (Supabase)       |
-| Tampilan       | Blade + Bootstrap (SB Admin 2) | React + Tailwind        |
-| Login          | Session Laravel            | Supabase Auth               |
-| Batas akses    | Middleware + `kategori_id` | RLS + `kategori_id`         |
-| Struktur DB    | Laravel Migration          | Supabase Migration (SQL)    |
-| Data awal      | `DatabaseSeeder.php`       | `supabase/seed.sql` + skrip |
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/StartBootstrap/startbootstrap-sb-admin-2/master/LICENSE)
+[![npm version](https://img.shields.io/npm/v/startbootstrap-sb-admin-2.svg)](https://www.npmjs.com/package/startbootstrap-sb-admin-2)
+[![Build Status](https://travis-ci.org/StartBootstrap/startbootstrap-sb-admin-2.svg?branch=master)](https://travis-ci.org/StartBootstrap/startbootstrap-sb-admin-2)
+[![dependencies Status](https://david-dm.org/StartBootstrap/startbootstrap-sb-admin-2/status.svg)](https://david-dm.org/StartBootstrap/startbootstrap-sb-admin-2)
+[![devDependencies Status](https://david-dm.org/StartBootstrap/startbootstrap-sb-admin-2/dev-status.svg)](https://david-dm.org/StartBootstrap/startbootstrap-sb-admin-2?type=dev)
 
----
+## Download and Installation
 
-## 2. Fitur Utama
+To begin using this template, choose one of the following options to get started:
 
-### Login & Hak Akses
+* [Download the latest release on Start Bootstrap](https://startbootstrap.com/theme/sb-admin-2/)
+* Install via npm: `npm i startbootstrap-sb-admin-2`
+* Clone the repo: `git clone https://github.com/StartBootstrap/startbootstrap-sb-admin-2.git`
+* [Fork, Clone, or Download on GitHub](https://github.com/StartBootstrap/startbootstrap-sb-admin-2)
 
-Pengguna login dengan akun sesuai kategorinya. Setelah login, admin hanya melihat dan mengelola data kategorinya. **Super Admin** dapat mengakses seluruh kategori.
+## Usage
 
-Kategori yang tersedia:
+After installation, run `npm install` and then run `npm start` which will open up a preview of the template in your default browser, watch for changes to core template files, and live reload the browser when changes are saved. You can view the `gulpfile.js` to see which tasks are included with the dev environment.
 
-* IDE
-* IDH
-* BGN
-* TPBW/TPP
-* Magang
-* PKWT
-* Inagov
+### Gulp Tasks
 
-### Dashboard
+* `gulp` the default task that builds everything
+* `gulp watch` browserSync opens the project in your default browser and live reloads when changes are made
+* `gulp css` compiles SCSS files into CSS and minifies the compiled CSS
+* `gulp js` minifies the themes JS file
+* `gulp vendor` copies dependencies from node_modules to the vendor directory
 
-Ringkasan informasi karyawan dan kontrak sesuai hak akses pengguna.
+You must have npm installed globally in order to use this build environment. This theme was built using node v11.6.0 and the Gulp CLI v2.0.1. If Gulp is not running properly after running `npm install`, you may need to update node and/or the Gulp CLI locally.
 
-### Data Karyawan
+## Bugs and Issues
 
-Create, Read, Update, Delete data karyawan. Data yang tampil menyesuaikan kategori pengguna.
+Have a bug or an issue with this template? [Open a new issue](https://github.com/StartBootstrap/startbootstrap-sb-admin-2/issues) here on GitHub or leave a comment on the [template overview page at Start Bootstrap](https://startbootstrap.com/theme/sb-admin-2/).
 
-### Kontrak
+## About
 
-Melihat dan mengelola data kontrak karyawan, termasuk informasi masa kontrak.
+Start Bootstrap is an open source library of free Bootstrap templates and themes. All of the free templates and themes on Start Bootstrap are released under the MIT license, which means you can use them for any purpose, even for commercial projects.
 
-### Monitoring
+* <https://startbootstrap.com>
+* <https://twitter.com/SBootstrap>
 
-Memantau kelengkapan data atau proses yang harus diselesaikan sebelum karyawan terminasi/resign.
+Start Bootstrap was created by and is maintained by **[David Miller](https://davidmiller.io/)**.
 
-### Terminate
+* <https://davidmiller.io>
+* <https://twitter.com/davidmillerhere>
+* <https://github.com/davidtmiller>
 
-Melihat data karyawan yang sudah terminasi.
+Start Bootstrap is based on the [Bootstrap](https://getbootstrap.com/) framework created by [Mark Otto](https://twitter.com/mdo) and [Jacob Thorton](https://twitter.com/fat).
 
-### Data Diri
+## Copyright and License
 
-Melihat detail data diri tiap karyawan.
-
-### Import & Export Data
-
-Import dan export data (Excel) seperti pada versi sebelumnya. **[KONFIRMASI]** format file dan kolom yang dipakai.
-
----
-
-## 3. Alur Sistem
-
-```text
-Login (Supabase Auth)
-  ↓
-Ambil profil pengguna (role + kategori_id)
-  ↓
-Dashboard
-  ↓
-┌─────────────────────────────────────┐
-│ Data Karyawan                       │
-│ Kontrak                             │
-│ Monitoring                          │
-│ Terminate                           │
-│ Data Diri                           │
-└─────────────────────────────────────┘
-```
-
-Admin kategori: login → kategori pengguna → data sesuai kategori.
-Super Admin: login → seluruh kategori → seluruh data.
-
-Pembatasan data dilakukan di **dua lapis**: tampilan (menu yang muncul) dan database (RLS). Lapis database yang menjadi penjaga utama, sehingga data tetap aman meski seseorang memanggil API secara langsung.
-
----
-
-## 4. Role dan Hak Akses
-
-| Role           | Akses Data              |
-| -------------- | ----------------------- |
-| Admin IDE      | Data kategori IDE       |
-| Admin IDH      | Data kategori IDH       |
-| Admin BGN      | Data kategori BGN       |
-| Admin TPBW/TPP | Data kategori TPBW/TPP  |
-| PIC Magang     | Data kategori Magang    |
-| PIC PKWT       | Data kategori PKWT      |
-| Admin Inagov   | Data kategori Inagov    |
-| Super Admin    | Seluruh kategori        |
-
-Kategori pengguna disimpan di `kategori_id` pada tabel `profiles`. Pengguna dengan role `superadmin` tidak terikat kategori.
-
-### Matriks hak akses (diisi seiring development)
-
-| Menu / Aksi     | Admin kategori      | Super Admin |
-| --------------- | ------------------- | ----------- |
-| Dashboard       | Lihat (kategorinya) | Lihat semua |
-| Data Karyawan   | CRUD (kategorinya)  | CRUD semua  |
-| Kontrak         | **[KONFIRMASI]**    | CRUD semua  |
-| Monitoring      | **[KONFIRMASI]**    | CRUD semua  |
-| Terminate       | Lihat (kategorinya) | Lihat semua |
-| Data Diri       | **[KONFIRMASI]**    | CRUD semua  |
-
----
-
-## 5. Database
-
-* DBMS: PostgreSQL di Supabase
-* Struktur database dikelola lewat **file migrasi SQL** di `supabase/migrations/`, bukan lewat dashboard.
-
-### Tabel utama (draft)
-
-Nama tabel mengikuti model versi lama. **Kolom lengkap diambil dari migration Laravel lama**, lalu disesuaikan.
-
-| Tabel        | Isi                                                        |
-| ------------ | ---------------------------------------------------------- |
-| `kategori`   | Daftar kategori (IDE, IDH, BGN, TPBW/TPP, Magang, PKWT, Inagov)             |
-| `profiles`   | Profil pengguna: terhubung ke `auth.users`, `role`, `kategori_id` |
-| `karyawan`   | Data karyawan, terhubung ke `kategori`                     |
-| `kontrak`    | Kontrak karyawan, terhubung ke `karyawan`                  |
-| `monitoring` | Status kelengkapan/proses, terhubung ke `karyawan`         |
-| `data_diri`  | Data diri detail, terhubung ke `karyawan`                  |
-
-Diagram relasi (ERD) disimpan di `docs/erd.md`.
-
-### Contoh kebijakan RLS
-
-Pola dasar: Super Admin melihat semua, admin kategori hanya melihat baris dengan `kategori_id` yang sama.
-
-```sql
-alter table karyawan enable row level security;
-
-create policy "karyawan_per_kategori"
-on karyawan
-for all
-to authenticated
-using (
-  exists (
-    select 1 from profiles p
-    where p.id = auth.uid()
-      and (p.role = 'superadmin' or p.kategori_id = karyawan.kategori_id)
-  )
-)
-with check (
-  exists (
-    select 1 from profiles p
-    where p.id = auth.uid()
-      and (p.role = 'superadmin' or p.kategori_id = karyawan.kategori_id)
-  )
-);
-```
-
-Pola yang sama diterapkan ke tabel lain. Tabel yang tidak memiliki `kategori_id` sendiri (misalnya `kontrak`) mengikuti kategori karyawannya lewat relasi.
-
-### Data awal
-
-* `supabase/seed.sql` membuat data kategori dan data contoh (dummy).
-* Akun pengguna dibuat lewat Supabase Auth (skrip di `scripts/` atau dashboard), lalu profilnya diisi `role` dan `kategori_id`.
-
-> Selama prototype, **gunakan data dummy saja**. Jangan memasukkan data karyawan asli.
->
-> Kredensial login diberikan secara terpisah dan tidak dicantumkan di README.
-
----
-
-## 6. Struktur Project
-
-```text
-sdms/
-│
-├── src/
-│   ├── app/
-│   │   ├── (auth)/              ← login (fondasi, satu pemegang)
-│   │   ├── dashboard/
-│   │   ├── pic-magang/          ← area kerja PIC Magang
-│   │   └── pic-pkwt/            ← area kerja PIC PKWT
-│   ├── components/
-│   │   ├── shared/              ← komponen bersama (kabari sebelum mengubah)
-│   │   ├── pic-magang/
-│   │   └── pic-pkwt/
-│   ├── lib/
-│   │   └── supabase/            ← klien Supabase (browser & server)
-│   └── middleware.ts            ← proteksi halaman berdasarkan login
-│
-├── supabase/
-│   ├── migrations/              ← seluruh perubahan skema, berurutan
-│   └── seed.sql                 ← data dummy
-│
-├── scripts/                     ← skrip bantu (mis. membuat akun awal)
-├── docs/                        ← ERD, matriks akses, alur kontrak
-│
-├── .env.example
-├── .gitignore
-├── CLAUDE.md                    ← aturan proyek untuk Claude Code
-├── package.json
-└── README.md
-```
-
----
-
-## 7. Persiapan Environment
-
-Pastikan sudah tersedia:
-
-* Node.js (versi LTS)
-* npm
-* Git
-* Akun Supabase (atau Docker, jika memakai Supabase lokal)
-
-Clone repository:
-
-```bash
-git clone [URL_REPOSITORY]
-cd sdms
-```
-
-Install dependency:
-
-```bash
-npm install
-```
-
----
-
-## 8. Konfigurasi `.env`
-
-Copy `.env.example` menjadi `.env.local`, lalu isi nilainya.
-
-```env
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
-```
-
-* `NEXT_PUBLIC_SUPABASE_URL` dan `NEXT_PUBLIC_SUPABASE_ANON_KEY` aman dipakai di sisi browser, karena akses datanya dibatasi RLS.
-* `SUPABASE_SERVICE_ROLE_KEY` melewati RLS. **Hanya boleh dipakai di sisi server** dan tidak boleh diawali `NEXT_PUBLIC_`.
-
-**File `.env.local` tidak boleh di-commit ke GitHub.** Gunakan `.env.example` (berisi nama variabel tanpa nilai) sebagai template.
-
----
-
-## 9. Database Setup
-
-Hubungkan project ke Supabase, lalu terapkan migrasi:
-
-```bash
-npx supabase login
-npx supabase link --project-ref [PROJECT_REF]
-npx supabase db push
-```
-
-Lalu muat data dummy dari `supabase/seed.sql` (lewat SQL Editor Supabase atau perintah seed), dan buat akun awal sesuai panduan di `scripts/`.
-
-> Gunakan project Supabase **dev** untuk pengembangan. Jangan menjalankan perintah yang menghapus atau me-reset database di project **prod** tanpa backup.
-
----
-
-## 10. Menjalankan Project
-
-```bash
-npm run dev
-```
-
-Buka `http://localhost:3000`.
-
----
-
-## 11. Kolaborasi Dua Orang (Git & GitHub)
-
-Pembagian area kerja:
-
-| Orang     | Area                                   | Branch                |
-| --------- | -------------------------------------- | --------------------- |
-| Developer A | `pic-magang` (folder & komponen)     | `fitur/magang-...`    |
-| Developer B | `pic-pkwt` (folder & komponen)       | `fitur/pkwt-...`      |
-
-### Alur harian
-
-```bash
-git checkout main
-git pull origin main
-git checkout -b fitur/pkwt-nama-fitur
-# kerjakan dengan Claude Code, commit kecil dan sering
-git add .
-git commit -m "deskripsi perubahan"
-git push origin fitur/pkwt-nama-fitur
-```
-
-Lalu buka **Pull Request** ke `main`. Vercel otomatis membuat preview URL untuk tiap PR. Satu orang me-review, lalu merge.
-
-### Aturan bersama
-
-1. **Branch `main` diproteksi.** Tidak ada push langsung ke `main`.
-2. Setiap orang hanya mengubah folder areanya sendiri.
-3. **File bersama** (`package.json`, layout utama, `components/shared/`, `middleware.ts`) hanya diubah lewat PR kecil dan dikabari ke rekan.
-4. **Perubahan skema database** selalu lewat file migrasi di `supabase/migrations/`, bukan lewat dashboard Supabase.
-   * Satu orang menjadi pemegang skema dan menggabungkan migrasi.
-   * Sebelum membuat migrasi baru, `git pull` dulu agar urutan tidak bentrok.
-   * Buat migrasi baru dengan `npx supabase migration new nama_perubahan`.
-5. **Jangan menghapus atau mengubah migrasi yang sudah ter-merge.** Perbaikan dilakukan dengan migrasi baru.
-6. Jangan commit `.env.local` atau key apa pun.
-7. Setelah fitur selesai, uji di preview URL sebelum merge.
-
-### Aturan untuk Claude Code
-
-Aturan proyek (struktur folder, penamaan tabel, gaya kode, larangan mengubah area rekan) ditulis di `CLAUDE.md` agar kedua Claude Code mengikuti konvensi yang sama.
-
----
-
-## 12. Panduan Singkat Pengembangan
-
-| Kebutuhan               | Lokasi                         |
-| ----------------------- | ------------------------------ |
-| Halaman & route         | `src/app/`                     |
-| Komponen tampilan       | `src/components/`              |
-| Koneksi & query Supabase | `src/lib/supabase/`           |
-| Proteksi login/halaman  | `src/middleware.ts`            |
-| Struktur database & RLS | `supabase/migrations/`         |
-| Data awal (dummy)       | `supabase/seed.sql`            |
-| Dokumentasi             | `docs/`                        |
-
----
-
-## 13. Catatan Handover ke Tim IT
-
-Project ini prototype. Hal yang perlu diketahui tim IT:
-
-1. **Database tidak ikut di GitHub.** Struktur tabel dan aturan akses dibangun ulang lewat `supabase/migrations/`.
-2. Database berbasis **PostgreSQL**. Datanya dapat dipindah ke server PostgreSQL mandiri. Supabase juga dapat di-host sendiri.
-3. Fitur login dan RLS memakai Supabase. Jika IT memakai stack lain, aturan akses perlu diimplementasikan ulang sesuai **matriks hak akses** (bagian 4) dan kebijakan RLS (bagian 5).
-4. Dokumen di `docs/` (ERD, matriks akses, alur status kontrak) menjadi spesifikasi untuk membangun ulang di stack lain bila diperlukan.
-5. Semua key dan kredensial dikelola lewat environment variables, tidak ada di repository.
-6. Data di prototype hanya data dummy. Data asli dimasukkan setelah sistem terpasang di lingkungan yang disetujui IT.
-7. Cek ketentuan terbaru Vercel (terutama paket Hobby dan deployment dari beberapa akun GitHub) sebelum memakainya untuk kolaborasi.
-
----
-
-## 14. Ringkasan Alur Pengguna
-
-```text
-                    LOGIN
-                      │
-             ┌────────┴────────┐
-             │                 │
-       ADMIN KATEGORI      SUPER ADMIN
-             │                 │
-             ↓                 ↓
-      Data sesuai         Seluruh kategori
-        kategori                 │
-             │                   │
-             └─────────┬─────────┘
-                       ↓
-                    DASHBOARD
-                       │
-        ┌──────────────┼──────────────┐
-        ↓              ↓              ↓
- Data Karyawan      Kontrak       Monitoring
-        │              │              │
-        └──────────────┼──────────────┘
-                       ↓
-                  Data Diri
-                       │
-                       ↓
-                   Terminate
-```
-
-SDMS menjadi pusat pengelolaan data karyawan dan administrasi kontrak, dengan pembatasan akses berdasarkan kategori pengguna dan akses penuh untuk Super Admin.
+Copyright 2013-2021 Start Bootstrap LLC. Code released under the [MIT](https://github.com/StartBootstrap/startbootstrap-resume/blob/master/LICENSE) license.
