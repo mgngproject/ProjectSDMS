@@ -1,3 +1,4 @@
+import PageHeader from "@/components/PageHeader";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Flash from "@/components/Flash";
@@ -42,11 +43,11 @@ export default async function DataDiriFormPage({
   return (
     <div className="space-y-4">
       <div>
-        <Link className="text-sm text-blue-600 hover:underline" href="/datadiri">← Kembali</Link>
-        <h1 className="text-xl font-bold">Data Diri: {karyawan.nama} ({karyawan.np})</h1>
+        <Link className="text-sm link" href="/datadiri">← Kembali</Link>
+        <PageHeader title={`Data Diri: ${karyawan.nama} (${karyawan.np})`} />
       </div>
       <Flash error={error} />
-      <form action={saveDataDiri.bind(null, karyawan.id)} className="grid max-w-3xl gap-3 rounded bg-white p-4 shadow-sm sm:grid-cols-2">
+      <form action={saveDataDiri.bind(null, karyawan.id)} className="grid max-w-3xl gap-3 card p-4 sm:grid-cols-2">
         {FIELDS.map(([name, label, type]) => (
           <div key={name}>
             <label className="label" htmlFor={name}>{label}</label>

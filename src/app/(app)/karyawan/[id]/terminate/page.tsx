@@ -1,3 +1,4 @@
+import PageHeader from "@/components/PageHeader";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Flash from "@/components/Flash";
@@ -20,11 +21,11 @@ export default async function TerminateKaryawanPage({
   return (
     <div className="space-y-4">
       <div>
-        <Link className="text-sm text-blue-600 hover:underline" href="/karyawan">← Kembali</Link>
-        <h1 className="text-xl font-bold">Terminate: {karyawan.nama} ({karyawan.np})</h1>
+        <Link className="text-sm link" href="/karyawan">← Kembali</Link>
+        <PageHeader title={`Terminate: ${karyawan.nama} (${karyawan.np})`} />
       </div>
       <Flash error={error} />
-      <form action={terminateKaryawan.bind(null, karyawan.id)} className="grid max-w-xl gap-3 rounded bg-white p-4 shadow-sm">
+      <form action={terminateKaryawan.bind(null, karyawan.id)} className="grid max-w-xl gap-3 card p-4">
         <div>
           <label className="label" htmlFor="tanggal_keluar">Tanggal Keluar</label>
           <input className="input" id="tanggal_keluar" name="tanggal_keluar" type="date" required />

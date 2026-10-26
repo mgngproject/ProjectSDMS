@@ -12,7 +12,7 @@ type Props = {
 
 export default function KontrakForm({ action, np, kontrak: c, kontrakKeDefault, allowTerminate, batal }: Props) {
   return (
-    <form action={action} className="grid max-w-3xl gap-3 rounded bg-white p-4 shadow-sm sm:grid-cols-2">
+    <form action={action} className="grid max-w-3xl gap-3 card p-4 sm:grid-cols-2">
       <div>
         <label className="label" htmlFor="kontrak_ke">Kontrak ke</label>
         <input className="input" id="kontrak_ke" name="kontrak_ke" defaultValue={c?.kontrak_ke ?? kontrakKeDefault} required />

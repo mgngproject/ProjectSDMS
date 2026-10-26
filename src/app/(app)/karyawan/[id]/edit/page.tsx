@@ -1,3 +1,4 @@
+import PageHeader from "@/components/PageHeader";
 import { notFound } from "next/navigation";
 import Flash from "@/components/Flash";
 import KaryawanForm from "@/components/KaryawanForm";
@@ -26,7 +27,7 @@ export default async function EditKaryawanPage({
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-bold">Ubah Karyawan</h1>
+      <PageHeader title="Ubah Karyawan" />
       <Flash error={error} />
       <KaryawanForm
         mode="ubah"
@@ -37,7 +38,7 @@ export default async function EditKaryawanPage({
         kategoriAdmin={profile.kategori?.nama}
         karyawan={karyawan as Karyawan}
       />
-      <p className="text-sm text-gray-500">Tanggal kontrak diatur lewat menu Kontrak.</p>
+      <p className="text-sm text-muted">Tanggal kontrak diatur lewat menu Kontrak.</p>
     </div>
   );
 }

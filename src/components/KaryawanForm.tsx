@@ -24,7 +24,7 @@ function Field({ name, label, type = "text", defaultValue, required }: {
 
 export default function KaryawanForm({ action, kategori, isSuperAdmin, kategoriAdmin, karyawan: k, mode, batal }: Props) {
   return (
-    <form action={action} className="grid max-w-3xl gap-4 rounded bg-white p-4 shadow-sm sm:grid-cols-2">
+    <form action={action} className="grid max-w-3xl gap-4 card p-4 sm:grid-cols-2">
       <Field name="np" label="NP" defaultValue={k?.np} required />
       <Field name="nama" label="Nama" defaultValue={k?.nama} required />
       <div>
@@ -35,7 +35,7 @@ export default function KaryawanForm({ action, kategori, isSuperAdmin, kategoriA
             {kategori.map((c) => <option key={c.id} value={c.id}>{c.nama}</option>)}
           </select>
         ) : (
-          <input className="input bg-gray-100" value={kategoriAdmin ?? ""} readOnly />
+          <input className="input bg-soft" value={kategoriAdmin ?? ""} readOnly />
         )}
       </div>
       {mode === "baru" && (

@@ -1,3 +1,4 @@
+import { Lock, Mail } from "lucide-react";
 import { login } from "./actions";
 
 const PESAN: Record<string, string> = {
@@ -10,19 +11,37 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
 
   return (
     <main className="flex min-h-screen items-center justify-center p-4">
-      <form action={login} className="w-full max-w-sm space-y-4 rounded-lg bg-white p-6 shadow">
-        <h1 className="text-xl font-bold">SDMS</h1>
-        <p className="text-sm text-gray-500">Masuk dengan akun kategori Anda.</p>
-        {error && <p className="rounded bg-red-50 p-2 text-sm text-red-700">{PESAN[error] ?? "Gagal masuk."}{detail && <span className="mt-1 block text-xs text-red-500">Detail: {detail}</span>}</p>}
+      <form action={login} className="card w-full max-w-sm space-y-5 p-8">
+        <div className="flex flex-col items-center gap-3 text-center">
+          <span className="h-12 w-12 rounded-full bg-gradient-to-br from-violet-400 to-indigo-500" />
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">SDMS</h1>
+            <p className="text-sm text-muted">Masuk dengan akun kategori Anda.</p>
+          </div>
+        </div>
+
+        {error && (
+          <p className="rounded-xl bg-danger-soft p-3 text-sm text-danger">
+            {PESAN[error] ?? "Gagal masuk."}
+            {detail && <span className="mt-1 block text-xs opacity-80">Detail: {detail}</span>}
+          </p>
+        )}
+
         <div>
           <label className="label" htmlFor="email">Email</label>
-          <input className="input" id="email" name="email" type="email" required autoComplete="email" />
+          <div className="relative">
+            <Mail size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+            <input className="input pl-9" id="email" name="email" type="email" required autoComplete="email" />
+          </div>
         </div>
         <div>
           <label className="label" htmlFor="password">Password</label>
-          <input className="input" id="password" name="password" type="password" required autoComplete="current-password" />
+          <div className="relative">
+            <Lock size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+            <input className="input pl-9" id="password" name="password" type="password" required autoComplete="current-password" />
+          </div>
         </div>
-        <button className="btn w-full" type="submit">Masuk</button>
+        <button className="btn w-full py-2.5" type="submit">Masuk</button>
       </form>
     </main>
   );

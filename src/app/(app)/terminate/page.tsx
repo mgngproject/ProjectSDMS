@@ -1,3 +1,4 @@
+import PageHeader from "@/components/PageHeader";
 import Link from "next/link";
 import ConfirmSubmit from "@/components/ConfirmSubmit";
 import FilterBulanTahun from "@/components/FilterBulanTahun";
@@ -22,27 +23,24 @@ export default async function TerminatePage({ searchParams }: { searchParams: Pr
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="text-xl font-bold">Data Terminate</h1>
-        <div className="flex gap-2">
+      <PageHeader title="Data Terminate">
           <a className="btn-secondary" href="/api/export/terminate">Export Excel</a>
           <Link className="btn" href="/terminate/new">Tambah Data Terminate</Link>
-        </div>
-      </div>
+        </PageHeader>
       <Flash ok={p.ok} error={p.error} />
       <FilterBulanTahun filter={p.filter} bulan={p.bulan} tahun={p.tahun} />
 
       <form className="space-y-2">
         <ConfirmSubmit label="Hapus yang dipilih" message="Hapus semua data terminate yang dicentang?" formAction={bulkDeleteTerminate} />
-        <div className="overflow-x-auto rounded bg-white shadow-sm">
-          <table className="min-w-full divide-y divide-gray-200">
+        <div className="card overflow-x-auto">
+          <table className="min-w-full divide-y divide-line">
             <thead>
               <tr>
                 <th className="th" />
                 {["NP", "Nama", "Kategori", "Awal Kontrak Masuk", "Akhir Kontrak", "Masa Kerja", "Unit Kerja", "Jabatan", "Tanggal Keluar", "Alasan", ""].map((h) => <th key={h} className="th">{h}</th>)}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-line">
               {rows.map((r) => (
                 <tr key={r.id}>
                   <td className="td"><input type="checkbox" name="ids" value={r.id} /></td>
@@ -58,13 +56,13 @@ export default async function TerminatePage({ searchParams }: { searchParams: Pr
                   <td className="td">{r.alasan_keluar ?? "-"}</td>
                   <td className="td whitespace-nowrap">
                     <div className="flex items-center gap-2">
-                      <Link className="text-blue-600 hover:underline" href={`/terminate/${r.id}/edit`}>Ubah</Link>
+                      <Link className="link" href={`/terminate/${r.id}/edit`}>Ubah</Link>
                       <ConfirmSubmit label="Hapus" message={`Hapus data terminate ${r.nama}?`} formAction={deleteTerminate} name="id" value={r.id} />
                     </div>
                   </td>
                 </tr>
               ))}
-              {rows.length === 0 && <tr><td className="td text-center text-gray-500" colSpan={12}>Belum ada data.</td></tr>}
+              {rows.length === 0 && <tr><td className="td text-center text-muted" colSpan={12}>Belum ada data.</td></tr>}
             </tbody>
           </table>
         </div>

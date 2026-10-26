@@ -1,3 +1,4 @@
+import PageHeader from "@/components/PageHeader";
 import Link from "next/link";
 import Flash from "@/components/Flash";
 import { formatTanggal } from "@/lib/format";
@@ -17,10 +18,9 @@ export default async function DataDiriPage({ searchParams }: { searchParams: Pro
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="text-xl font-bold">Data Diri Karyawan</h1>
+      <PageHeader title="Data Diri Karyawan">
         <a className="btn-secondary" href="/api/export/datadiri">Export Excel</a>
-      </div>
+      </PageHeader>
       <Flash ok={p.ok} error={p.error} />
 
       <form className="flex gap-2">
@@ -31,12 +31,12 @@ export default async function DataDiriPage({ searchParams }: { searchParams: Pro
         <button className="btn-secondary" type="submit">Terapkan</button>
       </form>
 
-      <div className="overflow-x-auto rounded bg-white shadow-sm">
-        <table className="min-w-full divide-y divide-gray-200">
+      <div className="card overflow-x-auto">
+        <table className="min-w-full divide-y divide-line">
           <thead>
             <tr>{["NP", "Nama", "Kategori", "No. KTP", "Tempat, Tanggal Lahir", "Alamat", "Jenjang", "Jurusan", "Kampus", ""].map((h) => <th key={h} className="th">{h}</th>)}</tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-line">
             {rows.map((d) => {
               const terakhir = d.jenjang_2 ? { j: d.jenjang_2, s: d.jurusan_2, k: d.kampus_2 } : { j: d.jenjang_1, s: d.jurusan_1, k: d.kampus_1 };
               const alamat = [d.alamat, d.rt && `RT ${d.rt}`, d.rw && `RW ${d.rw}`, d.kelurahan, d.kecamatan, d.kabupaten, d.provinsi].filter(Boolean).join(", ");
@@ -51,11 +51,11 @@ export default async function DataDiriPage({ searchParams }: { searchParams: Pro
                   <td className="td">{terakhir.j ?? "-"}</td>
                   <td className="td">{terakhir.s ?? "-"}</td>
                   <td className="td">{terakhir.k ?? "-"}</td>
-                  <td className="td"><Link className="text-blue-600 hover:underline" href={`/karyawan/${d.karyawan_id}/datadiri`}>Ubah</Link></td>
+                  <td className="td"><Link className="link" href={`/karyawan/${d.karyawan_id}/datadiri`}>Ubah</Link></td>
                 </tr>
               );
             })}
-            {rows.length === 0 && <tr><td className="td text-center text-gray-500" colSpan={10}>Belum ada data.</td></tr>}
+            {rows.length === 0 && <tr><td className="td text-center text-muted" colSpan={10}>Belum ada data.</td></tr>}
           </tbody>
         </table>
       </div>

@@ -45,17 +45,20 @@ export function hitungDashboard(opts: {
     (k) => k.status === "aktif" && !k.tanggal_keluar && (!k.akhir_kontrak || k.akhir_kontrak >= hari),
   );
 
-  const [tahunB, bulanB] = bulan.split("-").map(Number);
   const bulanIni = hari.slice(0, 7);
-
-  const masukBulan = aktif.filter((k) => tahunDari(k.awal_kontrak) === tahunB && bulanDari(k.awal_kontrak) === bulanB).length;
+  const geser = (ymStr: string, d: number) => {
+    const [y, m] = ymStr.split("-").map(Number);
+    return new Date(Date.UTC(y, m - 1 + d, 1)).toISOString().slice(0, 7);
+  };
+  const masukDi = (b: string) => aktif.filter((k) => ym(k.awal_kontrak) === b).length;
   // Bulan di masa depan belum dihitung (sama seperti Laravel)
-  const habisBulan =
-    bulan <= bulanIni
-      ? karyawan.filter(
-          (k) => k.status === "aktif" && !k.tanggal_keluar && tahunDari(k.akhir_kontrak) === tahunB && bulanDari(k.akhir_kontrak) === bulanB,
-        ).length
-      : 0;
+  const habisDi = (b: string) =>
+    b <= bulanIni ? karyawan.filter((k) => k.status === "aktif" && !k.tanggal_keluar && ym(k.akhir_kontrak) === b).length : 0;
+
+  const masukBulan = masukDi(bulan);
+  const habisBulan = habisDi(bulan);
+  const masukBulanLalu = masukDi(geser(bulan, -1));
+  const habisBulanLalu = habisDi(geser(bulan, -1));
 
   const perBulan = (rows: KaryawanRow[], kolom: "awal_kontrak" | "akhir_kontrak", tahun: number) =>
     Array.from({ length: 12 }, (_, i) => rows.filter((k) => tahunDari(k[kolom]) === tahun && bulanDari(k[kolom]) === i + 1).length);
@@ -111,6 +114,9 @@ export function hitungDashboard(opts: {
     totalAktif: aktif.length,
     masukBulan,
     habisBulan,
+    masukBulanLalu,
+    habisBulanLalu,
+    totalTerminate: karyawan.filter((k) => k.status === "terminate").length,
     berkasBelumLengkap,
     kontrakHabis,
     chartMasuk,
