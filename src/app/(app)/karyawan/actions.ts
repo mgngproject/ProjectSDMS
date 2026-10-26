@@ -3,21 +3,21 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getProfile } from "@/lib/auth";
+import { hariIni } from "@/lib/format";
+import { dengan, pesanGalat, text } from "@/lib/params";
 import { createClient } from "@/lib/supabase/server";
 
-const text = (f: FormData, k: string) => {
-  const v = String(f.get(k) ?? "").trim();
-  return v === "" ? null : v;
-};
-
-async function karyawanPayload(f: FormData) {
+async function kategoriDipilih(f: FormData) {
   const profile = await getProfile();
+  // Admin selalu terkunci ke kategorinya; hanya superadmin yang boleh memilih
+  return profile.role === "superadmin" ? Number(f.get("kategori_id")) || null : profile.kategori_id;
+}
+
+function kolomUmum(f: FormData) {
   const gross = text(f, "gross_per_month");
   return {
     np: text(f, "np"),
     nama: text(f, "nama"),
-    // Admin selalu terkunci ke kategorinya; hanya superadmin yang boleh memilih
-    kategori_id: profile.role === "superadmin" ? Number(f.get("kategori_id")) : profile.kategori_id,
     kode_bagan: text(f, "kode_bagan"),
     unit_kerja: text(f, "unit_kerja"),
     jabatan: text(f, "jabatan"),
@@ -27,96 +27,101 @@ async function karyawanPayload(f: FormData) {
     faskes: text(f, "faskes"),
     gross_per_month: gross ? Number(gross) : null,
     kpi: text(f, "kpi"),
-    folder_link: text(f, "folder_link"),
-    awal_kontrak: text(f, "awal_kontrak"),
-    awal_kontrak_aktif: text(f, "awal_kontrak_aktif"),
-    akhir_kontrak: text(f, "akhir_kontrak"),
   };
 }
 
 export async function createKaryawan(formData: FormData) {
+  const awal = text(formData, "awal_kontrak");
+  const akhir = text(formData, "akhir_kontrak");
+  if (!text(formData, "np") || !text(formData, "nama")) redirect(dengan("/karyawan/new", "error", "NP dan nama wajib diisi."));
+  if (!awal || !akhir) redirect(dengan("/karyawan/new", "error", "Awal dan akhir kontrak wajib diisi."));
+  if (akhir <= awal) redirect(dengan("/karyawan/new", "error", "Akhir kontrak harus setelah awal kontrak."));
+
+  const kategori_id = await kategoriDipilih(formData);
+  if (!kategori_id) redirect(dengan("/karyawan/new", "error", "Kategori wajib dipilih."));
+
   const supabase = await createClient();
-  const { error } = await supabase.from("karyawan").insert(await karyawanPayload(formData));
-  if (error) redirect(`/karyawan/new?error=${encodeURIComponent(error.message)}`);
+  const { data: karyawan, error } = await supabase
+    .from("karyawan")
+    .insert({
+      ...kolomUmum(formData),
+      kategori_id,
+      folder_link: text(formData, "folder_link"),
+      awal_kontrak: awal,
+      awal_kontrak_aktif: awal,
+      akhir_kontrak: akhir,
+      status: "aktif",
+    })
+    .select("id, np")
+    .single();
+  if (error || !karyawan) redirect(dengan("/karyawan/new", "error", pesanGalat(error ?? { message: "Gagal menyimpan." })));
+
+  // Monitoring dan data diri dibuat otomatis oleh trigger database
+  const { error: kontrakError } = await supabase.from("kontrak").insert({
+    karyawan_id: karyawan.id,
+    kontrak_ke: "Kontrak 1",
+    np: karyawan.np,
+    awal_kontrak: awal,
+    akhir_kontrak: akhir,
+    status: akhir < hariIni() ? "selesai" : "aktif",
+  });
+  if (kontrakError) redirect(dengan("/karyawan", "error", `Karyawan tersimpan, tetapi kontrak gagal dibuat: ${pesanGalat(kontrakError)}`));
+
   revalidatePath("/karyawan");
-  redirect("/karyawan");
+  redirect(dengan("/karyawan", "ok", "Data karyawan berhasil ditambahkan"));
 }
 
 export async function updateKaryawan(id: number, formData: FormData) {
   const supabase = await createClient();
-  const { error } = await supabase.from("karyawan").update(await karyawanPayload(formData)).eq("id", id);
-  if (error) redirect(`/karyawan/${id}/edit?error=${encodeURIComponent(error.message)}`);
+  const kategori_id = await kategoriDipilih(formData);
+  const payload = { ...kolomUmum(formData), ...(kategori_id ? { kategori_id } : {}), folder_link: text(formData, "folder_link") };
+  if (!payload.np || !payload.nama) redirect(dengan(`/karyawan/${id}/edit`, "error", "NP dan nama wajib diisi."));
+
+  const { error } = await supabase.from("karyawan").update(payload).eq("id", id);
+  if (error) redirect(dengan(`/karyawan/${id}/edit`, "error", pesanGalat(error)));
+
+  // NP pada riwayat kontrak ikut berubah
+  await supabase.from("kontrak").update({ np: payload.np }).eq("karyawan_id", id);
   revalidatePath("/karyawan");
-  redirect("/karyawan");
+  redirect(dengan("/karyawan", "ok", "Data karyawan berhasil diupdate"));
 }
 
-export async function deleteKaryawan(id: number) {
+export async function deleteKaryawan(formData: FormData) {
+  const id = Number(formData.get("id"));
   const supabase = await createClient();
-  await supabase.from("karyawan").delete().eq("id", id);
+  const { error } = await supabase.from("karyawan").delete().eq("id", id);
   revalidatePath("/karyawan");
+  revalidatePath("/terminate");
+  redirect(error ? dengan("/karyawan", "error", pesanGalat(error)) : dengan("/karyawan", "ok", "Data karyawan berhasil dihapus"));
+}
+
+export async function bulkDeleteKaryawan(formData: FormData) {
+  const ids = formData.getAll("ids").map(Number).filter(Boolean);
+  if (ids.length === 0) redirect(dengan("/karyawan", "error", "Tidak ada data yang dipilih"));
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("karyawan").delete().in("id", ids).select("id");
+  revalidatePath("/karyawan");
+  redirect(
+    error || !data?.length
+      ? dengan("/karyawan", "error", "Tidak ada data yang bisa dihapus atau Anda tidak memiliki akses")
+      : dengan("/karyawan", "ok", `Berhasil menghapus ${data.length} data karyawan`),
+  );
 }
 
 export async function terminateKaryawan(id: number, formData: FormData) {
+  const tanggal = text(formData, "tanggal_keluar");
+  const alasan = text(formData, "alasan_keluar");
+  if (!tanggal || !alasan) redirect(dengan(`/karyawan/${id}/terminate`, "error", "Tanggal keluar dan alasan wajib diisi."));
+
   const supabase = await createClient();
-  await supabase
+  const { error } = await supabase
     .from("karyawan")
-    .update({ status: "terminate", tanggal_keluar: text(formData, "tanggal_keluar"), alasan_keluar: text(formData, "alasan_keluar") })
+    .update({ status: "terminate", tanggal_keluar: tanggal, alasan_keluar: alasan })
     .eq("id", id);
+  if (error) redirect(dengan(`/karyawan/${id}/terminate`, "error", pesanGalat(error)));
+
+  await supabase.from("kontrak").update({ status: "terminate" }).eq("karyawan_id", id);
   revalidatePath("/karyawan");
   revalidatePath("/terminate");
-  redirect("/terminate");
-}
-
-export async function addKontrak(karyawanId: number, formData: FormData) {
-  const supabase = await createClient();
-  const awal = text(formData, "awal_kontrak");
-  const akhir = text(formData, "akhir_kontrak");
-
-  // Kontrak sebelumnya otomatis selesai; kontrak baru menjadi kontrak aktif
-  await supabase.from("kontrak").update({ status: "selesai" }).eq("karyawan_id", karyawanId).eq("status", "aktif");
-  const { error } = await supabase.from("kontrak").insert({
-    karyawan_id: karyawanId,
-    kontrak_ke: text(formData, "kontrak_ke"),
-    np: text(formData, "np"),
-    awal_kontrak: awal,
-    akhir_kontrak: akhir,
-    penilaian: text(formData, "penilaian"),
-    folder_link: text(formData, "folder_link"),
-    status: "aktif",
-  });
-  if (error) redirect(`/karyawan/${karyawanId}/kontrak?error=${encodeURIComponent(error.message)}`);
-
-  await supabase.from("karyawan").update({ awal_kontrak_aktif: awal, akhir_kontrak: akhir }).eq("id", karyawanId);
-  revalidatePath(`/karyawan/${karyawanId}/kontrak`);
-  revalidatePath("/karyawan");
-}
-
-export async function saveDataDiri(karyawanId: number, formData: FormData) {
-  const supabase = await createClient();
-  const fields = [
-    "ktp", "tempat_lahir", "tanggal_lahir", "alamat", "rt", "rw", "kelurahan", "kecamatan", "kabupaten", "provinsi",
-    "jenjang_1", "jurusan_1", "kampus_1", "jenjang_2", "jurusan_2", "kampus_2",
-  ];
-  const payload = Object.fromEntries(fields.map((k) => [k, text(formData, k)]));
-  const { error } = await supabase.from("data_diri").upsert({ karyawan_id: karyawanId, ...payload }, { onConflict: "karyawan_id" });
-  if (error) redirect(`/karyawan/${karyawanId}/datadiri?error=${encodeURIComponent(error.message)}`);
-  revalidatePath(`/karyawan/${karyawanId}/datadiri`);
-  redirect(`/karyawan/${karyawanId}/datadiri?saved=1`);
-}
-
-export async function toggleMonitoring(karyawanId: number, field: string, value: boolean) {
-  const allowed = [
-    "nde_konfirmasi", "nde_jawaban", "nde_laporan", "offering_letter", "izin_prinsip_nde", "izin_prinsip_manual",
-    "nde_penyampaian_unit_kerja", "nde_penyampaian_sdmo", "upload_ess", "data_diri",
-  ];
-  if (!allowed.includes(field)) return;
-  const supabase = await createClient();
-  await supabase.from("monitoring").update({ [field]: value }).eq("karyawan_id", karyawanId);
-
-  const { data } = await supabase.from("monitoring").select(allowed.join(",")).eq("karyawan_id", karyawanId).single();
-  if (data) {
-    const lengkap = Object.values(data as unknown as Record<string, boolean>).every(Boolean);
-    await supabase.from("monitoring").update({ status: lengkap ? "Selesai" : "Belum Selesai" }).eq("karyawan_id", karyawanId);
-  }
-  revalidatePath("/monitoring");
+  redirect(dengan("/terminate", "ok", "Karyawan berhasil di-terminate"));
 }

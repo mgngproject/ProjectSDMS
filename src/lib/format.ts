@@ -1,6 +1,7 @@
 export function formatTanggal(value: string | null | undefined): string {
   if (!value) return "-";
-  return new Date(value).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" });
+  const [y, m, d] = value.slice(0, 10).split("-").map(Number);
+  return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" });
 }
 
 export function formatRupiah(value: number | null | undefined): string {
@@ -8,25 +9,38 @@ export function formatRupiah(value: number | null | undefined): string {
   return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(value);
 }
 
-/** Selisih bulan penuh dari `dari` ke `sampai` (default hari ini). */
-export function selisihBulan(dari: string | null, sampai?: string | null): number | null {
-  if (!dari) return null;
-  const a = new Date(dari);
-  const b = sampai ? new Date(sampai) : new Date();
-  let bulan = (b.getFullYear() - a.getFullYear()) * 12 + (b.getMonth() - a.getMonth());
-  if (b.getDate() < a.getDate()) bulan -= 1;
-  return Math.max(bulan, 0);
+/** Tanggal hari ini (zona Asia/Jakarta) dalam format YYYY-MM-DD. */
+export function hariIni(): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Jakarta" }).format(new Date());
+}
+
+/**
+ * Selisih bulan antara dua tanggal setelah keduanya dibulatkan ke awal bulan
+ * (sama dengan `startOfMonth()->diffInMonths()` di Laravel).
+ */
+export function bulanAntara(awal: string | null, akhir: string | null): number | null {
+  if (!awal || !akhir) return null;
+  const [y1, m1] = awal.split("-").map(Number);
+  const [y2, m2] = akhir.split("-").map(Number);
+  return Math.abs((y2 - y1) * 12 + (m2 - m1));
 }
 
 export function formatBulan(bulan: number | null): string {
   if (bulan == null) return "-";
-  const tahun = Math.floor(bulan / 12);
-  const sisa = bulan % 12;
-  return [tahun ? `${tahun} tahun` : "", sisa || !tahun ? `${sisa} bulan` : ""].filter(Boolean).join(" ");
+  return `${Math.floor(bulan / 12)} Tahun ${bulan % 12} Bulan`;
 }
 
-/** Sisa hari sampai tanggal; negatif bila sudah lewat. */
-export function sisaHari(tanggal: string | null): number | null {
-  if (!tanggal) return null;
-  return Math.ceil((new Date(tanggal).getTime() - Date.now()) / 86_400_000);
+/** Masa kerja = awal kontrak pertama sampai akhir kontrak; kosong bila akhir kontrak kosong. */
+export function masaKerja(k: { awal_kontrak: string | null; akhir_kontrak: string | null }): string {
+  return formatBulan(bulanAntara(k.awal_kontrak, k.akhir_kontrak));
 }
+
+/** Masa kontrak = awal kontrak aktif sampai akhir kontrak. */
+export function masaKontrak(k: { awal_kontrak_aktif: string | null; akhir_kontrak: string | null }): string {
+  return formatBulan(bulanAntara(k.awal_kontrak_aktif, k.akhir_kontrak));
+}
+
+export const NAMA_BULAN = [
+  "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+  "Juli", "Agustus", "September", "Oktober", "November", "Desember",
+];

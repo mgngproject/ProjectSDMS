@@ -1,31 +1,25 @@
-import * as XLSX from "xlsx";
-import { createClient } from "@/lib/supabase/server";
+import { excelResponse } from "@/lib/export";
+import { masaKerja } from "@/lib/format";
+import type { Karyawan } from "@/lib/types";
 
 export async function GET() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return new Response("Unauthorized", { status: 401 });
-
-  // RLS membatasi baris sesuai kategori pengguna
-  const { data, error } = await supabase
-    .from("karyawan")
-    .select("np, nama, unit_kerja, jabatan, level, awal_kontrak, akhir_kontrak, status, kategori:kategori_id(nama)")
-    .order("nama");
-  if (error) return new Response(error.message, { status: 500 });
-
-  const rows = (data ?? []).map((r) => {
-    const { kategori, ...rest } = r as unknown as { kategori: { nama: string } | null } & Record<string, unknown>;
-    return { ...rest, kategori: kategori?.nama ?? "" };
-  });
-  const sheet = XLSX.utils.json_to_sheet(rows);
-  const book = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(book, sheet, "Karyawan");
-  const buffer = XLSX.write(book, { type: "buffer", bookType: "xlsx" });
-
-  return new Response(buffer, {
-    headers: {
-      "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      "Content-Disposition": 'attachment; filename="karyawan.xlsx"',
-    },
+  return excelResponse("DataKaryawan", async (supabase) => {
+    const { data } = await supabase.from("karyawan").select("*, kategori:kategori_id(nama)").eq("status", "aktif").order("nama");
+    return ((data ?? []) as Karyawan[]).map((k) => ({
+      NP: k.np,
+      Nama: k.nama,
+      Kategori: k.kategori?.nama ?? "",
+      "Masa Kerja": masaKerja(k),
+      "Awal Kontrak Masuk": k.awal_kontrak,
+      "Akhir Kontrak": k.akhir_kontrak,
+      "Kode Bagan": k.kode_bagan,
+      "Unit Kerja": k.unit_kerja,
+      Jabatan: k.jabatan,
+      Level: k.level,
+      Role: k.role,
+      "Benefit Kesehatan": k.benefit_kesehatan,
+      "Gross per Month": k.gross_per_month,
+      KPI: k.kpi,
+    }));
   });
 }

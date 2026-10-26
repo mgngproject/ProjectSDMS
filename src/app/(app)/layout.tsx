@@ -5,6 +5,8 @@ import { logout } from "@/app/login/actions";
 const MENU = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/karyawan", label: "Karyawan" },
+  { href: "/kontrak", label: "Kontrak" },
+  { href: "/datadiri", label: "Data Diri" },
   { href: "/monitoring", label: "Monitoring" },
   { href: "/terminate", label: "Terminate" },
 ];

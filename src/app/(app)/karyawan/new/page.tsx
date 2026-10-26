@@ -1,3 +1,4 @@
+import Flash from "@/components/Flash";
 import KaryawanForm from "@/components/KaryawanForm";
 import { getProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -12,12 +13,14 @@ export default async function NewKaryawanPage({ searchParams }: { searchParams: 
   return (
     <div className="space-y-4">
       <h1 className="text-xl font-bold">Tambah Karyawan</h1>
+      <Flash error={error} />
       <KaryawanForm
+        mode="baru"
         action={createKaryawan}
+        batal="/karyawan"
         kategori={kategori ?? []}
         isSuperAdmin={profile.role === "superadmin"}
         kategoriAdmin={profile.kategori?.nama}
-        error={error}
       />
     </div>
   );
