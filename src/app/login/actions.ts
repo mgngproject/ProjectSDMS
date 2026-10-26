@@ -9,7 +9,7 @@ export async function login(formData: FormData) {
     email: String(formData.get("email") ?? ""),
     password: String(formData.get("password") ?? ""),
   });
-  if (error) redirect("/login?error=kredensial");
+  if (error) redirect(`/login?error=kredensial&detail=${encodeURIComponent(error.message)}`);
   redirect("/dashboard");
 }
 
