@@ -47,7 +47,9 @@ Kategori yang tersedia:
 * IDH
 * BGN
 * TPBW/TPP
-* **[KONFIRMASI]** Magang dan PKWT, jika keduanya diperlakukan sebagai kategori tersendiri
+* Magang
+* PKWT
+* Inagov
 
 ### Dashboard
 
@@ -112,9 +114,10 @@ Pembatasan data dilakukan di **dua lapis**: tampilan (menu yang muncul) dan data
 | Admin IDH      | Data kategori IDH       |
 | Admin BGN      | Data kategori BGN       |
 | Admin TPBW/TPP | Data kategori TPBW/TPP  |
+| PIC Magang     | Data kategori Magang    |
+| PIC PKWT       | Data kategori PKWT      |
+| Admin Inagov   | Data kategori Inagov    |
 | Super Admin    | Seluruh kategori        |
-
-**[KONFIRMASI]** Role PIC Magang dan PIC PKWT: apakah menjadi kategori baru (dengan `kategori_id` sendiri) atau role terpisah dengan cakupan data berbeda? Jawabannya menentukan isi tabel di atas dan kebijakan RLS.
 
 Kategori pengguna disimpan di `kategori_id` pada tabel `profiles`. Pengguna dengan role `superadmin` tidak terikat kategori.
 
@@ -142,7 +145,7 @@ Nama tabel mengikuti model versi lama. **Kolom lengkap diambil dari migration La
 
 | Tabel        | Isi                                                        |
 | ------------ | ---------------------------------------------------------- |
-| `kategori`   | Daftar kategori (IDE, IDH, BGN, TPBW/TPP, ...)             |
+| `kategori`   | Daftar kategori (IDE, IDH, BGN, TPBW/TPP, Magang, PKWT, Inagov)             |
 | `profiles`   | Profil pengguna: terhubung ke `auth.users`, `role`, `kategori_id` |
 | `karyawan`   | Data karyawan, terhubung ke `kategori`                     |
 | `kontrak`    | Kontrak karyawan, terhubung ke `karyawan`                  |
