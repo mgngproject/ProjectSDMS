@@ -79,7 +79,7 @@ Prasyarat: Node.js 20+ dan project Supabase.
 ### a. Siapkan Supabase
 
 1. Buat project di [supabase.com](https://supabase.com).
-2. Buka **SQL Editor**, jalankan isi `supabase/migrations/0001_init.sql`, lalu `supabase/seed.sql`.
+2. Buka **SQL Editor**, jalankan isi `supabase/migrations/0001_init.sql`, lalu `supabase/migrations/0002_grants.sql`, lalu `supabase/seed.sql`.
 3. Ambil `Project URL`, `anon key`, dan `service_role key` dari **Project Settings → API**.
 
 ### b. Konfigurasi dan jalankan
