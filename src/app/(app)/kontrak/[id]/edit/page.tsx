@@ -1,3 +1,4 @@
+import PageHeader from "@/components/PageHeader";
 import { notFound } from "next/navigation";
 import Flash from "@/components/Flash";
 import KontrakForm from "@/components/KontrakForm";
@@ -21,7 +22,7 @@ export default async function EditKontrakPage({
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-bold">Ubah Kontrak: {kontrak.karyawan.nama}</h1>
+      <PageHeader title={`Ubah Kontrak: ${kontrak.karyawan.nama}`} />
       <Flash error={error} />
       <KontrakForm
         action={updateKontrak.bind(null, kontrak.id, kontrak.karyawan_id)}

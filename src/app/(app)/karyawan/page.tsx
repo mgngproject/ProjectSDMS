@@ -1,3 +1,4 @@
+import PageHeader from "@/components/PageHeader";
 import Link from "next/link";
 import ConfirmSubmit from "@/components/ConfirmSubmit";
 import Flash from "@/components/Flash";
@@ -27,13 +28,10 @@ export default async function KaryawanPage({ searchParams }: { searchParams: Pro
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="text-xl font-bold">Data Karyawan</h1>
-        <div className="flex gap-2">
+      <PageHeader title="Data Karyawan">
           <a className="btn-secondary" href="/api/export/karyawan">Export Excel</a>
           <Link className="btn" href="/karyawan/new">Tambah Karyawan</Link>
-        </div>
-      </div>
+        </PageHeader>
 
       <Flash ok={p.ok} error={p.error} />
 
@@ -47,8 +45,8 @@ export default async function KaryawanPage({ searchParams }: { searchParams: Pro
 
       <form className="space-y-2">
         <ConfirmSubmit label="Hapus yang dipilih" message="Hapus semua karyawan yang dicentang? Kontrak, data diri, dan monitoring ikut terhapus." formAction={bulkDeleteKaryawan} />
-        <div className="overflow-x-auto rounded bg-white shadow-sm">
-          <table className="min-w-full divide-y divide-gray-200">
+        <div className="card overflow-x-auto">
+          <table className="min-w-full divide-y divide-line">
             <thead>
               <tr>
                 <th className="th" />
@@ -57,7 +55,7 @@ export default async function KaryawanPage({ searchParams }: { searchParams: Pro
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-line">
               {rows.map((r) => (
                 <tr key={r.id}>
                   <td className="td"><input type="checkbox" name="ids" value={r.id} /></td>
@@ -74,20 +72,20 @@ export default async function KaryawanPage({ searchParams }: { searchParams: Pro
                   <td className="td">{r.role ?? "-"}</td>
                   <td className="td">{formatRupiah(r.gross_per_month)}</td>
                   <td className="td">
-                    {r.folder_link ? <a className="text-blue-600 hover:underline" href={r.folder_link} target="_blank" rel="noreferrer">Buka</a> : "-"}
+                    {r.folder_link ? <a className="link" href={r.folder_link} target="_blank" rel="noreferrer">Buka</a> : "-"}
                   </td>
                   <td className="td whitespace-nowrap">
                     <div className="flex items-center gap-2">
-                      <Link className="text-blue-600 hover:underline" href={`/karyawan/${r.id}/edit`}>Ubah</Link>
-                      <Link className="text-blue-600 hover:underline" href={`/karyawan/${r.id}/kontrak`}>Kontrak</Link>
-                      <Link className="text-blue-600 hover:underline" href={`/karyawan/${r.id}/datadiri`}>Data Diri</Link>
-                      <Link className="text-blue-600 hover:underline" href={`/karyawan/${r.id}/terminate`}>Terminate</Link>
+                      <Link className="link" href={`/karyawan/${r.id}/edit`}>Ubah</Link>
+                      <Link className="link" href={`/karyawan/${r.id}/kontrak`}>Kontrak</Link>
+                      <Link className="link" href={`/karyawan/${r.id}/datadiri`}>Data Diri</Link>
+                      <Link className="link" href={`/karyawan/${r.id}/terminate`}>Terminate</Link>
                       <ConfirmSubmit label="Hapus" message={`Hapus ${r.nama}?`} formAction={deleteKaryawan} name="id" value={r.id} />
                     </div>
                   </td>
                 </tr>
               ))}
-              {rows.length === 0 && <tr><td className="td text-center text-gray-500" colSpan={15}>Belum ada data.</td></tr>}
+              {rows.length === 0 && <tr><td className="td text-center text-muted" colSpan={15}>Belum ada data.</td></tr>}
             </tbody>
           </table>
         </div>

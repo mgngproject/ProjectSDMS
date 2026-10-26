@@ -1,3 +1,4 @@
+import PageHeader from "@/components/PageHeader";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import ConfirmSubmit from "@/components/ConfirmSubmit";
@@ -30,20 +31,20 @@ export default async function KontrakPage({
   return (
     <div className="space-y-4">
       <div>
-        <Link className="text-sm text-blue-600 hover:underline" href="/karyawan">← Kembali</Link>
-        <h1 className="text-xl font-bold">Riwayat Kontrak: {karyawan.nama} ({karyawan.np})</h1>
-        <p className="text-sm text-gray-600">
+        <Link className="text-sm link" href="/karyawan">← Kembali</Link>
+        <PageHeader title={`Riwayat Kontrak: ${karyawan.nama} (${karyawan.np})`} />
+        <p className="text-sm text-muted">
           Masa kerja {masaKerja(karyawan)} · Masa kontrak aktif {masaKontrak(karyawan)}
         </p>
       </div>
       <Flash ok={p.ok} error={p.error} />
 
-      <form className="overflow-x-auto rounded bg-white shadow-sm">
-        <table className="min-w-full divide-y divide-gray-200">
+      <form className="card overflow-x-auto">
+        <table className="min-w-full divide-y divide-line">
           <thead>
             <tr>{["Kontrak ke", "NP", "Awal", "Akhir", "Status", "Penilaian", "Folder", ""].map((h) => <th key={h} className="th">{h}</th>)}</tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-line">
             {kontrak.map((c) => (
               <tr key={c.id}>
                 <td className="td">{c.kontrak_ke}</td>
@@ -53,18 +54,18 @@ export default async function KontrakPage({
                 <td className="td">{c.status}</td>
                 <td className="td">{c.penilaian ?? "-"}</td>
                 <td className="td">
-                  {c.folder_link ? <a className="text-blue-600 hover:underline" href={c.folder_link} target="_blank" rel="noreferrer">Buka</a> : "-"}
+                  {c.folder_link ? <a className="link" href={c.folder_link} target="_blank" rel="noreferrer">Buka</a> : "-"}
                 </td>
                 <td className="td whitespace-nowrap">
                   <div className="flex items-center gap-2">
-                    <Link className="text-blue-600 hover:underline" href={`/kontrak/${c.id}/edit`}>Ubah</Link>
+                    <Link className="link" href={`/kontrak/${c.id}/edit`}>Ubah</Link>
                     <input type="hidden" name="karyawan_id" value={karyawan.id} />
                     <ConfirmSubmit label="Hapus" message={`Hapus ${c.kontrak_ke}?`} formAction={deleteKontrak} name="id" value={c.id} />
                   </div>
                 </td>
               </tr>
             ))}
-            {kontrak.length === 0 && <tr><td className="td text-center text-gray-500" colSpan={8}>Belum ada kontrak.</td></tr>}
+            {kontrak.length === 0 && <tr><td className="td text-center text-muted" colSpan={8}>Belum ada kontrak.</td></tr>}
           </tbody>
         </table>
       </form>

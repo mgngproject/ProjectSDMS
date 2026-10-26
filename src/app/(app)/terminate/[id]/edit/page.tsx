@@ -1,3 +1,4 @@
+import PageHeader from "@/components/PageHeader";
 import { notFound } from "next/navigation";
 import Flash from "@/components/Flash";
 import { createClient } from "@/lib/supabase/server";
@@ -18,9 +19,9 @@ export default async function EditTerminatePage({
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-bold">Ubah Data Terminate: {k.nama} ({k.np})</h1>
+      <PageHeader title={`Ubah Data Terminate: ${k.nama} (${k.np})`} />
       <Flash error={error} />
-      <form action={updateTerminate.bind(null, k.id)} className="grid max-w-xl gap-3 rounded bg-white p-4 shadow-sm">
+      <form action={updateTerminate.bind(null, k.id)} className="grid max-w-xl gap-3 card p-4">
         <div>
           <label className="label" htmlFor="akhir_kontrak">Akhir Kontrak</label>
           <input className="input" id="akhir_kontrak" name="akhir_kontrak" type="date" defaultValue={k.akhir_kontrak ?? ""} />

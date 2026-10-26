@@ -1,3 +1,4 @@
+import PageHeader from "@/components/PageHeader";
 import Flash from "@/components/Flash";
 import { getProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -24,9 +25,9 @@ export default async function NewTerminatePage({ searchParams }: { searchParams:
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-bold">Tambah Data Terminate</h1>
+      <PageHeader title="Tambah Data Terminate" />
       <Flash error={error} />
-      <form action={createTerminate} className="grid max-w-3xl gap-3 rounded bg-white p-4 shadow-sm sm:grid-cols-2">
+      <form action={createTerminate} className="grid max-w-3xl gap-3 card p-4 sm:grid-cols-2">
         {FIELDS.slice(0, 2).map(([name, label, type, req]) => (
           <div key={name}>
             <label className="label" htmlFor={name}>{label}</label>
@@ -41,7 +42,7 @@ export default async function NewTerminatePage({ searchParams }: { searchParams:
               {(kategori ?? []).map((c) => <option key={c.id} value={c.id}>{c.nama}</option>)}
             </select>
           ) : (
-            <input className="input bg-gray-100" value={profile.kategori?.nama ?? ""} readOnly />
+            <input className="input bg-soft" value={profile.kategori?.nama ?? ""} readOnly />
           )}
         </div>
         {FIELDS.slice(2).map(([name, label, type, req]) => (

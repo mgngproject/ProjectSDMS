@@ -1,3 +1,4 @@
+import PageHeader from "@/components/PageHeader";
 import MonitoringCheckbox from "@/components/MonitoringCheckbox";
 import MonitoringText from "@/components/MonitoringText";
 import { NAMA_BULAN, formatTanggal } from "@/lib/format";
@@ -21,7 +22,7 @@ export default async function MonitoringPage({ searchParams }: { searchParams: P
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-bold">Monitoring Berkas Karyawan</h1>
+      <PageHeader title="Monitoring Berkas Karyawan" />
 
       <form className="flex flex-wrap gap-2">
         <select className="input w-auto" name="bulan" defaultValue={p.bulan ?? ""}>
@@ -36,8 +37,8 @@ export default async function MonitoringPage({ searchParams }: { searchParams: P
         <button className="btn-secondary" type="submit">Terapkan</button>
       </form>
 
-      <div className="overflow-x-auto rounded bg-white shadow-sm">
-        <table className="min-w-full divide-y divide-gray-200">
+      <div className="card overflow-x-auto">
+        <table className="min-w-full divide-y divide-line">
           <thead>
             <tr>
               <th className="th">NP</th>
@@ -50,7 +51,7 @@ export default async function MonitoringPage({ searchParams }: { searchParams: P
               <th className="th">Keterangan</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-line">
             {rows.map((r) => {
               const kurang = monitoringKurang(r);
               return (
@@ -69,12 +70,12 @@ export default async function MonitoringPage({ searchParams }: { searchParams: P
                     </td>
                   ))}
                   <td className="td">
-                    <span className={`rounded px-2 py-0.5 text-xs ${r.status === "Selesai" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}>
+                    <span className={r.status === "Selesai" ? "pill-success" : "pill-warning"}>
                       {r.status}
                     </span>
                   </td>
-                  <td className="td text-xs text-red-600">
-                    {kurang.length === 0 ? <span className="text-green-700">Selesai</span> : kurang.map((k) => <div key={k}>• {k}</div>)}
+                  <td className="td text-xs text-danger">
+                    {kurang.length === 0 ? <span className="text-success">Selesai</span> : kurang.map((k) => <div key={k}>• {k}</div>)}
                   </td>
                   <td className="td">
                     <MonitoringText karyawanId={r.karyawan_id} field="keterangan" value={r.keterangan ?? ""} />
@@ -82,7 +83,7 @@ export default async function MonitoringPage({ searchParams }: { searchParams: P
                 </tr>
               );
             })}
-            {rows.length === 0 && <tr><td className="td text-center text-gray-500" colSpan={20}>Belum ada data.</td></tr>}
+            {rows.length === 0 && <tr><td className="td text-center text-muted" colSpan={20}>Belum ada data.</td></tr>}
           </tbody>
         </table>
       </div>

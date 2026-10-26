@@ -2,22 +2,36 @@
 
 import { Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
-const WARNA = ["#2563eb", "#16a34a", "#f59e0b", "#dc2626", "#7c3aed"];
+const WARNA = ["#6366f1", "#10b981", "#f59e0b", "#f43f5e", "#8b5cf6"];
 const BULAN = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
 
-export function GrafikBulanan({ data, warna = "#2563eb" }: { data: number[]; warna?: string }) {
-  const rows = data.map((total, i) => ({ nama: BULAN[i], total }));
+// Warna netral agar terbaca di mode terang maupun gelap
+const TICK = { fill: "#8b8ba5", fontSize: 12 };
+const GRID = "rgba(139, 139, 165, 0.25)";
+const TOOLTIP = {
+  contentStyle: { background: "rgb(var(--card))", border: "1px solid rgb(var(--line))", borderRadius: 12, color: "rgb(var(--ink))" },
+  cursor: { fill: "rgba(139, 139, 165, 0.12)" },
+};
+
+function Kolom({ data, kunci, warna }: { data: Record<string, string | number>[]; kunci: string[]; warna: string[] }) {
+  return (
+    <ResponsiveContainer>
+      <BarChart data={data}>
+        <CartesianGrid strokeDasharray="3 3" stroke={GRID} vertical={false} />
+        <XAxis dataKey="nama" tick={TICK} axisLine={false} tickLine={false} />
+        <YAxis allowDecimals={false} tick={TICK} axisLine={false} tickLine={false} />
+        <Tooltip {...TOOLTIP} />
+        {kunci.length > 1 && <Legend />}
+        {kunci.map((k, i) => <Bar key={k} dataKey={k} name={k === "total" ? "Karyawan" : k} fill={warna[i]} radius={[6, 6, 0, 0]} />)}
+      </BarChart>
+    </ResponsiveContainer>
+  );
+}
+
+export function GrafikBulanan({ data, warna = WARNA[0] }: { data: number[]; warna?: string }) {
   return (
     <div className="h-64 w-full">
-      <ResponsiveContainer>
-        <BarChart data={rows}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="nama" />
-          <YAxis allowDecimals={false} />
-          <Tooltip />
-          <Bar dataKey="total" name="Karyawan" fill={warna} />
-        </BarChart>
-      </ResponsiveContainer>
+      <Kolom data={data.map((total, i) => ({ nama: BULAN[i], total }))} kunci={["total"]} warna={[warna]} />
     </div>
   );
 }
@@ -25,15 +39,15 @@ export function GrafikBulanan({ data, warna = "#2563eb" }: { data: number[]; war
 export function GrafikKategori({ data }: { data: { nama: string; total: number }[] }) {
   return (
     <div className="h-64 w-full">
-      <ResponsiveContainer>
-        <BarChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="nama" />
-          <YAxis allowDecimals={false} />
-          <Tooltip />
-          <Bar dataKey="total" name="Karyawan" fill="#2563eb" />
-        </BarChart>
-      </ResponsiveContainer>
+      <Kolom data={data} kunci={["total"]} warna={[WARNA[0]]} />
+    </div>
+  );
+}
+
+export function GrafikKampus({ data }: { data: { nama: string; S1: number; S2: number }[] }) {
+  return (
+    <div className="h-72 w-full">
+      <Kolom data={data} kunci={["S1", "S2"]} warna={[WARNA[0], WARNA[1]]} />
     </div>
   );
 }
@@ -43,30 +57,12 @@ export function GrafikPendidikan({ data }: { data: { nama: string; total: number
     <div className="h-64 w-full">
       <ResponsiveContainer>
         <PieChart>
-          <Pie data={data} dataKey="total" nameKey="nama" label>
+          <Pie data={data} dataKey="total" nameKey="nama" innerRadius={50} outerRadius={85} paddingAngle={2} stroke="none">
             {data.map((_, i) => <Cell key={i} fill={WARNA[i % WARNA.length]} />)}
           </Pie>
-          <Tooltip />
+          <Tooltip {...TOOLTIP} />
           <Legend />
         </PieChart>
-      </ResponsiveContainer>
-    </div>
-  );
-}
-
-export function GrafikKampus({ data }: { data: { nama: string; S1: number; S2: number }[] }) {
-  return (
-    <div className="h-72 w-full">
-      <ResponsiveContainer>
-        <BarChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="nama" />
-          <YAxis allowDecimals={false} />
-          <Tooltip />
-          <Legend />
-          <Bar dataKey="S1" fill="#2563eb" />
-          <Bar dataKey="S2" fill="#16a34a" />
-        </BarChart>
       </ResponsiveContainer>
     </div>
   );

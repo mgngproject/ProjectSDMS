@@ -1,3 +1,4 @@
+import PageHeader from "@/components/PageHeader";
 import Flash from "@/components/Flash";
 import KaryawanForm from "@/components/KaryawanForm";
 import { getProfile } from "@/lib/auth";
@@ -12,7 +13,7 @@ export default async function NewKaryawanPage({ searchParams }: { searchParams: 
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-bold">Tambah Karyawan</h1>
+      <PageHeader title="Tambah Karyawan" />
       <Flash error={error} />
       <KaryawanForm
         mode="baru"

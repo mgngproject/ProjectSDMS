@@ -1,3 +1,4 @@
+import PageHeader from "@/components/PageHeader";
 import Link from "next/link";
 import { formatTanggal, masaKerja, masaKontrak } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
@@ -19,13 +20,13 @@ export default async function RiwayatKontrakPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-bold">Riwayat Kontrak</h1>
-      <div className="overflow-x-auto rounded bg-white shadow-sm">
-        <table className="min-w-full divide-y divide-gray-200">
+      <PageHeader title="Riwayat Kontrak" />
+      <div className="card overflow-x-auto">
+        <table className="min-w-full divide-y divide-line">
           <thead>
             <tr>{["NP", "Nama", "Kategori", "Kontrak Aktif", "Awal", "Akhir", "Masa Kerja", "Masa Kontrak", ""].map((h) => <th key={h} className="th">{h}</th>)}</tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-line">
             {rows.map((r) => {
               const aktif = r.kontrak_aktif[0];
               return (
@@ -38,11 +39,11 @@ export default async function RiwayatKontrakPage() {
                   <td className="td">{formatTanggal(aktif?.akhir_kontrak ?? r.akhir_kontrak)}</td>
                   <td className="td">{masaKerja(r)}</td>
                   <td className="td">{masaKontrak(r)}</td>
-                  <td className="td"><Link className="text-blue-600 hover:underline" href={`/karyawan/${r.id}/kontrak`}>Riwayat</Link></td>
+                  <td className="td"><Link className="link" href={`/karyawan/${r.id}/kontrak`}>Riwayat</Link></td>
                 </tr>
               );
             })}
-            {rows.length === 0 && <tr><td className="td text-center text-gray-500" colSpan={9}>Belum ada data.</td></tr>}
+            {rows.length === 0 && <tr><td className="td text-center text-muted" colSpan={9}>Belum ada data.</td></tr>}
           </tbody>
         </table>
       </div>

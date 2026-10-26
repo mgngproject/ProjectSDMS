@@ -2,12 +2,57 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --bg: 244 243 251;
+  --card: 255 255 255;
+  --line: 233 231 246;
+  --ink: 27 27 47;
+  --muted: 107 107 133;
+  --soft: 244 243 251;
+  --primary: 91 91 214;
+  --primary-soft: 238 237 252;
+  --success: 24 138 102;
+  --success-soft: 223 245 236;
+  --danger: 214 64 104;
+  --danger-soft: 253 228 234;
+  --warning: 176 118 16;
+  --warning-soft: 252 239 214;
+}
+
+.dark {
+  --bg: 18 18 28;
+  --card: 27 27 43;
+  --line: 44 44 66;
+  --ink: 236 235 247;
+  --muted: 155 155 180;
+  --soft: 35 35 54;
+  --primary: 139 139 255;
+  --primary-soft: 38 38 74;
+  --success: 74 211 168;
+  --success-soft: 22 52 44;
+  --danger: 255 128 160;
+  --danger-soft: 66 28 40;
+  --warning: 240 180 70;
+  --warning-soft: 62 46 18;
+}
+
+@layer base {
+  body { @apply bg-bg font-sans text-ink antialiased; }
+  a { @apply transition-colors; }
+}
+
 @layer components {
-  .input { @apply w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none; }
-  .btn { @apply inline-block rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700; }
-  .btn-secondary { @apply inline-block rounded border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50; }
-  .btn-danger { @apply inline-block rounded bg-red-600 px-3 py-1 text-xs font-medium text-white hover:bg-red-700; }
-  .label { @apply mb-1 block text-sm font-medium text-gray-700; }
-  .th { @apply px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-gray-500; }
-  .td { @apply px-3 py-2 text-sm text-gray-800; }
+  .card { @apply rounded-2xl border border-line bg-card shadow-card; }
+  .input { @apply w-full rounded-xl border border-line bg-card px-3 py-2 text-sm text-ink outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20; }
+  .btn { @apply inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:opacity-90; }
+  .btn-secondary { @apply inline-flex items-center justify-center gap-2 rounded-xl border border-line bg-card px-4 py-2 text-sm font-medium text-ink transition hover:bg-soft; }
+  .btn-danger { @apply inline-flex items-center justify-center rounded-lg bg-danger-soft px-3 py-1 text-xs font-medium text-danger transition hover:opacity-80; }
+  .label { @apply mb-1 block text-sm font-medium text-ink; }
+  .th { @apply whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted; }
+  .td { @apply px-4 py-3 text-sm text-ink; }
+  .link { @apply text-primary hover:underline; }
+  .pill { @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium; }
+  .pill-success { @apply pill bg-success-soft text-success; }
+  .pill-warning { @apply pill bg-warning-soft text-warning; }
+  .pill-danger { @apply pill bg-danger-soft text-danger; }
 }
