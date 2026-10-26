@@ -10,5 +10,3 @@ grant select on public.profiles to authenticated;
 grant select, insert, update, delete on
   public.karyawan, public.kontrak, public.data_diri, public.monitoring
   to authenticated;
-
-grant usage, select on all sequences in schema public to authenticated;
