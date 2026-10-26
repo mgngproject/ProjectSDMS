@@ -13,10 +13,8 @@ export async function getProfile(): Promise<Profile> {
     .eq("id", user.id)
     .single();
 
-  // Akun Auth tanpa profil tidak boleh masuk
-  if (!data) {
-    await supabase.auth.signOut();
-    redirect("/login?error=profil");
-  }
+  // Akun Auth tanpa profil tidak boleh masuk. Cookie tidak bisa dihapus dari Server Component,
+  // jadi middleware membiarkan /login?error=... terbuka agar tidak terjadi redirect berputar.
+  if (!data) redirect("/login?error=profil");
   return data as unknown as Profile;
 }
