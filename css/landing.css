@@ -1,0 +1,110 @@
+body{
+    font-family:'Poppins',sans-serif !important;
+    font-size:12px;
+    background:#ffffff;
+    color:#4053b2;
+}
+
+body,p,h1,h2,h3,h4,h5,h6,a,span,strong{
+    color:#333D6D;
+}
+
+a{
+    text-decoration:none;
+    transition:.3s;
+}
+
+a:hover{
+    color:#723EC3;
+}
+
+.header .logo img{
+    height:60px;
+    width:auto;
+}
+
+.header .btn-getstarted{
+    background: #333D6D;
+    color: #fff;
+    border: none;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+}
+
+.header .btn-getstarted:hover{
+    background: #5a24b0;
+    color: #fff;
+}
+
+.hero-content h1{
+    font-weight:800;
+    color:#333D6D;
+    margin-bottom:18px;
+}
+
+.hero-content p{
+    font-size:15px;
+    color:#6B7280;
+    line-height:1.7;
+}
+
+.footer{
+
+    background:#333D6D;
+    padding:60px 0 30px;
+
+}
+
+.footer .sitename{
+
+    color:#fff !important;
+    font-size:22px;
+    font-weight:700;
+
+}
+
+.footer .footer-contact p{
+
+    color:#D7D7E5;
+    margin-bottom:5px;
+
+}
+
+.footer .footer-contact strong{
+
+    color:#fff;
+
+}
+
+.footer .footer-contact span{
+
+    color:#D7D7E5;
+
+}
+
+.footer-divider{
+
+    border-color:rgba(255,255,255,.08);
+
+}
+
+.footer-copy{
+
+    color:#CFCFE6;
+    font-size:12px;
+
+}
+
+#scroll-top{
+
+    background:#333D6D;
+    color:#fff;
+    transition:.3s;
+
+}
+
+#scroll-top:hover{
+
+    background:#723EC3;
+
+}

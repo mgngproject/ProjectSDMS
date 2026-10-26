@@ -1,0 +1,152 @@
+ body {
+        background-color: #f8f9fc;
+        min-height: 100vh;
+        padding: 20px 0;
+    }
+
+    .page-title {
+        color: #5a5c69;
+        font-size: 20px;
+        font-weight: 400;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        overflow: hidden;
+        margin-bottom: 30px;
+    }
+
+    .form-header {
+    background: #3956ad;
+    color: white;
+    padding: 18px 25px;
+}
+
+    .form-header h4 {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 500;
+    }
+
+    .form-body {
+    padding: 30px 25px;
+    font-size: 12px;
+    }
+
+    .karyawan-info {
+    background: #edf2ff; 
+    color: #3956ad;
+    padding: 6px 14px;
+    border-radius: 20px;
+    display: inline-block;
+    margin-bottom: 25px;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        color: #5a5c69;
+        margin-bottom: 0.5rem;
+        font-size: 12px;
+        display: block;
+    }
+
+    .form-control,
+    .form-select {
+        border: 1px solid #d1d3e2;
+        border-radius: 0.35rem;
+        padding: 0.50rem;
+        font-size: 12px;
+        color: #6e707e;
+        transition: all 0.2s;
+        width: 100%;
+    }
+
+    .form-control:focus,
+.form-select:focus {
+    border-color: #3956ad;
+    box-shadow: 0 0 0 0.15rem rgba(59, 91, 219, 0.15);
+    outline: none;
+}
+
+    textarea.form-control {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    .form-control::placeholder {
+        color: #b7b9cc;
+    }
+
+    .form-text {
+        font-size: 0.8rem;
+        color: #858796;
+        margin-top: 0.25rem;
+        font-size: 10px;
+    }
+
+    .text-danger {
+        color: #e74a3b;
+    }
+
+    .btn-submit {
+    background: #3956ad;
+    color: white;
+    border: none;
+    padding: 0.4rem 1rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: 0.2s;
+    font-size: 12px;
+}
+
+.btn-submit:hover {
+    background: #21387e !important;
+}
+
+    .btn-cancel {
+        background: white;
+        color: #858796;
+        border: 1px solid #d1d3e2;
+        padding: 0.65rem 1.5rem;
+        border-radius: 0.35rem;
+        font-weight: 600;
+        font-size: 0.875rem;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.15s;
+    }
+
+    .btn-cancel:hover {
+        background: #eaecf4;
+        border-color: #c5c7d4;
+        color: #5a5c69;
+        text-decoration: none;
+    }
+
+    .invalid-feedback {
+        color: #e74a3b;
+        font-size: 0.8rem;
+        margin-top: 0.25rem;
+    }
+
+    .is-invalid {
+        border-color: #e74a3b;
+    }
+
+    .form-divider {
+        border-top: 1px solid #e3e6f0;
+        margin: 1.5rem 0;
+    }
+
+    

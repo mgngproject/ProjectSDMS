@@ -1,0 +1,162 @@
+#filterForm .form-control-sm {
+    font-size: 13px;
+    font-family: 'Poppins', sans-serif;
+}
+
+#filterForm .btn-sm {
+    font-size: 12px;
+    font-family: 'Poppins', sans-serif;
+    padding: 0.25rem 0.5rem;
+    align-items: center;
+    height: 34px;
+    display: inline-flex;
+}
+
+#crudCard .btn-sm {
+    font-size: 12px;
+    font-family: 'Poppins', sans-serif;
+    padding: 0.35rem 0.75rem;
+}
+
+#crudCard .btn-sm i {
+    font-size: 13px;
+}
+
+button,
+.btn {
+    font-size: 12px;
+    font-family: 'Poppins', sans-serif;
+    line-height: 1.4;
+}
+
+.form-group {
+    font-size: 12px;
+}
+
+.form-control {
+    font-size: 12px;
+}
+
+.readonly-field {
+    background-color: #e9ecef;
+    cursor: not-allowed;
+}
+
+.modal-body {
+    font-family: 'Poppins', sans-serif;
+    font-size: 12px;
+}
+
+.modal-content strong,
+.modal-content .fs-5 {
+    color: #4e4e4e;
+}
+
+.btn-outline-primary.border-0:hover {
+    background-color: rgba(72, 124, 202, 1);
+    transform: scale(1.1);
+    transition: all 0.2s ease;
+    border-radius: 30px;
+}
+
+.modal-header,
+.modal-header-custom {
+    background: white !important;
+    color: rgb(48, 48, 48);
+}
+
+.modal-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.nama-clickable {
+    cursor: pointer;
+    color: #000000;
+    font-weight: 500;
+}
+
+.nama-clickable:hover {
+    text-decoration: underline;
+    color: #000000;
+}
+
+.badge-large {
+    font-size: 12px;
+    padding: 4px 6px;
+}
+
+.form-label-custom {
+    font-size: 12px;
+}
+
+.form-control-custom {
+    font-size: 12px;
+}
+
+.info-custom {
+    font-size: 13px;
+}
+
+.swal-title-kecil {
+    font-size: 16px !important;
+}
+
+.swal-text-kecil {
+    font-size: 14px !important;
+}
+
+.swal-confirm-kecil,
+.swal-cancel-kecil {
+    font-size: 12px !important;
+}
+
+.search-custom {
+    font-size: 12px;
+    padding: 15px;
+    border-radius: 10px;
+}
+
+#paginationFixed {
+    width: 100%;
+}
+
+#paginationFixed .pagination {
+    margin: 0;
+}
+
+.create-custom {
+    background-color: #3956ad;
+}
+
+.riwayat-custom {
+    color: #4f4f4f;
+    font-size: 12px;
+}
+
+.data-karyawan-page input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+}
+
+.row-habis-kontrak td {
+    background-color: #db2929;
+}
+
+.btn-kpi {
+    background: linear-gradient(135deg, #719bd1 0%, #719bd1 100%);
+    border: none;
+    color: rgb(255, 255, 255);
+    padding: 4px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+    text-decoration: none;
+}
+
+.btn-kpi:hover {
+    color: rgb(255, 255, 255);
+    text-decoration: underline;
+}
