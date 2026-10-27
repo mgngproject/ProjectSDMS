@@ -11,8 +11,6 @@ type Props = {
   karyawan?: Karyawan;
   detail?: Detail | null;
   mode: "baru" | "ubah";
-  /** Tautan sementara foto saat ini (mode ubah). */
-  fotoUrl?: string | null;
 };
 
 function Field({ name, label, type = "text", defaultValue, required }: {
@@ -46,7 +44,7 @@ function DetailInput({ field, value }: { field: DetailField; value: string | nul
 }
 
 /** Isian karyawan: kolom standar dan, bila kategorinya punya, kolom khusus kategori. */
-export default function KaryawanFields({ kategori, isSuperAdmin, kategoriAdmin, karyawan: k, detail, mode, fotoUrl }: Props) {
+export default function KaryawanFields({ kategori, isSuperAdmin, kategoriAdmin, karyawan: k, detail, mode }: Props) {
   const [kategoriId, setKategoriId] = useState(String(k?.kategori_id ?? ""));
   const namaTerpilih = isSuperAdmin ? kategori.find((c) => String(c.id) === kategoriId)?.nama : kategoriAdmin;
   const config = configKategori(namaTerpilih);
@@ -97,17 +95,6 @@ export default function KaryawanFields({ kategori, isSuperAdmin, kategoriAdmin, 
       {tampil("gross_per_month") && <Field name="gross_per_month" label="Gross per Bulan" type="number" defaultValue={k?.gross_per_month} />}
       {tampil("kpi") && <Field name="kpi" label="KPI" defaultValue={k?.kpi} />}
       <Field name="folder_link" label="Link Folder Dokumen" type="url" defaultValue={k?.folder_link} />
-      <div className="sm:col-span-2">
-        <label className="label" htmlFor="foto">Foto (JPG atau PNG, maks 2 MB)</label>
-        <div className="flex items-center gap-3">
-          {fotoUrl && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={fotoUrl} alt="Foto saat ini" className="h-16 w-16 rounded-xl object-cover" />
-          )}
-          <input className="input" id="foto" name="foto" type="file" accept="image/jpeg,image/png" />
-        </div>
-        {fotoUrl && <p className="mt-1 text-xs text-muted">Pilih berkas baru untuk mengganti foto.</p>}
-      </div>
     </>
   );
 }

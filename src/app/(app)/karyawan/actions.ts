@@ -3,7 +3,6 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getProfile } from "@/lib/auth";
-import { berkasFoto, hapusFotoKaryawan, simpanFoto } from "@/lib/foto";
 import { hariIni } from "@/lib/format";
 import { configKategori, periksaPilihanStandar, type KategoriConfig } from "@/lib/kategori-config";
 import { dengan, pesanGalat, text } from "@/lib/params";
@@ -104,11 +103,8 @@ export async function createKaryawan(formData: FormData) {
   });
   if (kontrakError) redirect(dengan("/karyawan", "error", `Karyawan tersimpan, tetapi kontrak gagal dibuat: ${pesanGalat(kontrakError)}`));
 
-  const foto = berkasFoto(formData);
-  const galatFoto = foto ? await simpanFoto(supabase, karyawan.id, foto, null) : null;
-
   revalidatePath("/karyawan");
-  redirect(dengan("/karyawan", "ok", `Data karyawan berhasil ditambahkan${galatFoto ? `, tetapi ${galatFoto}` : ""}`));
+  redirect(dengan("/karyawan", "ok", "Data karyawan berhasil ditambahkan"));
 }
 
 export async function updateKaryawan(id: number, formData: FormData) {
@@ -135,21 +131,13 @@ export async function updateKaryawan(id: number, formData: FormData) {
   // NP pada riwayat kontrak ikut berubah
   await supabase.from("kontrak").update({ np: payload.np }).eq("karyawan_id", id);
 
-  const foto = berkasFoto(formData);
-  let galatFoto: string | null = null;
-  if (foto) {
-    const { data: lama } = await supabase.from("karyawan").select("foto").eq("id", id).maybeSingle();
-    galatFoto = await simpanFoto(supabase, id, foto, lama?.foto ?? null);
-  }
-
   revalidatePath("/karyawan");
-  redirect(dengan("/karyawan", "ok", `Data karyawan berhasil diupdate${galatFoto ? `, tetapi ${galatFoto}` : ""}`));
+  redirect(dengan("/karyawan", "ok", "Data karyawan berhasil diupdate"));
 }
 
 export async function deleteKaryawan(formData: FormData) {
   const id = Number(formData.get("id"));
   const supabase = await createClient();
-  await hapusFotoKaryawan(supabase, [id]);
   const { error } = await supabase.from("karyawan").delete().eq("id", id);
   revalidatePath("/karyawan");
   revalidatePath("/terminate");
@@ -160,7 +148,6 @@ export async function bulkDeleteKaryawan(formData: FormData) {
   const ids = formData.getAll("ids").map(Number).filter(Boolean);
   if (ids.length === 0) redirect(dengan("/karyawan", "error", "Tidak ada data yang dipilih"));
   const supabase = await createClient();
-  await hapusFotoKaryawan(supabase, ids);
   const { data, error } = await supabase.from("karyawan").delete().in("id", ids).select("id");
   revalidatePath("/karyawan");
   redirect(

@@ -4,7 +4,6 @@ import FilterBulanTahun from "@/components/FilterBulanTahun";
 import Flash from "@/components/Flash";
 import PageHeader from "@/components/PageHeader";
 import { getProfile } from "@/lib/auth";
-import { tautanFoto } from "@/lib/foto";
 import { KATEGORI_CONFIG, LABEL_INTI, configKategori, labelKolom } from "@/lib/kategori-config";
 import { KOLOM_STANDAR, nilaiKolom, normalisasi, type BarisKaryawan } from "@/lib/kolom";
 import { filterBulanTahun } from "@/lib/params";
@@ -42,7 +41,6 @@ export default async function KaryawanPage({ searchParams }: { searchParams: Pro
   }
   const { data } = await query;
   const rows = filterBulanTahun(normalisasi((data ?? []) as unknown as BarisKaryawan[]), p);
-  const foto = await tautanFoto(supabase, rows.map((r) => r.foto));
 
   // Kategori dengan kolom khusus tidak menampilkan kolom "Kategori" (semua barisnya sama)
   const kolom = config ? config.kolomTabel : KOLOM_STANDAR;
@@ -84,7 +82,6 @@ export default async function KaryawanPage({ searchParams }: { searchParams: Pro
             <thead>
               <tr>
                 <th className="th" />
-                <th className="th">Foto</th>
                 {kolom.map((k) => <th key={k} className="th">{config ? labelKolom(k, config) : LABEL_INTI[k] ?? k}</th>)}
                 <th className="th">Link</th>
                 <th className="th" />
@@ -94,14 +91,6 @@ export default async function KaryawanPage({ searchParams }: { searchParams: Pro
               {rows.map((r) => (
                 <tr key={r.id} className="hover:bg-soft/60">
                   <td className="td"><input type="checkbox" name="ids" value={r.id} /></td>
-                  <td className="td">
-                    {r.foto && foto.get(r.foto) ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={foto.get(r.foto)} alt={r.nama} className="h-9 w-9 rounded-full object-cover" />
-                    ) : (
-                      <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-soft text-sm font-bold text-primary">{r.nama.slice(0, 1).toUpperCase()}</span>
-                    )}
-                  </td>
                   {kolom.map((k) => (
                     <td key={k} className={`td ${k === "nama" ? "font-medium" : ""} ${k === "catatan_titipan" ? "min-w-48" : ""}`}>
                       {nilaiKolom(r, k, config, true) ?? "-"}
@@ -121,7 +110,7 @@ export default async function KaryawanPage({ searchParams }: { searchParams: Pro
                   </td>
                 </tr>
               ))}
-              {rows.length === 0 && <tr><td className="td text-center text-muted" colSpan={kolom.length + 4}>Belum ada data.</td></tr>}
+              {rows.length === 0 && <tr><td className="td text-center text-muted" colSpan={kolom.length + 3}>Belum ada data.</td></tr>}
             </tbody>
           </table>
         </div>
