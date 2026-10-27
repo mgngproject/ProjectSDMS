@@ -1,6 +1,6 @@
 import * as XLSX from "xlsx";
 import { getProfile } from "@/lib/auth";
-import { LABEL_INTI, configKategori, kolomDisembunyikan } from "@/lib/kategori-config";
+import { LABEL_INTI, configKategori, kolomDisembunyikan, pilihanStandar } from "@/lib/kategori-config";
 
 /** Template import: judul kolom sesuai kategori, plus satu baris contoh. */
 export async function GET(request: Request) {
@@ -21,6 +21,7 @@ export async function GET(request: Request) {
     if (j.startsWith("Awal Kontrak")) return j.endsWith("2") ? "" : "2026-01-01";
     if (j.startsWith("Akhir Kontrak")) return j.endsWith("2") ? "" : "2026-12-31";
     if (f?.type === "select") return f.options?.[0] ?? "";
+    if (j === LABEL_INTI.level && pilihanStandar(namaKategori).level) return pilihanStandar(namaKategori).level[0];
     if (f?.type === "date") return "2026-01-01";
     return "";
   });

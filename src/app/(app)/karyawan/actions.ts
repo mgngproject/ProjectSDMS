@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { getProfile } from "@/lib/auth";
 import { berkasFoto, hapusFotoKaryawan, simpanFoto } from "@/lib/foto";
 import { hariIni } from "@/lib/format";
-import { configKategori, type KategoriConfig } from "@/lib/kategori-config";
+import { configKategori, periksaPilihanStandar, type KategoriConfig } from "@/lib/kategori-config";
 import { dengan, pesanGalat, text } from "@/lib/params";
 import { createClient } from "@/lib/supabase/server";
 
@@ -63,9 +63,12 @@ export async function createKaryawan(formData: FormData) {
   if (!kategori_id) redirect(dengan("/karyawan/new", "error", "Kategori wajib dipilih."));
 
   const supabase = await createClient();
-  const config = configKategori(await namaKategori(supabase, kategori_id));
+  const namaKat = await namaKategori(supabase, kategori_id);
+  const config = configKategori(namaKat);
   const detail = config ? bacaDetail(config, formData) : null;
   if (detail?.error) redirect(dengan("/karyawan/new", "error", detail.error));
+  const salahPilihan = periksaPilihanStandar(namaKat, { level: text(formData, "level") });
+  if (salahPilihan) redirect(dengan("/karyawan/new", "error", salahPilihan));
 
   const { data: karyawan, error } = await supabase
     .from("karyawan")
@@ -114,9 +117,12 @@ export async function updateKaryawan(id: number, formData: FormData) {
   const payload = { ...kolomUmum(formData), ...(kategori_id ? { kategori_id } : {}), folder_link: text(formData, "folder_link") };
   if (!payload.np || !payload.nama) redirect(dengan(`/karyawan/${id}/edit`, "error", "NP dan nama wajib diisi."));
 
-  const config = configKategori(await namaKategori(supabase, kategori_id));
+  const namaKat = await namaKategori(supabase, kategori_id);
+  const config = configKategori(namaKat);
   const detail = config ? bacaDetail(config, formData) : null;
   if (detail?.error) redirect(dengan(`/karyawan/${id}/edit`, "error", detail.error));
+  const salahPilihan = periksaPilihanStandar(namaKat, { level: payload.level });
+  if (salahPilihan) redirect(dengan(`/karyawan/${id}/edit`, "error", salahPilihan));
 
   const { error } = await supabase.from("karyawan").update(payload).eq("id", id);
   if (error) redirect(dengan(`/karyawan/${id}/edit`, "error", pesanGalat(error)));

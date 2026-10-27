@@ -68,7 +68,7 @@ export async function importExcel(formData: FormData) {
   const hari = hariIni();
 
   // 1. Sheet Database: karyawan, kolom khusus kategori, dan kontrak
-  const kar = bacaKaryawan(sheetDatabase, config);
+  const kar = bacaKaryawan(sheetDatabase, config, kat?.nama ?? null);
   galat.push(...kar.galat);
   const idDisentuh = new Set<number>();
 
