@@ -1,6 +1,6 @@
 import * as XLSX from "xlsx";
 import { getProfile } from "@/lib/auth";
-import { LABEL_INTI, configKategori } from "@/lib/kategori-config";
+import { LABEL_INTI, configKategori, kolomDisembunyikan } from "@/lib/kategori-config";
 
 /** Template import: judul kolom sesuai kategori, plus satu baris contoh. */
 export async function GET(request: Request) {
@@ -10,7 +10,7 @@ export async function GET(request: Request) {
   const config = configKategori(namaKategori);
 
   const standar = ["kode_bagan", "unit_kerja", "jabatan", "level", "role", "benefit_kesehatan", "faskes", "gross_per_month", "kpi"]
-    .filter((k) => !config?.sembunyikan.includes(k))
+    .filter((k) => !kolomDisembunyikan(namaKategori).includes(k))
     .map((k) => LABEL_INTI[k]);
   const detail = (config?.fields ?? []).map((f) => f.label);
   const judul = ["NP", "Nama", ...detail, "Awal Kontrak", "Akhir Kontrak", "Awal Kontrak 2", "Akhir Kontrak 2", ...standar];

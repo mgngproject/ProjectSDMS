@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { configKategori, type DetailField } from "@/lib/kategori-config";
+import { configKategori, kolomDisembunyikan, type DetailField } from "@/lib/kategori-config";
 import type { Detail, Karyawan, Kategori } from "@/lib/types";
 
 type Props = {
@@ -50,7 +50,8 @@ export default function KaryawanFields({ kategori, isSuperAdmin, kategoriAdmin, 
   const [kategoriId, setKategoriId] = useState(String(k?.kategori_id ?? ""));
   const namaTerpilih = isSuperAdmin ? kategori.find((c) => String(c.id) === kategoriId)?.nama : kategoriAdmin;
   const config = configKategori(namaTerpilih);
-  const tampil = (kolom: string) => !config?.sembunyikan.includes(kolom);
+  const disembunyikan = kolomDisembunyikan(namaTerpilih);
+  const tampil = (kolom: string) => !disembunyikan.includes(kolom);
 
   return (
     <>

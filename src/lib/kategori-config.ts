@@ -104,6 +104,17 @@ export function jendelaKategori(nama: string | null | undefined): Jendela {
   return (nama && JENDELA_KHUSUS[nama]) || JENDELA_UMUM;
 }
 
+// Kolom standar yang disembunyikan untuk kategori yang tidak punya tabel khusus.
+const SEMBUNYIKAN_STANDAR: Record<string, string[]> = {
+  IDH: ["faskes"],
+};
+
+/** Kolom standar karyawan yang tidak dipakai kategori ini (disembunyikan di form dan template import). */
+export function kolomDisembunyikan(nama: string | null | undefined): string[] {
+  if (!nama) return [];
+  return KATEGORI_CONFIG[nama]?.sembunyikan ?? SEMBUNYIKAN_STANDAR[nama] ?? [];
+}
+
 export function configKategori(nama: string | null | undefined): KategoriConfig | null {
   return nama ? KATEGORI_CONFIG[nama] ?? null : null;
 }
