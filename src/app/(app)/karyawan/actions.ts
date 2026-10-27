@@ -82,7 +82,7 @@ export async function createKaryawan(formData: FormData) {
   if (error || !karyawan) redirect(dengan("/karyawan/new", "error", pesanGalat(error ?? { message: "Gagal menyimpan." })));
 
   if (config && detail) {
-    const { error: detailError } = await supabase.from(config.tabel).insert({ karyawan_id: karyawan.id, ...detail.values });
+    const { error: detailError } = await supabase.from(config.tabel).upsert({ karyawan_id: karyawan.id, ...detail.values }, { onConflict: "karyawan_id" });
     if (detailError) {
       await supabase.from("karyawan").delete().eq("id", karyawan.id);
       redirect(dengan("/karyawan/new", "error", pesanGalat(detailError)));
