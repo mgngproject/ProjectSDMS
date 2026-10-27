@@ -1,4 +1,6 @@
 import { Lock, Mail } from "lucide-react";
+import Image from "next/image";
+import AsciiBackground from "@/components/AsciiBackground";
 import { login } from "./actions";
 
 const PESAN: Record<string, string> = {
@@ -10,14 +12,19 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   const { error, detail } = await searchParams;
 
   return (
-    <main className="flex min-h-screen items-center justify-center p-4">
-      <form action={login} className="card w-full max-w-sm space-y-5 p-8">
-        <div className="flex flex-col items-center gap-3 text-center">
-          <span className="h-12 w-12 rounded-full bg-gradient-to-br from-violet-400 to-indigo-500" />
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">SDMS</h1>
-            <p className="text-sm text-muted">Masuk dengan akun kategori Anda.</p>
-          </div>
+    <main className="relative flex min-h-screen flex-col items-center justify-center gap-8 overflow-hidden p-4">
+      <AsciiBackground avoidId="logo-login" />
+
+      <div id="logo-login" className="relative z-10 flex flex-col items-center gap-2">
+        <div className="absolute -inset-10 -z-10 rounded-full bg-primary/15 blur-3xl" />
+        <Image src="/logo-peruri.png" alt="Peruri" width={941} height={333} priority className="h-auto w-64 dark:hidden sm:w-80" />
+        <Image src="/logo-peruri-putih.png" alt="Peruri" width={1466} height={492} priority className="hidden h-auto w-64 dark:block sm:w-80" />
+      </div>
+
+      <form action={login} className="card relative z-10 w-full max-w-sm space-y-5 bg-card/85 p-8 backdrop-blur">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold tracking-tight">SDMS</h1>
+          <p className="text-sm text-muted">Masuk dengan akun kategori Anda.</p>
         </div>
 
         {error && (

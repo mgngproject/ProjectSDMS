@@ -8,7 +8,12 @@ import { KATEGORI_CONFIG, LABEL_INTI, configKategori, labelKolom } from "@/lib/k
 import { KOLOM_STANDAR, nilaiKolom, normalisasi, type BarisKaryawan } from "@/lib/kolom";
 import { filterBulanTahun } from "@/lib/params";
 import { createClient } from "@/lib/supabase/server";
+import ImporForm from "@/components/ImporForm";
 import { bulkDeleteKaryawan, deleteKaryawan } from "./actions";
+import { importExcel } from "./impor";
+
+// Import Excel dan pembaruan kontrak massal bisa memakan waktu
+export const maxDuration = 60;
 
 type Params = { q?: string; kategori?: string; filter?: string; bulan?: string; tahun?: string; ok?: string; error?: string };
 
@@ -39,12 +44,16 @@ export default async function KaryawanPage({ searchParams }: { searchParams: Pro
 
   // Kategori dengan kolom khusus tidak menampilkan kolom "Kategori" (semua barisnya sama)
   const kolom = config ? config.kolomTabel : KOLOM_STANDAR;
-  const exportHref = `/api/export/karyawan${isSuperAdmin && namaKategori ? `?kategori=${encodeURIComponent(namaKategori)}` : ""}`;
+  const sufiks = isSuperAdmin && namaKategori ? `?kategori=${encodeURIComponent(namaKategori)}` : "";
+  const exportHref = `/api/export/karyawan${sufiks}`;
+  const pdfHref = `/api/pdf/karyawan${sufiks}`;
 
   return (
     <div className="space-y-4">
       <PageHeader title="Data Karyawan">
+        <ImporForm action={importExcel} kategori={isSuperAdmin ? daftarKategori ?? [] : undefined} kategoriDipilih={namaKategori} />
         <a className="btn-secondary" href={exportHref}>Export Excel</a>
+        <a className="btn-secondary" href={pdfHref} target="_blank" rel="noreferrer">Export PDF</a>
         <Link className="btn" href="/karyawan/new">Tambah Karyawan</Link>
       </PageHeader>
 

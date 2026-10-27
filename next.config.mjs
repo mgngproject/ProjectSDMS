@@ -1,4 +1,9 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {};
+const nextConfig = {
+  experimental: {
+    // Unggah file Excel (maks 3 MB) lewat Server Action
+    serverActions: { bodySizeLimit: "4mb" },
+  },
+};
 
 export default nextConfig;

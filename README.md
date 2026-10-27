@@ -36,16 +36,24 @@ Logikanya mengikuti versi Laravel.
 * **Data Diri** — daftar dengan filter jenjang, ubah (KTP 16 digit dan unik), export Excel.
 * **Monitoring** — 10 kotak centang dan 3 isian (usulan remunerasi, SP, SKEP); status `Selesai` hanya bila semuanya lengkap, catatan menampilkan yang kurang; filter bulan dan status.
 * **Terminate** — terminate dari karyawan, tambah langsung, ubah, hapus, hapus massal, filter, export Excel.
+* **Import Excel** — format sama dengan versi lama: sheet `Database` (karyawan dan kontrak berurutan `awal_kontrak`, `akhir_kontrak`, `awal_kontrak2`, ...), `Mail Merge` (data diri), `Terminate`, dan `Kontrak`. File tanpa nama sheet dibaca sebagai Database. Template per kategori bisa diunduh dari tombol Import. Maksimal 3 MB dan 1000 baris per sheet; baris yang salah dilaporkan dan dilewati.
+* **Export** — Excel dan PDF (A4 lanskap) untuk karyawan, terminate, dan data diri. Isi mengikuti kolom kategori.
 
 ### Kategori Magang
 Kategori Magang punya kolom khusus (tabel `karyawan_magang`): Kategori (Magenta / PKL / Maganghub), Universitas/Sekolah, Jurusan, Penempatan (Jakarta / Karawang), Status (Baru / Alih Status / Perpanjangan Maganghub), Awal dan Akhir Pendidikan, serta Catatan Titipan. Awal dan Akhir Kontrak tetap di data kontrak seperti kategori lain. Dashboard Magang menampilkan peserta yang berakhir dalam 30 hari dan sebaran per kategori, penempatan, dan status. Kolom standar yang tidak dipakai (jabatan, level, role, benefit, faskes, gross, KPI) disembunyikan.
 
 Kategori TPBW/TPP memakai kolom standar ditambah **Status** (TPBW atau TPP), tabel `karyawan_tpbw`.
 
+Kategori BGN memakai kolom standar ditambah **Level Jabatan** (Senior, Middle, Junior, atau PKWT Reguler), tabel `karyawan_bgn`.
+
+Kategori IDH memakai kolom standar, dengan **Level** berupa pilihan (Junior, Middle, Senior) dan tanpa Faskes; tidak ada tabel khusus.
+
+Kategori Inagov memakai kolom standar, dengan **Level** berupa pilihan (Senior, Middle, Junior); tidak ada tabel khusus.
+
 Kolom khusus kategori lain didaftarkan di `src/lib/kategori-config.ts`.
 
 ### Dashboard "akan selesai"
-Dashboard menampilkan daftar karyawan yang kontraknya akan berakhir dalam jendela waktu per kategori: Magang 30 hari, TPBW/TPP 2 bulan dan IDE dan IDH 1 bulan (bulan kalender), kategori lain 60 hari. Jendela diatur di `JENDELA_KHUSUS` pada `src/lib/kategori-config.ts`.
+Dashboard menampilkan daftar karyawan yang kontraknya akan berakhir dalam jendela waktu per kategori: Magang 30 hari, TPBW/TPP, PKWT, BGN, dan Inagov 2 bulan serta IDE dan IDH 1 bulan (bulan kalender), kategori lain 60 hari. Jendela diatur di `JENDELA_KHUSUS` pada `src/lib/kategori-config.ts`.
 
 ## 3. Kategori dan Role
 
@@ -78,7 +86,7 @@ src/
 ├── lib/                       # klien Supabase, auth, format tanggal
 └── middleware.ts              # menyegarkan sesi dan mengarahkan ke /login
 supabase/
-├── migrations/                # 0001 tabel+RLS, 0002 hak akses, 0003 logika kontrak/monitoring, 0004 kolom Magang, 0005 kolom TPBW/TPP, 0006 kolom IDE, 0007 salinan data IDE, 0008 hapus status IDE, 0009 hapus salinan status, 0010 tabel IDH, 0011 hapus faskes IDE, 0012 hapus faskes IDH
+├── migrations/                # 0001 tabel+RLS, 0002 hak akses, 0003 logika kontrak/monitoring, 0004 kolom Magang, 0005 kolom TPBW/TPP, 0006 import Excel (sinkron massal), 0007 kolom BGN, 0008 kolom IDE, 0009 salinan data IDE, 0010 hapus status IDE, 0011 hapus salinan status, 0012 tabel IDH, 0013 hapus faskes IDE, 0014 hapus faskes IDH
 └── seed.sql                   # daftar kategori
 scripts/create-users.mjs       # membuat akun awal
 legacy-laravel/                # kode Laravel lama (acuan)
@@ -91,7 +99,7 @@ Prasyarat: Node.js 20+ dan project Supabase.
 ### a. Siapkan Supabase
 
 1. Buat project di [supabase.com](https://supabase.com).
-2. Buka **SQL Editor**, jalankan berurutan: `supabase/migrations/0001_init.sql`, `0002_grants.sql`, `0003_parity_laravel.sql`, `0004_magang.sql`, `0005_tpbw.sql`, `0006_ide.sql`, `0007_ide_salin.sql`, `0008_ide_hapus_status.sql`, `0009_ide_hapus_salinan_status.sql`, `0010_idh.sql`, `0011_ide_hapus_faskes.sql`, `0012_idh_hapus_faskes.sql`, lalu `supabase/seed.sql`.
+2. Buka **SQL Editor**, jalankan berurutan: `supabase/migrations/0001_init.sql`, `0002_grants.sql`, `0003_parity_laravel.sql`, `0004_magang.sql`, `0005_tpbw.sql`, `0006_impor_foto.sql`, `0007_bgn.sql`, `0008_ide.sql`, `0009_ide_salin.sql`, `0010_ide_hapus_status.sql`, `0011_ide_hapus_salinan_status.sql`, `0012_idh.sql`, `0013_ide_hapus_faskes.sql`, `0014_idh_hapus_faskes.sql`, lalu `supabase/seed.sql`.
 3. Ambil `Project URL`, `anon key`, dan `service_role key` dari **Project Settings → API**.
 
 ### b. Konfigurasi dan jalankan
@@ -152,9 +160,6 @@ Buat Pull Request ke `main` dan minta review sebelum merge.
 
 ## 9. Belum Dimigrasikan dari Versi Laravel
 
-* Import Excel (karyawan, data diri, kontrak, terminate) dan export PDF.
-* Upload foto karyawan (rencana: Supabase Storage).
-* Kolom khusus per kategori (PIC) — menyusul setelah daftar kolomnya ditentukan.
-* Perpindahan data dari MySQL lama ke Supabase.
+* Perpindahan data dari MySQL lama ke Supabase. Jalurnya: ekspor data lama ke Excel dengan format import di atas, lalu import per kategori.
 
 Kode acuannya ada di `legacy-laravel/app/`.

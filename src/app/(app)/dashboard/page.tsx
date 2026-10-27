@@ -4,9 +4,9 @@ import { GrafikBulanan, GrafikKampus, GrafikKategori, GrafikPendidikan, GrafikSe
 import PageHeader from "@/components/PageHeader";
 import StatCard from "@/components/StatCard";
 import { getProfile } from "@/lib/auth";
-import { hitungDashboard, sebaranDetail } from "@/lib/dashboard";
+import { hitungDashboard, sebaranDetail, sebaranStandar } from "@/lib/dashboard";
 import { NAMA_BULAN, formatTanggal, hariIni, selisihHari } from "@/lib/format";
-import { configKategori, jendelaKategori } from "@/lib/kategori-config";
+import { LABEL_INTI, configKategori, jendelaKategori, pilihanStandar } from "@/lib/kategori-config";
 import { createClient } from "@/lib/supabase/server";
 
 type Params = { bulan?: string; tahun_masuk?: string; tahun_habis?: string; kategori?: string };
@@ -35,7 +35,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
 
   const [{ data: kategori }, { data: karyawanData }, { data: dataDiri }, { data: monitoring }, { data: detailData }] = await Promise.all([
     supabase.from("kategori").select("id, nama").order("id"),
-    supabase.from("karyawan").select("id, np, nama, unit_kerja, jabatan, status, tanggal_keluar, awal_kontrak, akhir_kontrak, kategori:kategori_id(nama)"),
+    supabase.from("karyawan").select("id, np, nama, unit_kerja, jabatan, level, status, tanggal_keluar, awal_kontrak, akhir_kontrak, kategori:kategori_id(nama)"),
     supabase.from("data_diri").select("karyawan_id, jenjang_1, jenjang_2, kampus_1, kampus_2"),
     supabase.from("monitoring").select("karyawan_id, status"),
     config ? supabase.from(config.tabel).select("*") : Promise.resolve({ data: [] as Record<string, string | null>[] }),
@@ -50,7 +50,11 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   );
 
   const d = hitungDashboard({ karyawan, dataDiri: dataDiri ?? [], monitoring: monitoring ?? [], bulan, tahunMasuk, tahunHabis, sampai: jendela.sampai(sekarang) });
-  const sebaran = config ? sebaranDetail(config.fields, d.aktifIds, detail) : [];
+  const idAktif = new Set(d.aktifIds);
+  const sebaran = [
+    ...(config ? sebaranDetail(config.fields, d.aktifIds, detail) : []),
+    ...sebaranStandar(pilihanStandar(namaKategori), (k) => LABEL_INTI[k] ?? k, karyawan.filter((k) => idAktif.has(k.id))),
+  ];
 
   const [tahunB, bulanB] = bulan.split("-").map(Number);
   const namaBulan = `${NAMA_BULAN[bulanB - 1]} ${tahunB}`;
@@ -186,7 +190,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                   <span className="min-w-0">
                     <span className="block truncate">{r.nama} ({r.np}){isSuperAdmin && !config ? ` · ${r.kategori?.nama}` : ""}</span>
                     <span className="block truncate text-xs text-muted">
-                      {[info?.jenis, info?.status_tpbw, info?.institusi].filter(Boolean).join(" · ") || [r.unit_kerja, r.jabatan].filter(Boolean).join(" · ")}
+                      {[info?.jenis, info?.status_tpbw, info?.level_jabatan, info?.institusi].filter(Boolean).join(" · ") || [r.unit_kerja, r.jabatan].filter(Boolean).join(" · ")}
                     </span>
                   </span>
                   <span className="flex shrink-0 items-center gap-2">

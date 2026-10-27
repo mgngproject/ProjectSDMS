@@ -18,7 +18,7 @@ const ALIAS_KAMPUS: Record<string, string[]> = {
 const normal = (s: string) => s.trim().toLowerCase().replace(/\s+/g, " ");
 const LOOKUP = new Map(Object.entries(ALIAS_KAMPUS).flatMap(([key, list]) => list.map((a) => [normal(a), key] as const)));
 
-type KaryawanRow = Pick<Karyawan, "id" | "np" | "nama" | "unit_kerja" | "jabatan" | "status" | "tanggal_keluar" | "awal_kontrak" | "akhir_kontrak"> & {
+type KaryawanRow = Pick<Karyawan, "id" | "np" | "nama" | "unit_kerja" | "jabatan" | "level" | "status" | "tanggal_keluar" | "awal_kontrak" | "akhir_kontrak"> & {
   kategori: { nama: string } | null;
 };
 type PendidikanRow = Pick<DataDiri, "karyawan_id" | "jenjang_1" | "jenjang_2" | "kampus_1" | "kampus_2">;
@@ -154,4 +154,23 @@ export function sebaranDetail(
         { nama: "Belum diisi", total: baris.filter((b) => !b[f.name]).length },
       ].filter((x) => x.nama !== "Belum diisi" || x.total > 0),
     }));
+}
+
+/** Sebaran karyawan aktif menurut kolom standar berpilihan (mis. Level di IDH). */
+export function sebaranStandar(
+  pilihan: Record<string, string[]>,
+  label: (kolom: string) => string,
+  aktif: { level: string | null }[],
+) {
+  return Object.entries(pilihan).map(([kolom, opsi]) => {
+    const nilai = aktif.map((k) => (kolom === "level" ? k.level : null));
+    return {
+      name: kolom,
+      label: label(kolom),
+      data: [
+        ...opsi.map((o) => ({ nama: o, total: nilai.filter((v) => v === o).length })),
+        { nama: "Belum diisi", total: nilai.filter((v) => !v || !opsi.includes(v)).length },
+      ].filter((x) => x.nama !== "Belum diisi" || x.total > 0),
+    };
+  });
 }

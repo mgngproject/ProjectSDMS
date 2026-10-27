@@ -61,13 +61,22 @@ export const KATEGORI_CONFIG: Record<string, KategoriConfig> = {
       "unit_kerja", "jabatan", "level", "role", "benefit_kesehatan", "gross_per_month",
     ],
   },
+  BGN: {
+    tabel: "karyawan_bgn",
+    sembunyikan: ["faskes"],
+    fields: [{ name: "level_jabatan", label: "Level Jabatan", type: "select", options: ["Senior", "Middle", "Junior", "PKWT Reguler"], required: true }],
+    kolomTabel: [
+      "np", "nama", "level_jabatan", "awal_kontrak", "akhir_kontrak", "masa_kerja", "masa_kontrak",
+      "kode_bagan", "unit_kerja", "jabatan", "level", "role", "benefit_kesehatan", "gross_per_month", "kpi",
+    ],
+  },
   "TPBW/TPP": {
     tabel: "karyawan_tpbw",
     sembunyikan: [],
     fields: [{ name: "status_tpbw", label: "Status", type: "select", options: ["TPBW", "TPP"], required: true }],
     kolomTabel: [
       "np", "nama", "status_tpbw", "awal_kontrak", "akhir_kontrak", "masa_kerja", "masa_kontrak",
-      "unit_kerja", "jabatan", "level", "role", "gross_per_month",
+      "kode_bagan", "unit_kerja", "jabatan", "level", "role", "benefit_kesehatan", "gross_per_month", "kpi",
     ],
   },
   Magang: {
@@ -105,11 +114,45 @@ const JENDELA_KHUSUS: Record<string, Jendela> = {
   "TPBW/TPP": { label: "2 bulan", sampai: (h) => tambahBulan(h, 2), fokus: true },
   IDE: { label: "1 bulan", sampai: (h) => tambahBulan(h, 1), fokus: true },
   IDH: { label: "1 bulan", sampai: (h) => tambahBulan(h, 1), fokus: true },
+  PKWT: { label: "2 bulan", sampai: (h) => tambahBulan(h, 2), fokus: true },
+  BGN: { label: "2 bulan", sampai: (h) => tambahBulan(h, 2), fokus: true },
+  Inagov: { label: "2 bulan", sampai: (h) => tambahBulan(h, 2), fokus: true },
 };
 const JENDELA_UMUM: Jendela = { label: "60 hari", sampai: (h) => tambahHari(h, 60), fokus: false };
 
 export function jendelaKategori(nama: string | null | undefined): Jendela {
   return (nama && JENDELA_KHUSUS[nama]) || JENDELA_UMUM;
+}
+
+  // Kolom standar yang pilihannya dibatasi untuk kategori tertentu (menggantikan isian bebas).
+const PILIHAN_STANDAR: Record<string, Record<string, string[]>> = {
+  IDH: { level: ["Junior", "Middle", "Senior"] },
+  Inagov: { level: ["Senior", "Middle", "Junior"] },
+};
+
+export function pilihanStandar(nama: string | null | undefined): Record<string, string[]> {
+  return (nama && PILIHAN_STANDAR[nama]) || {};
+}
+
+/** Memeriksa kolom standar berpilihan; mengembalikan pesan galat atau null. Wajib diisi dan harus salah satu pilihan. */
+export function periksaPilihanStandar(nama: string | null | undefined, nilai: Record<string, string | null>): string | null {
+  for (const [kolom, opsi] of Object.entries(pilihanStandar(nama))) {
+    const v = nilai[kolom];
+    if (!v) return `${LABEL_INTI[kolom] ?? kolom} wajib dipilih.`;
+    if (!opsi.includes(v)) return `${LABEL_INTI[kolom] ?? kolom} tidak valid (pilihan: ${opsi.join(", ")}).`;
+  }
+  return null;
+}
+
+// Kolom standar yang disembunyikan untuk kategori yang tidak punya tabel khusus.
+const SEMBUNYIKAN_STANDAR: Record<string, string[]> = {
+  IDH: ["faskes"],
+};
+
+/** Kolom standar karyawan yang tidak dipakai kategori ini (disembunyikan di form dan template import). */
+export function kolomDisembunyikan(nama: string | null | undefined): string[] {
+  if (!nama) return [];
+  return KATEGORI_CONFIG[nama]?.sembunyikan ?? SEMBUNYIKAN_STANDAR[nama] ?? [];
 }
 
 export function configKategori(nama: string | null | undefined): KategoriConfig | null {
