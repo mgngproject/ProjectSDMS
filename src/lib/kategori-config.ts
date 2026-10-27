@@ -104,6 +104,36 @@ export function jendelaKategori(nama: string | null | undefined): Jendela {
   return (nama && JENDELA_KHUSUS[nama]) || JENDELA_UMUM;
 }
 
+  // Kolom standar yang pilihannya dibatasi untuk kategori tertentu (menggantikan isian bebas).
+const PILIHAN_STANDAR: Record<string, Record<string, string[]>> = {
+  IDH: { level: ["Junior", "Middle", "Senior"] },
+};
+
+export function pilihanStandar(nama: string | null | undefined): Record<string, string[]> {
+  return (nama && PILIHAN_STANDAR[nama]) || {};
+}
+
+/** Memeriksa kolom standar berpilihan; mengembalikan pesan galat atau null. Wajib diisi dan harus salah satu pilihan. */
+export function periksaPilihanStandar(nama: string | null | undefined, nilai: Record<string, string | null>): string | null {
+  for (const [kolom, opsi] of Object.entries(pilihanStandar(nama))) {
+    const v = nilai[kolom];
+    if (!v) return `${LABEL_INTI[kolom] ?? kolom} wajib dipilih.`;
+    if (!opsi.includes(v)) return `${LABEL_INTI[kolom] ?? kolom} tidak valid (pilihan: ${opsi.join(", ")}).`;
+  }
+  return null;
+}
+
+// Kolom standar yang disembunyikan untuk kategori yang tidak punya tabel khusus.
+const SEMBUNYIKAN_STANDAR: Record<string, string[]> = {
+  IDH: ["faskes"],
+};
+
+/** Kolom standar karyawan yang tidak dipakai kategori ini (disembunyikan di form dan template import). */
+export function kolomDisembunyikan(nama: string | null | undefined): string[] {
+  if (!nama) return [];
+  return KATEGORI_CONFIG[nama]?.sembunyikan ?? SEMBUNYIKAN_STANDAR[nama] ?? [];
+}
+
 export function configKategori(nama: string | null | undefined): KategoriConfig | null {
   return nama ? KATEGORI_CONFIG[nama] ?? null : null;
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { configKategori, type DetailField } from "@/lib/kategori-config";
+import { configKategori, kolomDisembunyikan, pilihanStandar, type DetailField } from "@/lib/kategori-config";
 import type { Detail, Karyawan, Kategori } from "@/lib/types";
 
 type Props = {
@@ -50,7 +50,9 @@ export default function KaryawanFields({ kategori, isSuperAdmin, kategoriAdmin, 
   const [kategoriId, setKategoriId] = useState(String(k?.kategori_id ?? ""));
   const namaTerpilih = isSuperAdmin ? kategori.find((c) => String(c.id) === kategoriId)?.nama : kategoriAdmin;
   const config = configKategori(namaTerpilih);
-  const tampil = (kolom: string) => !config?.sembunyikan.includes(kolom);
+  const disembunyikan = kolomDisembunyikan(namaTerpilih);
+  const pilihan = pilihanStandar(namaTerpilih);
+  const tampil = (kolom: string) => !disembunyikan.includes(kolom);
 
   return (
     <>
@@ -79,7 +81,16 @@ export default function KaryawanFields({ kategori, isSuperAdmin, kategoriAdmin, 
       <Field name="kode_bagan" label="Kode Bagan" defaultValue={k?.kode_bagan} />
       <Field name="unit_kerja" label="Unit Kerja" defaultValue={k?.unit_kerja} />
       {tampil("jabatan") && <Field name="jabatan" label="Jabatan" defaultValue={k?.jabatan} />}
-      {tampil("level") && <Field name="level" label="Level" defaultValue={k?.level} />}
+      {tampil("level") && pilihan.level && (
+        <div>
+          <label className="label" htmlFor="level">Level</label>
+          <select className="input" id="level" name="level" defaultValue={k?.level && pilihan.level.includes(k.level) ? k.level : ""} required>
+            <option value="">-- Pilih Level --</option>
+            {pilihan.level.map((o) => <option key={o} value={o}>{o}</option>)}
+          </select>
+        </div>
+      )}
+      {tampil("level") && !pilihan.level && <Field name="level" label="Level" defaultValue={k?.level} />}
       {tampil("role") && <Field name="role" label="Role" defaultValue={k?.role} />}
       {tampil("benefit_kesehatan") && <Field name="benefit_kesehatan" label="Benefit Kesehatan" defaultValue={k?.benefit_kesehatan} />}
       {tampil("faskes") && <Field name="faskes" label="Faskes" defaultValue={k?.faskes} />}

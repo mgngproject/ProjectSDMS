@@ -1,5 +1,5 @@
 import * as XLSX from "xlsx";
-import type { KategoriConfig } from "@/lib/kategori-config";
+import { pilihanStandar, type KategoriConfig } from "@/lib/kategori-config";
 
 // Format file sama dengan versi Laravel: satu workbook dengan sheet
 // "Database" (karyawan + kontrak berurutan), "Mail Merge" (data diri), "Terminate", dan "Kontrak".
@@ -115,7 +115,8 @@ function bacaKontrakBerurutan(r: Baris): Kontrak[] {
   return daftar;
 }
 
-export function bacaKaryawan(rows: Baris[], config: KategoriConfig | null): Hasil<KaryawanImpor> {
+export function bacaKaryawan(rows: Baris[], config: KategoriConfig | null, namaKategori: string | null = null): Hasil<KaryawanImpor> {
+  const pilihan = pilihanStandar(namaKategori);
   const data: KaryawanImpor[] = [];
   const galat: string[] = [];
   const dilihat = new Set<string>();
@@ -148,6 +149,15 @@ export function bacaKaryawan(rows: Baris[], config: KategoriConfig | null): Hasi
       return void galat.push(`Baris ${baris}: akhir pendidikan sebelum awal pendidikan`);
     }
 
+    // Kolom standar berpilihan (mis. Level di IDH): wajib salah satu pilihan, huruf besar-kecil diseragamkan
+    let level = teks(r.level);
+    const opsiLevel = pilihan.level;
+    if (opsiLevel) {
+      const cocok = opsiLevel.find((o) => o.toLowerCase() === level?.toLowerCase());
+      if (!cocok) return void galat.push(`Baris ${baris}: Level ${level ? `"${level}" tidak valid` : "wajib diisi"} (pilihan: ${opsiLevel.join(", ")})`);
+      level = cocok;
+    }
+
     const terakhir = kontrak[kontrak.length - 1];
     data.push({
       baris,
@@ -156,7 +166,7 @@ export function bacaKaryawan(rows: Baris[], config: KategoriConfig | null): Hasi
       kode_bagan: teks(r.kode_bagan),
       unit_kerja: teks(r.unit_kerja),
       jabatan: teks(r.jabatan),
-      level: teks(r.level),
+      level,
       role: teks(r.role),
       benefit_kesehatan: teks(r.benefit_kesehatan),
       faskes: teks(r.faskes),
