@@ -54,7 +54,7 @@ export const KATEGORI_CONFIG: Record<string, KategoriConfig> = {
   },
   IDH: {
     tabel: "karyawan_idh",
-    sembunyikan: [],
+    sembunyikan: ["faskes"],
     fields: [],
     kolomTabel: [
       "np", "nama", "awal_kontrak", "akhir_kontrak", "masa_kerja", "masa_kontrak",
