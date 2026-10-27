@@ -66,6 +66,7 @@ Dashboard menampilkan daftar karyawan yang kontraknya akan berakhir dalam jendel
 | Magang   | PIC Magang   |
 | PKWT     | PIC PKWT     |
 | Inagov   | Admin Inagov |
+| TAD      | Admin TAD    |
 | —        | Super Admin (semua kategori) |
 
 Tabel `profiles` menyimpan `role` (`admin` atau `superadmin`) dan `kategori_id`. Admin wajib punya kategori; Super Admin tidak terikat kategori. Pembatasan data ditegakkan di database lewat RLS (lihat `supabase/migrations/0001_init.sql`), jadi tetap berlaku walau ada yang memanggil API Supabase langsung.
@@ -86,7 +87,7 @@ src/
 ├── lib/                       # klien Supabase, auth, format tanggal
 └── middleware.ts              # menyegarkan sesi dan mengarahkan ke /login
 supabase/
-├── migrations/                # 0001 tabel+RLS, 0002 hak akses, 0003 logika kontrak/monitoring, 0004 kolom Magang, 0005 kolom TPBW/TPP, 0006 import Excel (sinkron massal), 0007 kolom BGN, 0008 kolom IDE, 0009 salinan data IDE, 0010 hapus status IDE, 0011 hapus salinan status, 0012 tabel IDH, 0013 hapus faskes IDE, 0014 hapus faskes IDH
+├── migrations/                # 0001 tabel+RLS, 0002 hak akses, 0003 logika kontrak/monitoring, 0004 kolom Magang, 0005 kolom TPBW/TPP, 0006 import Excel (sinkron massal), 0007 kolom BGN, 0008 kolom IDE, 0009 salinan data IDE, 0010 hapus status IDE, 0011 hapus salinan status, 0012 tabel IDH, 0013 hapus faskes IDE, 0014 hapus faskes IDH, 0015 kolom TAD
 └── seed.sql                   # daftar kategori
 scripts/create-users.mjs       # membuat akun awal
 legacy-laravel/                # kode Laravel lama (acuan)
@@ -99,7 +100,7 @@ Prasyarat: Node.js 20+ dan project Supabase.
 ### a. Siapkan Supabase
 
 1. Buat project di [supabase.com](https://supabase.com).
-2. Buka **SQL Editor**, jalankan berurutan: `supabase/migrations/0001_init.sql`, `0002_grants.sql`, `0003_parity_laravel.sql`, `0004_magang.sql`, `0005_tpbw.sql`, `0006_impor_foto.sql`, `0007_bgn.sql`, `0008_ide.sql`, `0009_ide_salin.sql`, `0010_ide_hapus_status.sql`, `0011_ide_hapus_salinan_status.sql`, `0012_idh.sql`, `0013_ide_hapus_faskes.sql`, `0014_idh_hapus_faskes.sql`, lalu `supabase/seed.sql`.
+2. Buka **SQL Editor**, jalankan berurutan: `supabase/migrations/0001_init.sql`, `0002_grants.sql`, `0003_parity_laravel.sql`, `0004_magang.sql`, `0005_tpbw.sql`, `0006_impor_foto.sql`, `0007_bgn.sql`, `0008_ide.sql`, `0009_ide_salin.sql`, `0010_ide_hapus_status.sql`, `0011_ide_hapus_salinan_status.sql`, `0012_idh.sql`, `0013_ide_hapus_faskes.sql`, `0014_idh_hapus_faskes.sql`, `0015_tad.sql`, lalu `supabase/seed.sql`.
 3. Ambil `Project URL`, `anon key`, dan `service_role key` dari **Project Settings → API**.
 
 ### b. Konfigurasi dan jalankan
@@ -118,7 +119,7 @@ Isi password tiap akun lewat variabel lingkungan (tidak disimpan di repo), lalu 
 
 ```bash
 PASSWORD_IDE=... PASSWORD_IDH=... PASSWORD_BGN=... PASSWORD_TPBW=... \
-PASSWORD_MAGANG=... PASSWORD_PKWT=... PASSWORD_INAGOV=... PASSWORD_SUPERADMIN=... \
+PASSWORD_MAGANG=... PASSWORD_PKWT=... PASSWORD_INAGOV=... PASSWORD_TAD=... PASSWORD_SUPERADMIN=... \
 node --env-file=.env scripts/create-users.mjs
 ```
 

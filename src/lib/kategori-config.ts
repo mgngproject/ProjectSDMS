@@ -70,6 +70,15 @@ export const KATEGORI_CONFIG: Record<string, KategoriConfig> = {
       "kode_bagan", "unit_kerja", "jabatan", "level", "role", "benefit_kesehatan", "gross_per_month", "kpi",
     ],
   },
+  TAD: {
+    tabel: "karyawan_tad",
+    sembunyikan: ["jabatan", "level", "role", "benefit_kesehatan", "faskes", "gross_per_month", "kpi"],
+    fields: [
+      { name: "sbu", label: "SBU", type: "select", options: ["SBU CS", "SBU DIGITAL", "SBU HSS", "Support Bisnis"], required: true },
+      { name: "tad", label: "TAD", type: "select", options: ["KCA", "DELTA BDP"], required: true },
+    ],
+    kolomTabel: ["np", "nama", "sbu", "tad", "awal_kontrak", "akhir_kontrak", "kode_bagan", "unit_kerja", "kategori"],
+  },
   "TPBW/TPP": {
     tabel: "karyawan_tpbw",
     sembunyikan: [],
