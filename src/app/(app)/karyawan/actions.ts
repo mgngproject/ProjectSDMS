@@ -135,8 +135,8 @@ export async function updateKaryawan(id: number, formData: FormData) {
   redirect(dengan("/karyawan", "ok", "Data karyawan berhasil diupdate"));
 }
 
-export async function deleteKaryawan(formData: FormData) {
-  const id = Number(formData.get("id"));
+// Nomor disematkan lewat bind(): nama dan nilai tombol tidak ikut terkirim bersama aksi server
+export async function deleteKaryawan(id: number, _formData: FormData) {
   const supabase = await createClient();
   const { error } = await supabase.from("karyawan").delete().eq("id", id);
   revalidatePath("/karyawan");
