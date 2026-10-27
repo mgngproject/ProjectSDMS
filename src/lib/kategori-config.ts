@@ -43,6 +43,15 @@ export const LABEL_INTI: Record<string, string> = {
 };
 
 export const KATEGORI_CONFIG: Record<string, KategoriConfig> = {
+  BGN: {
+    tabel: "karyawan_bgn",
+    sembunyikan: [],
+    fields: [{ name: "level_jabatan", label: "Level Jabatan", type: "select", options: ["Senior", "Middle", "Junior", "PKWT Reguler"], required: true }],
+    kolomTabel: [
+      "np", "nama", "level_jabatan", "awal_kontrak", "akhir_kontrak", "masa_kerja", "masa_kontrak",
+      "unit_kerja", "jabatan", "level", "role", "gross_per_month",
+    ],
+  },
   "TPBW/TPP": {
     tabel: "karyawan_tpbw",
     sembunyikan: [],
@@ -87,6 +96,7 @@ const JENDELA_KHUSUS: Record<string, Jendela> = {
   "TPBW/TPP": { label: "2 bulan", sampai: (h) => tambahBulan(h, 2), fokus: true },
   IDE: { label: "1 bulan", sampai: (h) => tambahBulan(h, 1), fokus: true },
   PKWT: { label: "2 bulan", sampai: (h) => tambahBulan(h, 2), fokus: true },
+  BGN: { label: "2 bulan", sampai: (h) => tambahBulan(h, 2), fokus: true },
 };
 const JENDELA_UMUM: Jendela = { label: "60 hari", sampai: (h) => tambahHari(h, 60), fokus: false };
 

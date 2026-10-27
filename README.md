@@ -45,10 +45,12 @@ Kategori Magang punya kolom khusus (tabel `karyawan_magang`): Kategori (Magenta 
 
 Kategori TPBW/TPP memakai kolom standar ditambah **Status** (TPBW atau TPP), tabel `karyawan_tpbw`.
 
+Kategori BGN memakai kolom standar ditambah **Level Jabatan** (Senior, Middle, Junior, atau PKWT Reguler), tabel `karyawan_bgn`.
+
 Kolom khusus kategori lain didaftarkan di `src/lib/kategori-config.ts`.
 
 ### Dashboard "akan selesai"
-Dashboard menampilkan daftar karyawan yang kontraknya akan berakhir dalam jendela waktu per kategori: Magang 30 hari, TPBW/TPP dan PKWT 2 bulan serta IDE 1 bulan (bulan kalender), kategori lain 60 hari. Jendela diatur di `JENDELA_KHUSUS` pada `src/lib/kategori-config.ts`.
+Dashboard menampilkan daftar karyawan yang kontraknya akan berakhir dalam jendela waktu per kategori: Magang 30 hari, TPBW/TPP, PKWT, dan BGN 2 bulan serta IDE 1 bulan (bulan kalender), kategori lain 60 hari. Jendela diatur di `JENDELA_KHUSUS` pada `src/lib/kategori-config.ts`.
 
 ## 3. Kategori dan Role
 
@@ -81,7 +83,7 @@ src/
 ├── lib/                       # klien Supabase, auth, format tanggal
 └── middleware.ts              # menyegarkan sesi dan mengarahkan ke /login
 supabase/
-├── migrations/                # 0001 tabel+RLS, 0002 hak akses, 0003 logika kontrak/monitoring, 0004 kolom Magang, 0005 kolom TPBW/TPP, 0006 import dan foto
+├── migrations/                # 0001 tabel+RLS, 0002 hak akses, 0003 logika kontrak/monitoring, 0004 kolom Magang, 0005 kolom TPBW/TPP, 0006 import dan foto, 0007 kolom BGN
 └── seed.sql                   # daftar kategori
 scripts/create-users.mjs       # membuat akun awal
 legacy-laravel/                # kode Laravel lama (acuan)
@@ -94,7 +96,7 @@ Prasyarat: Node.js 20+ dan project Supabase.
 ### a. Siapkan Supabase
 
 1. Buat project di [supabase.com](https://supabase.com).
-2. Buka **SQL Editor**, jalankan berurutan: `supabase/migrations/0001_init.sql`, `0002_grants.sql`, `0003_parity_laravel.sql`, `0004_magang.sql`, `0005_tpbw.sql`, `0006_impor_foto.sql`, lalu `supabase/seed.sql`.
+2. Buka **SQL Editor**, jalankan berurutan: `supabase/migrations/0001_init.sql`, `0002_grants.sql`, `0003_parity_laravel.sql`, `0004_magang.sql`, `0005_tpbw.sql`, `0006_impor_foto.sql`, `0007_bgn.sql`, lalu `supabase/seed.sql`.
 3. Ambil `Project URL`, `anon key`, dan `service_role key` dari **Project Settings → API**.
 
 ### b. Konfigurasi dan jalankan

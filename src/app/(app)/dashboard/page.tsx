@@ -186,7 +186,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                   <span className="min-w-0">
                     <span className="block truncate">{r.nama} ({r.np}){isSuperAdmin && !config ? ` · ${r.kategori?.nama}` : ""}</span>
                     <span className="block truncate text-xs text-muted">
-                      {[info?.jenis, info?.status_tpbw, info?.institusi].filter(Boolean).join(" · ") || [r.unit_kerja, r.jabatan].filter(Boolean).join(" · ")}
+                      {[info?.jenis, info?.status_tpbw, info?.level_jabatan, info?.institusi].filter(Boolean).join(" · ") || [r.unit_kerja, r.jabatan].filter(Boolean).join(" · ")}
                     </span>
                   </span>
                   <span className="flex shrink-0 items-center gap-2">
