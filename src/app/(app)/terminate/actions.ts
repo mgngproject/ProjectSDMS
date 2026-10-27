@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getProfile } from "@/lib/auth";
+import { hapusFotoKaryawan } from "@/lib/foto";
 import { dengan, pesanGalat, text } from "@/lib/params";
 import { createClient } from "@/lib/supabase/server";
 
@@ -63,6 +64,7 @@ export async function updateTerminate(id: number, formData: FormData) {
 
 export async function deleteTerminate(formData: FormData) {
   const supabase = await createClient();
+  await hapusFotoKaryawan(supabase, [Number(formData.get("id"))]);
   const { error } = await supabase.from("karyawan").delete().eq("id", Number(formData.get("id"))).eq("status", "terminate");
   revalidatePath("/terminate");
   redirect(error ? dengan("/terminate", "error", pesanGalat(error)) : dengan("/terminate", "ok", "Data karyawan terminate berhasil dihapus"));
@@ -72,6 +74,7 @@ export async function bulkDeleteTerminate(formData: FormData) {
   const ids = formData.getAll("ids").map(Number).filter(Boolean);
   if (ids.length === 0) redirect(dengan("/terminate", "error", "Tidak ada data yang dipilih"));
   const supabase = await createClient();
+  await hapusFotoKaryawan(supabase, ids);
   const { data, error } = await supabase.from("karyawan").delete().in("id", ids).eq("status", "terminate").select("id");
   revalidatePath("/terminate");
   redirect(

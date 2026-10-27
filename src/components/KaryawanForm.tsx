@@ -8,6 +8,7 @@ type Props = {
   kategoriAdmin?: string | null;
   karyawan?: Karyawan;
   detail?: Detail | null;
+  fotoUrl?: string | null;
   /** `baru`: awal dan akhir kontrak wajib. `ubah`: tanggal kontrak diatur lewat menu Kontrak. */
   mode: "baru" | "ubah";
   batal: string;
