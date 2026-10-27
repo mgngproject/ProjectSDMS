@@ -49,7 +49,7 @@ export const KATEGORI_CONFIG: Record<string, KategoriConfig> = {
     fields: [],
     kolomTabel: [
       "np", "nama", "awal_kontrak", "akhir_kontrak", "masa_kerja", "masa_kontrak",
-      "unit_kerja", "jabatan", "level", "role", "gross_per_month",
+      "unit_kerja", "jabatan", "level", "role", "benefit_kesehatan", "gross_per_month",
     ],
   },
   IDH: {
@@ -58,7 +58,7 @@ export const KATEGORI_CONFIG: Record<string, KategoriConfig> = {
     fields: [],
     kolomTabel: [
       "np", "nama", "awal_kontrak", "akhir_kontrak", "masa_kerja", "masa_kontrak",
-      "unit_kerja", "jabatan", "level", "role", "gross_per_month",
+      "unit_kerja", "jabatan", "level", "role", "benefit_kesehatan", "gross_per_month",
     ],
   },
   "TPBW/TPP": {
