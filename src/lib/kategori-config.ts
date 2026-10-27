@@ -43,6 +43,15 @@ export const LABEL_INTI: Record<string, string> = {
 };
 
 export const KATEGORI_CONFIG: Record<string, KategoriConfig> = {
+  "TPBW/TPP": {
+    tabel: "karyawan_tpbw",
+    sembunyikan: [],
+    fields: [{ name: "status_tpbw", label: "Status", type: "select", options: ["TPBW", "TPP"], required: true }],
+    kolomTabel: [
+      "np", "nama", "status_tpbw", "awal_kontrak", "akhir_kontrak", "masa_kerja", "masa_kontrak",
+      "unit_kerja", "jabatan", "level", "role", "gross_per_month",
+    ],
+  },
   Magang: {
     tabel: "karyawan_magang",
     sembunyikan: ["jabatan", "level", "role", "benefit_kesehatan", "faskes", "gross_per_month", "kpi"],
