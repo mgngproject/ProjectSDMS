@@ -86,6 +86,7 @@ const JENDELA_KHUSUS: Record<string, Jendela> = {
   Magang: { label: "30 hari", sampai: (h) => tambahHari(h, 30), fokus: true },
   "TPBW/TPP": { label: "2 bulan", sampai: (h) => tambahBulan(h, 2), fokus: true },
   IDE: { label: "1 bulan", sampai: (h) => tambahBulan(h, 1), fokus: true },
+  PKWT: { label: "2 bulan", sampai: (h) => tambahBulan(h, 2), fokus: true },
 };
 const JENDELA_UMUM: Jendela = { label: "60 hari", sampai: (h) => tambahHari(h, 60), fokus: false };
 
