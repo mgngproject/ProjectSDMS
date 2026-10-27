@@ -68,9 +68,8 @@ export async function updateKontrak(id: number, karyawanId: number, formData: Fo
   redirect(dengan(back, "ok", "Kontrak berhasil diupdate"));
 }
 
-export async function deleteKontrak(formData: FormData) {
-  const id = Number(formData.get("id"));
-  const karyawanId = Number(formData.get("karyawan_id"));
+// Nomor disematkan lewat bind(): nama dan nilai tombol tidak ikut terkirim bersama aksi server
+export async function deleteKontrak(id: number, karyawanId: number, _formData: FormData) {
   const back = `/karyawan/${karyawanId}/kontrak`;
 
   const supabase = await createClient();

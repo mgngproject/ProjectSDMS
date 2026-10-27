@@ -9,8 +9,9 @@ export const metadata: Metadata = {
   description: "Sistem Dashboard Rekrutmen",
 };
 
-// Menerapkan tema tersimpan sebelum halaman tampil agar tidak berkedip
-const TEMA = `try{var t=localStorage.getItem("theme");if(t==="dark"||(!t&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.classList.add("dark")}catch(e){}`;
+// Tema awal selalu terang; gelap hanya bila pengguna memilihnya sendiri (tersimpan di browser).
+// Diterapkan sebelum halaman tampil agar tidak berkedip.
+const TEMA = `try{if(localStorage.getItem("theme")==="dark")document.documentElement.classList.add("dark")}catch(e){}`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

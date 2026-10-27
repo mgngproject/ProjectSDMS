@@ -61,9 +61,10 @@ export async function updateTerminate(id: number, formData: FormData) {
   redirect(dengan("/terminate", "ok", "Data terminate berhasil diupdate"));
 }
 
-export async function deleteTerminate(formData: FormData) {
+// Nomor disematkan lewat bind(): nama dan nilai tombol tidak ikut terkirim bersama aksi server
+export async function deleteTerminate(id: number, _formData: FormData) {
   const supabase = await createClient();
-  const { error } = await supabase.from("karyawan").delete().eq("id", Number(formData.get("id"))).eq("status", "terminate");
+  const { error } = await supabase.from("karyawan").delete().eq("id", id).eq("status", "terminate");
   revalidatePath("/terminate");
   redirect(error ? dengan("/terminate", "error", pesanGalat(error)) : dengan("/terminate", "ok", "Data karyawan terminate berhasil dihapus"));
 }
@@ -104,8 +105,8 @@ async function aktifkan(ids: number[]): Promise<{ pesan: string; sukses: boolean
   return { pesan: `${hasil.aktif} karyawan berhasil diaktifkan kembali.${catatan}`, sukses: true };
 }
 
-export async function aktifkanKembali(formData: FormData) {
-  const hasil = await aktifkan([Number(formData.get("id"))].filter(Boolean));
+export async function aktifkanKembali(id: number, _formData: FormData) {
+  const hasil = await aktifkan([id]);
   redirect(dengan("/terminate", hasil.sukses ? "ok" : "error", hasil.pesan));
 }
 

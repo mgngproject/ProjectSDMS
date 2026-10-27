@@ -70,11 +70,9 @@ export default async function TerminatePage({ searchParams }: { searchParams: Pr
                         label="Aktifkan kembali"
                         message={`Aktifkan kembali ${r.nama}? Tanggal keluar dan alasan akan dihapus.`}
                         className="btn-secondary px-3 py-1 text-xs"
-                        formAction={aktifkanKembali}
-                        name="id"
-                        value={r.id}
+                        formAction={aktifkanKembali.bind(null, r.id)}
                       />
-                      <ConfirmSubmit label="Hapus" message={`Hapus data terminate ${r.nama}?`} formAction={deleteTerminate} name="id" value={r.id} />
+                      <ConfirmSubmit label="Hapus" message={`Hapus data terminate ${r.nama}?`} formAction={deleteTerminate.bind(null, r.id)} />
                     </div>
                   </td>
                 </tr>

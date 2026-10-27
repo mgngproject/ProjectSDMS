@@ -105,7 +105,7 @@ export default async function KaryawanPage({ searchParams }: { searchParams: Pro
                       <Link className="link" href={`/karyawan/${r.id}/kontrak`}>Kontrak</Link>
                       <Link className="link" href={`/karyawan/${r.id}/datadiri`}>Data Diri</Link>
                       <Link className="link" href={`/karyawan/${r.id}/terminate`}>Terminate</Link>
-                      <ConfirmSubmit label="Hapus" message={`Hapus ${r.nama}?`} formAction={deleteKaryawan} name="id" value={r.id} />
+                      <ConfirmSubmit label="Hapus" message={`Hapus ${r.nama}?`} formAction={deleteKaryawan.bind(null, r.id)} />
                     </div>
                   </td>
                 </tr>
