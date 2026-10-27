@@ -1,42 +1,65 @@
-import PageHeader from "@/components/PageHeader";
 import Link from "next/link";
 import ConfirmSubmit from "@/components/ConfirmSubmit";
-import Flash from "@/components/Flash";
 import FilterBulanTahun from "@/components/FilterBulanTahun";
-import { formatTanggal, formatRupiah, masaKerja, masaKontrak } from "@/lib/format";
+import Flash from "@/components/Flash";
+import PageHeader from "@/components/PageHeader";
+import { getProfile } from "@/lib/auth";
+import { KATEGORI_CONFIG, LABEL_INTI, configKategori, labelKolom } from "@/lib/kategori-config";
+import { KOLOM_STANDAR, nilaiKolom, normalisasi, type BarisKaryawan } from "@/lib/kolom";
 import { filterBulanTahun } from "@/lib/params";
 import { createClient } from "@/lib/supabase/server";
-import type { Karyawan } from "@/lib/types";
 import { bulkDeleteKaryawan, deleteKaryawan } from "./actions";
 
-type Params = { q?: string; filter?: string; bulan?: string; tahun?: string; ok?: string; error?: string };
+type Params = { q?: string; kategori?: string; filter?: string; bulan?: string; tahun?: string; ok?: string; error?: string };
 
 export default async function KaryawanPage({ searchParams }: { searchParams: Promise<Params> }) {
   const p = await searchParams;
+  const profile = await getProfile();
+  const isSuperAdmin = profile.role === "superadmin";
   const supabase = await createClient();
 
   // Kontrak aktif yang sudah lewat otomatis menjadi selesai
   await supabase.rpc("expire_kontrak");
 
-  let query = supabase.from("karyawan").select("*, kategori:kategori_id(nama)").eq("status", "aktif").order("nama");
+  const { data: daftarKategori } = await supabase.from("kategori").select("id, nama").order("id");
+  // Admin selalu pada kategorinya; Super Admin boleh memilih satu kategori untuk melihat kolom khususnya
+  const namaKategori = isSuperAdmin ? p.kategori || null : profile.kategori?.nama ?? null;
+  const kategoriDipilih = (daftarKategori ?? []).find((c) => c.nama === namaKategori);
+  const config = configKategori(namaKategori);
+
+  const relasi = config ? `, detail:${config.tabel}(*)` : "";
+  let query = supabase.from("karyawan").select(`*, kategori:kategori_id(nama)${relasi}`).eq("status", "aktif").order("nama");
+  if (isSuperAdmin && kategoriDipilih) query = query.eq("kategori_id", kategoriDipilih.id);
   if (p.q) {
     const term = p.q.replace(/[,()%]/g, " ").trim();
     query = query.or(`nama.ilike.%${term}%,np.ilike.%${term}%`);
   }
   const { data } = await query;
-  const rows = filterBulanTahun((data ?? []) as Karyawan[], p);
+  const rows = filterBulanTahun(normalisasi((data ?? []) as unknown as BarisKaryawan[]), p);
+
+  // Kategori dengan kolom khusus tidak menampilkan kolom "Kategori" (semua barisnya sama)
+  const kolom = config ? config.kolomTabel : KOLOM_STANDAR;
+  const exportHref = `/api/export/karyawan${isSuperAdmin && namaKategori ? `?kategori=${encodeURIComponent(namaKategori)}` : ""}`;
 
   return (
     <div className="space-y-4">
       <PageHeader title="Data Karyawan">
-          <a className="btn-secondary" href="/api/export/karyawan">Export Excel</a>
-          <Link className="btn" href="/karyawan/new">Tambah Karyawan</Link>
-        </PageHeader>
+        <a className="btn-secondary" href={exportHref}>Export Excel</a>
+        <Link className="btn" href="/karyawan/new">Tambah Karyawan</Link>
+      </PageHeader>
 
       <Flash ok={p.ok} error={p.error} />
 
       <div className="flex flex-wrap gap-2">
         <form className="flex gap-2">
+          {isSuperAdmin && (
+            <select className="input w-auto" name="kategori" defaultValue={namaKategori ?? ""}>
+              <option value="">Semua kategori</option>
+              {(daftarKategori ?? []).map((c) => (
+                <option key={c.id} value={c.nama}>{c.nama}{KATEGORI_CONFIG[c.nama] ? " (kolom khusus)" : ""}</option>
+              ))}
+            </select>
+          )}
           <input className="input max-w-xs" name="q" defaultValue={p.q} placeholder="Cari nama / NP" />
           <button className="btn-secondary" type="submit">Cari</button>
         </form>
@@ -50,32 +73,25 @@ export default async function KaryawanPage({ searchParams }: { searchParams: Pro
             <thead>
               <tr>
                 <th className="th" />
-                {["NP", "Nama", "Kategori", "Awal Kontrak Masuk", "Akhir Kontrak", "Masa Kerja", "Masa Kontrak", "Unit Kerja", "Jabatan", "Level", "Role", "Gross", "Link", ""].map((h) => (
-                  <th key={h} className="th">{h}</th>
-                ))}
+                {kolom.map((k) => <th key={k} className="th">{config ? labelKolom(k, config) : LABEL_INTI[k] ?? k}</th>)}
+                <th className="th">Link</th>
+                <th className="th" />
               </tr>
             </thead>
             <tbody className="divide-y divide-line">
               {rows.map((r) => (
-                <tr key={r.id}>
+                <tr key={r.id} className="hover:bg-soft/60">
                   <td className="td"><input type="checkbox" name="ids" value={r.id} /></td>
-                  <td className="td">{r.np}</td>
-                  <td className="td font-medium">{r.nama}</td>
-                  <td className="td">{r.kategori?.nama}</td>
-                  <td className="td">{formatTanggal(r.awal_kontrak)}</td>
-                  <td className="td">{formatTanggal(r.akhir_kontrak)}</td>
-                  <td className="td">{masaKerja(r)}</td>
-                  <td className="td">{masaKontrak(r)}</td>
-                  <td className="td">{r.unit_kerja ?? "-"}</td>
-                  <td className="td">{r.jabatan ?? "-"}</td>
-                  <td className="td">{r.level ?? "-"}</td>
-                  <td className="td">{r.role ?? "-"}</td>
-                  <td className="td">{formatRupiah(r.gross_per_month)}</td>
+                  {kolom.map((k) => (
+                    <td key={k} className={`td ${k === "nama" ? "font-medium" : ""} ${k === "catatan_titipan" ? "min-w-48" : ""}`}>
+                      {nilaiKolom(r, k, config, true) ?? "-"}
+                    </td>
+                  ))}
                   <td className="td">
                     {r.folder_link ? <a className="link" href={r.folder_link} target="_blank" rel="noreferrer">Buka</a> : "-"}
                   </td>
                   <td className="td whitespace-nowrap">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
                       <Link className="link" href={`/karyawan/${r.id}/edit`}>Ubah</Link>
                       <Link className="link" href={`/karyawan/${r.id}/kontrak`}>Kontrak</Link>
                       <Link className="link" href={`/karyawan/${r.id}/datadiri`}>Data Diri</Link>
@@ -85,7 +101,7 @@ export default async function KaryawanPage({ searchParams }: { searchParams: Pro
                   </td>
                 </tr>
               ))}
-              {rows.length === 0 && <tr><td className="td text-center text-muted" colSpan={15}>Belum ada data.</td></tr>}
+              {rows.length === 0 && <tr><td className="td text-center text-muted" colSpan={kolom.length + 3}>Belum ada data.</td></tr>}
             </tbody>
           </table>
         </div>

@@ -65,3 +65,18 @@ export type DataDiri = {
   jurusan_2: string | null;
   kampus_2: string | null;
 };
+
+export type KaryawanMagang = {
+  karyawan_id: number;
+  jenis: "Magenta" | "PKL" | "Maganghub" | null;
+  institusi: string | null;
+  jurusan: string | null;
+  penempatan: "Jakarta" | "Karawang" | null;
+  status_magang: "Baru" | "Alih Status" | "Perpanjangan Maganghub" | null;
+  awal_pendidikan: string | null;
+  akhir_pendidikan: string | null;
+  catatan_titipan: string | null;
+};
+
+/** Baris detail kategori; bentuknya bergantung pada konfigurasi kategori. */
+export type Detail = Record<string, string | null>;
