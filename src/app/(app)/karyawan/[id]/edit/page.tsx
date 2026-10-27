@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import Flash from "@/components/Flash";
 import KaryawanForm from "@/components/KaryawanForm";
 import { getProfile } from "@/lib/auth";
-import { tautanFoto } from "@/lib/foto";
 import { configKategori } from "@/lib/kategori-config";
 import { createClient } from "@/lib/supabase/server";
 import type { Detail, Karyawan } from "@/lib/types";
@@ -26,7 +25,6 @@ export default async function EditKaryawanPage({
     supabase.from("kategori").select("id, nama").order("id"),
   ]);
   if (!karyawan) notFound();
-  const fotoUrl = karyawan.foto ? (await tautanFoto(supabase, [karyawan.foto])).get(karyawan.foto) ?? null : null;
 
   // Kolom khusus kategori (mis. Magang)
   const namaKategori = (kategori ?? []).find((c) => c.id === karyawan.kategori_id)?.nama;
@@ -48,7 +46,6 @@ export default async function EditKaryawanPage({
         kategoriAdmin={profile.kategori?.nama}
         karyawan={karyawan as Karyawan}
         detail={detail as Detail | null}
-        fotoUrl={fotoUrl}
       />
       <p className="text-sm text-muted">Tanggal kontrak diatur lewat menu Kontrak.</p>
     </div>
