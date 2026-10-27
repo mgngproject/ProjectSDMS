@@ -43,6 +43,15 @@ export const LABEL_INTI: Record<string, string> = {
 };
 
 export const KATEGORI_CONFIG: Record<string, KategoriConfig> = {
+  IDE: {
+    tabel: "karyawan_ide",
+    sembunyikan: [],
+    fields: [{ name: "status_ide", label: "Status", type: "text", required: true }],
+    kolomTabel: [
+      "np", "nama", "status_ide", "awal_kontrak", "akhir_kontrak", "masa_kerja", "masa_kontrak",
+      "unit_kerja", "jabatan", "level", "role", "gross_per_month",
+    ],
+  },
   "TPBW/TPP": {
     tabel: "karyawan_tpbw",
     sembunyikan: [],
