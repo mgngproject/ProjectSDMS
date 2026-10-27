@@ -45,6 +45,20 @@ export function selisihHari(dari: string, ke: string): number {
   return Math.round((Date.parse(`${ke}T00:00:00Z`) - Date.parse(`${dari}T00:00:00Z`)) / 86_400_000);
 }
 
+/** Menambah hari ke tanggal YYYY-MM-DD. */
+export function tambahHari(tanggal: string, n: number): string {
+  const d = new Date(`${tanggal}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+
+/** Menambah bulan kalender ke tanggal YYYY-MM-DD; tanggal dipotong ke akhir bulan bila perlu (31 Des + 2 bulan = 28/29 Feb). */
+export function tambahBulan(tanggal: string, n: number): string {
+  const [y, m, d] = tanggal.split("-").map(Number);
+  const akhirBulan = new Date(Date.UTC(y, m - 1 + n + 1, 0)).getUTCDate();
+  return new Date(Date.UTC(y, m - 1 + n, Math.min(d, akhirBulan))).toISOString().slice(0, 10);
+}
+
 export const NAMA_BULAN = [
   "Januari", "Februari", "Maret", "April", "Mei", "Juni",
   "Juli", "Agustus", "September", "Oktober", "November", "Desember",
