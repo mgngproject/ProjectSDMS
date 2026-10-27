@@ -78,7 +78,7 @@ src/
 ├── lib/                       # klien Supabase, auth, format tanggal
 └── middleware.ts              # menyegarkan sesi dan mengarahkan ke /login
 supabase/
-├── migrations/                # 0001 tabel+RLS, 0002 hak akses, 0003 logika kontrak/monitoring, 0004 kolom Magang, 0005 kolom TPBW/TPP, 0006 kolom IDE, 0007 salinan data IDE, 0008 hapus status IDE, 0009 hapus salinan status, 0010 tabel IDH
+├── migrations/                # 0001 tabel+RLS, 0002 hak akses, 0003 logika kontrak/monitoring, 0004 kolom Magang, 0005 kolom TPBW/TPP, 0006 kolom IDE, 0007 salinan data IDE, 0008 hapus status IDE, 0009 hapus salinan status, 0010 tabel IDH, 0011 hapus faskes IDE
 └── seed.sql                   # daftar kategori
 scripts/create-users.mjs       # membuat akun awal
 legacy-laravel/                # kode Laravel lama (acuan)
@@ -91,7 +91,7 @@ Prasyarat: Node.js 20+ dan project Supabase.
 ### a. Siapkan Supabase
 
 1. Buat project di [supabase.com](https://supabase.com).
-2. Buka **SQL Editor**, jalankan berurutan: `supabase/migrations/0001_init.sql`, `0002_grants.sql`, `0003_parity_laravel.sql`, `0004_magang.sql`, `0005_tpbw.sql`, `0006_ide.sql`, `0007_ide_salin.sql`, `0008_ide_hapus_status.sql`, `0009_ide_hapus_salinan_status.sql`, `0010_idh.sql`, lalu `supabase/seed.sql`.
+2. Buka **SQL Editor**, jalankan berurutan: `supabase/migrations/0001_init.sql`, `0002_grants.sql`, `0003_parity_laravel.sql`, `0004_magang.sql`, `0005_tpbw.sql`, `0006_ide.sql`, `0007_ide_salin.sql`, `0008_ide_hapus_status.sql`, `0009_ide_hapus_salinan_status.sql`, `0010_idh.sql`, `0011_ide_hapus_faskes.sql`, lalu `supabase/seed.sql`.
 3. Ambil `Project URL`, `anon key`, dan `service_role key` dari **Project Settings → API**.
 
 ### b. Konfigurasi dan jalankan
