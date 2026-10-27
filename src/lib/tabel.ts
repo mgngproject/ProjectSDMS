@@ -14,7 +14,7 @@ export type Tabel = { judul: string; baris: Record<string, Sel>[] };
  */
 export async function tabelKaryawan(supabase: Klien, namaKategori: string | null, format: boolean): Promise<Tabel> {
   const config = configKategori(namaKategori);
-  const kolom = config ? config.kolomTabel : [...KOLOM_STANDAR, "kode_bagan", "benefit_kesehatan", "kpi"];
+  const kolom = config ? config.kolomTabel : KOLOM_STANDAR;
   const relasi = config ? `, detail:${config.tabel}(*)` : "";
   let query = supabase.from("karyawan").select(`*, kategori:kategori_id(nama)${relasi}`).eq("status", "aktif").order("nama");
   if (namaKategori) {

@@ -13,7 +13,7 @@ export function normalisasi(rows: BarisKaryawan[]): BarisKaryawan[] {
 /** Kolom tabel untuk kategori tanpa konfigurasi khusus. */
 export const KOLOM_STANDAR = [
   "np", "nama", "kategori", "awal_kontrak", "akhir_kontrak", "masa_kerja", "masa_kontrak",
-  "unit_kerja", "jabatan", "level", "role", "gross_per_month",
+  "kode_bagan", "unit_kerja", "jabatan", "level", "role", "benefit_kesehatan", "gross_per_month", "kpi",
 ];
 
 /**
