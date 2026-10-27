@@ -1,4 +1,4 @@
-import { hariIni } from "@/lib/format";
+import { hariIni, selisihHari } from "@/lib/format";
 import type { DataDiri, Karyawan } from "@/lib/types";
 
 // Alias nama kampus untuk grafik 10 kampus teratas (sama dengan Laravel)
@@ -35,6 +35,8 @@ export function hitungDashboard(opts: {
   bulan: string; // YYYY-MM
   tahunMasuk: number;
   tahunHabis: number;
+  /** Jendela "akan selesai" dalam hari (default 60). */
+  jendelaHari?: number;
 }) {
   const hari = hariIni();
   const { karyawan, bulan } = opts;
@@ -74,10 +76,10 @@ export function hitungDashboard(opts: {
   const berkasBelumLengkap = aktif.filter((k) => statusMonitoring.get(k.id) !== "selesai").length;
 
   const batas = new Date(`${hari}T00:00:00Z`);
-  batas.setUTCDate(batas.getUTCDate() + 60);
-  const batas60 = batas.toISOString().slice(0, 10);
+  batas.setUTCDate(batas.getUTCDate() + (opts.jendelaHari ?? 60));
+  const batasJendela = batas.toISOString().slice(0, 10);
   const kontrakHabis = karyawan
-    .filter((k) => k.status === "aktif" && k.akhir_kontrak && k.akhir_kontrak >= hari && k.akhir_kontrak <= batas60)
+    .filter((k) => k.status === "aktif" && k.akhir_kontrak && k.akhir_kontrak >= hari && k.akhir_kontrak <= batasJendela)
     .sort((a, b) => (a.akhir_kontrak ?? "").localeCompare(b.akhir_kontrak ?? ""));
 
   // Pendidikan dan kampus: karyawan yang belum keluar
@@ -119,6 +121,8 @@ export function hitungDashboard(opts: {
     totalTerminate: karyawan.filter((k) => k.status === "terminate").length,
     berkasBelumLengkap,
     kontrakHabis,
+    berakhir7Hari: kontrakHabis.filter((k) => selisihHari(hari, k.akhir_kontrak!) <= 7).length,
+    aktifIds: aktif.map((k) => k.id),
     chartMasuk,
     chartHabis,
     totalHabisChart: chartHabis.reduce((a, b) => a + b, 0),
@@ -133,3 +137,23 @@ export function hitungDashboard(opts: {
 }
 
 export { ym };
+
+/** Sebaran karyawan aktif menurut tiap field pilihan (select) milik kategori. */
+export function sebaranDetail(
+  fields: { name: string; label: string; type: string; options?: string[] }[],
+  aktifIds: number[],
+  detail: { karyawan_id: number }[],
+) {
+  const aktif = new Set(aktifIds);
+  const baris = detail.filter((d) => aktif.has(d.karyawan_id)) as unknown as Record<string, string | null>[];
+  return fields
+    .filter((f) => f.type === "select" && f.options)
+    .map((f) => ({
+      name: f.name,
+      label: f.label,
+      data: [
+        ...f.options!.map((o) => ({ nama: o, total: baris.filter((b) => b[f.name] === o).length })),
+        { nama: "Belum diisi", total: baris.filter((b) => !b[f.name]).length },
+      ].filter((x) => x.nama !== "Belum diisi" || x.total > 0),
+    }));
+}

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getProfile } from "@/lib/auth";
 import { hariIni } from "@/lib/format";
+import { configKategori, type KategoriConfig } from "@/lib/kategori-config";
 import { dengan, pesanGalat, text } from "@/lib/params";
 import { createClient } from "@/lib/supabase/server";
 
@@ -30,6 +31,26 @@ function kolomUmum(f: FormData) {
   };
 }
 
+/** Membaca dan memeriksa kolom khusus kategori dari form. */
+function bacaDetail(config: KategoriConfig, f: FormData): { values: Record<string, string | null>; error: string | null } {
+  const values: Record<string, string | null> = {};
+  for (const field of config.fields) {
+    const v = text(f, `detail_${field.name}`);
+    if (field.required && !v) return { values, error: `${field.label} wajib diisi.` };
+    if (v && field.type === "select" && !field.options?.includes(v)) return { values, error: `${field.label} tidak valid.` };
+    values[field.name] = v;
+  }
+  const { awal_pendidikan: awal, akhir_pendidikan: akhir } = values;
+  if (awal && akhir && akhir < awal) return { values, error: "Akhir pendidikan tidak boleh sebelum awal pendidikan." };
+  return { values, error: null };
+}
+
+async function namaKategori(supabase: Awaited<ReturnType<typeof createClient>>, id: number | null) {
+  if (!id) return null;
+  const { data } = await supabase.from("kategori").select("nama").eq("id", id).maybeSingle();
+  return data?.nama ?? null;
+}
+
 export async function createKaryawan(formData: FormData) {
   const awal = text(formData, "awal_kontrak");
   const akhir = text(formData, "akhir_kontrak");
@@ -41,6 +62,10 @@ export async function createKaryawan(formData: FormData) {
   if (!kategori_id) redirect(dengan("/karyawan/new", "error", "Kategori wajib dipilih."));
 
   const supabase = await createClient();
+  const config = configKategori(await namaKategori(supabase, kategori_id));
+  const detail = config ? bacaDetail(config, formData) : null;
+  if (detail?.error) redirect(dengan("/karyawan/new", "error", detail.error));
+
   const { data: karyawan, error } = await supabase
     .from("karyawan")
     .insert({
@@ -55,6 +80,14 @@ export async function createKaryawan(formData: FormData) {
     .select("id, np")
     .single();
   if (error || !karyawan) redirect(dengan("/karyawan/new", "error", pesanGalat(error ?? { message: "Gagal menyimpan." })));
+
+  if (config && detail) {
+    const { error: detailError } = await supabase.from(config.tabel).insert({ karyawan_id: karyawan.id, ...detail.values });
+    if (detailError) {
+      await supabase.from("karyawan").delete().eq("id", karyawan.id);
+      redirect(dengan("/karyawan/new", "error", pesanGalat(detailError)));
+    }
+  }
 
   // Monitoring dan data diri dibuat otomatis oleh trigger database
   const { error: kontrakError } = await supabase.from("kontrak").insert({
@@ -77,8 +110,17 @@ export async function updateKaryawan(id: number, formData: FormData) {
   const payload = { ...kolomUmum(formData), ...(kategori_id ? { kategori_id } : {}), folder_link: text(formData, "folder_link") };
   if (!payload.np || !payload.nama) redirect(dengan(`/karyawan/${id}/edit`, "error", "NP dan nama wajib diisi."));
 
+  const config = configKategori(await namaKategori(supabase, kategori_id));
+  const detail = config ? bacaDetail(config, formData) : null;
+  if (detail?.error) redirect(dengan(`/karyawan/${id}/edit`, "error", detail.error));
+
   const { error } = await supabase.from("karyawan").update(payload).eq("id", id);
   if (error) redirect(dengan(`/karyawan/${id}/edit`, "error", pesanGalat(error)));
+
+  if (config && detail) {
+    const { error: detailError } = await supabase.from(config.tabel).upsert({ karyawan_id: id, ...detail.values }, { onConflict: "karyawan_id" });
+    if (detailError) redirect(dengan(`/karyawan/${id}/edit`, "error", pesanGalat(detailError)));
+  }
 
   // NP pada riwayat kontrak ikut berubah
   await supabase.from("kontrak").update({ np: payload.np }).eq("karyawan_id", id);

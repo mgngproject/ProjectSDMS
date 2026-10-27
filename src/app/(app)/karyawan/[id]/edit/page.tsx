@@ -3,8 +3,9 @@ import { notFound } from "next/navigation";
 import Flash from "@/components/Flash";
 import KaryawanForm from "@/components/KaryawanForm";
 import { getProfile } from "@/lib/auth";
+import { configKategori } from "@/lib/kategori-config";
 import { createClient } from "@/lib/supabase/server";
-import type { Karyawan } from "@/lib/types";
+import type { Detail, Karyawan } from "@/lib/types";
 import { updateKaryawan } from "../../actions";
 
 export default async function EditKaryawanPage({
@@ -25,6 +26,13 @@ export default async function EditKaryawanPage({
   ]);
   if (!karyawan) notFound();
 
+  // Kolom khusus kategori (mis. Magang)
+  const namaKategori = (kategori ?? []).find((c) => c.id === karyawan.kategori_id)?.nama;
+  const config = configKategori(namaKategori);
+  const { data: detail } = config
+    ? await supabase.from(config.tabel).select("*").eq("karyawan_id", karyawan.id).maybeSingle()
+    : { data: null };
+
   return (
     <div className="space-y-4">
       <PageHeader title="Ubah Karyawan" />
@@ -37,6 +45,7 @@ export default async function EditKaryawanPage({
         isSuperAdmin={profile.role === "superadmin"}
         kategoriAdmin={profile.kategori?.nama}
         karyawan={karyawan as Karyawan}
+        detail={detail as Detail | null}
       />
       <p className="text-sm text-muted">Tanggal kontrak diatur lewat menu Kontrak.</p>
     </div>

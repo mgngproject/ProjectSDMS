@@ -67,3 +67,11 @@ export function GrafikPendidikan({ data }: { data: { nama: string; total: number
     </div>
   );
 }
+
+export function GrafikSebaran({ data }: { data: { nama: string; total: number }[] }) {
+  return (
+    <div className="h-64 w-full">
+      <Kolom data={data} kunci={["total"]} warna={[WARNA[4]]} />
+    </div>
+  );
+}

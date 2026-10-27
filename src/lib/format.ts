@@ -40,6 +40,11 @@ export function masaKontrak(k: { awal_kontrak_aktif: string | null; akhir_kontra
   return formatBulan(bulanAntara(k.awal_kontrak_aktif, k.akhir_kontrak));
 }
 
+/** Selisih hari kalender dari `dari` ke `ke` (YYYY-MM-DD); negatif bila `ke` sudah lewat. */
+export function selisihHari(dari: string, ke: string): number {
+  return Math.round((Date.parse(`${ke}T00:00:00Z`) - Date.parse(`${dari}T00:00:00Z`)) / 86_400_000);
+}
+
 export const NAMA_BULAN = [
   "Januari", "Februari", "Maret", "April", "Mei", "Juni",
   "Juli", "Agustus", "September", "Oktober", "November", "Desember",
