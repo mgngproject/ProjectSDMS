@@ -25,6 +25,7 @@ export default async function TerminatePage({ searchParams }: { searchParams: Pr
     <div className="space-y-4">
       <PageHeader title="Data Terminate">
           <a className="btn-secondary" href="/api/export/terminate">Export Excel</a>
+        <a className="btn-secondary" href="/api/pdf/terminate" target="_blank" rel="noreferrer">Export PDF</a>
           <Link className="btn" href="/terminate/new">Tambah Data Terminate</Link>
         </PageHeader>
       <Flash ok={p.ok} error={p.error} />

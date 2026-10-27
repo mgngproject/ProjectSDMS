@@ -24,6 +24,7 @@ export type Karyawan = {
   gross_per_month: number | null;
   kpi: string | null;
   folder_link: string | null;
+  foto: string | null;
   awal_kontrak: string | null;
   awal_kontrak_aktif: string | null;
   akhir_kontrak: string | null;

@@ -20,6 +20,7 @@ export default async function DataDiriPage({ searchParams }: { searchParams: Pro
     <div className="space-y-4">
       <PageHeader title="Data Diri Karyawan">
         <a className="btn-secondary" href="/api/export/datadiri">Export Excel</a>
+        <a className="btn-secondary" href="/api/pdf/datadiri" target="_blank" rel="noreferrer">Export PDF</a>
       </PageHeader>
       <Flash ok={p.ok} error={p.error} />
 
