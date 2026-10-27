@@ -1,3 +1,5 @@
+import { tambahBulan, tambahHari } from "@/lib/format";
+
 // Konfigurasi kolom khusus per kategori. Kategori yang tidak terdaftar memakai kolom standar.
 // Menambah kategori lain (PKWT, Inagov, ...) = tambah satu entri di sini dan satu tabel detail di database.
 
@@ -17,8 +19,6 @@ export type KategoriConfig = {
   fields: DetailField[];
   /** Urutan kolom pada tabel dan export: kolom standar atau nama field detail. */
   kolomTabel: string[];
-  /** Jendela "akan selesai" di dashboard (hari). */
-  jendelaHari: number;
 };
 
 /** Label kolom standar karyawan. */
@@ -46,7 +46,6 @@ export const KATEGORI_CONFIG: Record<string, KategoriConfig> = {
   Magang: {
     tabel: "karyawan_magang",
     sembunyikan: ["jabatan", "level", "role", "benefit_kesehatan", "faskes", "gross_per_month", "kpi"],
-    jendelaHari: 30,
     fields: [
       { name: "jenis", label: "Kategori", type: "select", options: ["Magenta", "PKL", "Maganghub"], required: true },
       { name: "institusi", label: "Universitas/Sekolah", type: "text", required: true },
@@ -63,6 +62,26 @@ export const KATEGORI_CONFIG: Record<string, KategoriConfig> = {
     ],
   },
 };
+
+export type Jendela = {
+  /** Teks untuk judul dan label, mis. "2 bulan". */
+  label: string;
+  /** Batas akhir jendela (YYYY-MM-DD) dihitung dari hari ini. */
+  sampai: (hariIni: string) => string;
+  /** Dashboard menampilkan kartu "Berakhir" menggantikan kartu berkas. */
+  fokus: boolean;
+};
+
+// Jendela "akan selesai" di dashboard per kategori; kategori lain memakai 60 hari.
+const JENDELA_KHUSUS: Record<string, Jendela> = {
+  Magang: { label: "30 hari", sampai: (h) => tambahHari(h, 30), fokus: true },
+  "TPBW/TPP": { label: "2 bulan", sampai: (h) => tambahBulan(h, 2), fokus: true },
+};
+const JENDELA_UMUM: Jendela = { label: "60 hari", sampai: (h) => tambahHari(h, 60), fokus: false };
+
+export function jendelaKategori(nama: string | null | undefined): Jendela {
+  return (nama && JENDELA_KHUSUS[nama]) || JENDELA_UMUM;
+}
 
 export function configKategori(nama: string | null | undefined): KategoriConfig | null {
   return nama ? KATEGORI_CONFIG[nama] ?? null : null;

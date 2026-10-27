@@ -42,6 +42,9 @@ Kategori Magang punya kolom khusus (tabel `karyawan_magang`): Kategori (Magenta 
 
 Kolom khusus kategori lain didaftarkan di `src/lib/kategori-config.ts`.
 
+### Dashboard "akan selesai"
+Dashboard menampilkan daftar karyawan yang kontraknya akan berakhir dalam jendela waktu per kategori: Magang 30 hari, TPBW/TPP 2 bulan (bulan kalender), kategori lain 60 hari. Jendela diatur di `JENDELA_KHUSUS` pada `src/lib/kategori-config.ts`.
+
 ## 3. Kategori dan Role
 
 | Kategori | Akun         |

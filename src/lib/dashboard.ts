@@ -1,4 +1,4 @@
-import { hariIni, selisihHari } from "@/lib/format";
+import { hariIni, selisihHari, tambahHari } from "@/lib/format";
 import type { DataDiri, Karyawan } from "@/lib/types";
 
 // Alias nama kampus untuk grafik 10 kampus teratas (sama dengan Laravel)
@@ -18,7 +18,7 @@ const ALIAS_KAMPUS: Record<string, string[]> = {
 const normal = (s: string) => s.trim().toLowerCase().replace(/\s+/g, " ");
 const LOOKUP = new Map(Object.entries(ALIAS_KAMPUS).flatMap(([key, list]) => list.map((a) => [normal(a), key] as const)));
 
-type KaryawanRow = Pick<Karyawan, "id" | "np" | "nama" | "status" | "tanggal_keluar" | "awal_kontrak" | "akhir_kontrak"> & {
+type KaryawanRow = Pick<Karyawan, "id" | "np" | "nama" | "unit_kerja" | "jabatan" | "status" | "tanggal_keluar" | "awal_kontrak" | "akhir_kontrak"> & {
   kategori: { nama: string } | null;
 };
 type PendidikanRow = Pick<DataDiri, "karyawan_id" | "jenjang_1" | "jenjang_2" | "kampus_1" | "kampus_2">;
@@ -35,8 +35,8 @@ export function hitungDashboard(opts: {
   bulan: string; // YYYY-MM
   tahunMasuk: number;
   tahunHabis: number;
-  /** Jendela "akan selesai" dalam hari (default 60). */
-  jendelaHari?: number;
+  /** Batas akhir jendela "akan selesai" (YYYY-MM-DD); default 60 hari dari hari ini. */
+  sampai?: string;
 }) {
   const hari = hariIni();
   const { karyawan, bulan } = opts;
@@ -75,9 +75,7 @@ export function hitungDashboard(opts: {
   const statusMonitoring = new Map(opts.monitoring.map((m) => [m.karyawan_id, (m.status ?? "").trim().toLowerCase()]));
   const berkasBelumLengkap = aktif.filter((k) => statusMonitoring.get(k.id) !== "selesai").length;
 
-  const batas = new Date(`${hari}T00:00:00Z`);
-  batas.setUTCDate(batas.getUTCDate() + (opts.jendelaHari ?? 60));
-  const batasJendela = batas.toISOString().slice(0, 10);
+  const batasJendela = opts.sampai ?? tambahHari(hari, 60);
   const kontrakHabis = karyawan
     .filter((k) => k.status === "aktif" && k.akhir_kontrak && k.akhir_kontrak >= hari && k.akhir_kontrak <= batasJendela)
     .sort((a, b) => (a.akhir_kontrak ?? "").localeCompare(b.akhir_kontrak ?? ""));

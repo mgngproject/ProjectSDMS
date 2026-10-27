@@ -6,7 +6,7 @@ import StatCard from "@/components/StatCard";
 import { getProfile } from "@/lib/auth";
 import { hitungDashboard, sebaranDetail } from "@/lib/dashboard";
 import { NAMA_BULAN, formatTanggal, hariIni, selisihHari } from "@/lib/format";
-import { configKategori } from "@/lib/kategori-config";
+import { configKategori, jendelaKategori } from "@/lib/kategori-config";
 import { createClient } from "@/lib/supabase/server";
 
 type Params = { bulan?: string; tahun_masuk?: string; tahun_habis?: string; kategori?: string };
@@ -31,11 +31,11 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   // Kategori yang sedang dilihat: kategori PIC, atau pilihan Super Admin
   const namaKategori = isSuperAdmin ? p.kategori || null : profile.kategori?.nama ?? null;
   const config = configKategori(namaKategori);
-  const jendela = config?.jendelaHari ?? 60;
+  const jendela = jendelaKategori(namaKategori);
 
   const [{ data: kategori }, { data: karyawanData }, { data: dataDiri }, { data: monitoring }, { data: detailData }] = await Promise.all([
     supabase.from("kategori").select("id, nama").order("id"),
-    supabase.from("karyawan").select("id, np, nama, status, tanggal_keluar, awal_kontrak, akhir_kontrak, kategori:kategori_id(nama)"),
+    supabase.from("karyawan").select("id, np, nama, unit_kerja, jabatan, status, tanggal_keluar, awal_kontrak, akhir_kontrak, kategori:kategori_id(nama)"),
     supabase.from("data_diri").select("karyawan_id, jenjang_1, jenjang_2, kampus_1, kampus_2"),
     supabase.from("monitoring").select("karyawan_id, status"),
     config ? supabase.from(config.tabel).select("*") : Promise.resolve({ data: [] as Record<string, string | null>[] }),
@@ -49,7 +49,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     (k) => !filterKategori || k.kategori?.nama === filterKategori,
   );
 
-  const d = hitungDashboard({ karyawan, dataDiri: dataDiri ?? [], monitoring: monitoring ?? [], bulan, tahunMasuk, tahunHabis, jendelaHari: jendela });
+  const d = hitungDashboard({ karyawan, dataDiri: dataDiri ?? [], monitoring: monitoring ?? [], bulan, tahunMasuk, tahunHabis, sampai: jendela.sampai(sekarang) });
   const sebaran = config ? sebaranDetail(config.fields, d.aktifIds, detail) : [];
 
   const [tahunB, bulanB] = bulan.split("-").map(Number);
@@ -61,7 +61,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
 
   const tindakLanjut = [
     { label: "Berkas karyawan belum lengkap", jumlah: d.berkasBelumLengkap, href: "/monitoring?status=Belum Lengkap", icon: FolderOpen },
-    { label: `Kontrak habis dalam ${jendela} hari`, jumlah: d.kontrakHabis.length, href: "#kontrak-habis", icon: CalendarClock },
+    { label: `Kontrak habis dalam ${jendela.label}`, jumlah: d.kontrakHabis.length, href: "#kontrak-habis", icon: CalendarClock },
     { label: "Karyawan terminate", jumlah: d.totalTerminate, href: "/terminate", icon: UserMinus },
   ];
 
@@ -89,8 +89,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         <StatCard label="Karyawan aktif" nilai={d.totalAktif} catatan={`${d.totalTerminate} terminate`} icon={Users} nada="primary" />
         <StatCard label="Masuk bulan ini" nilai={d.masukBulan} catatan={`Bulan lalu: ${d.masukBulanLalu}`} icon={UserPlus} nada="success" />
         <StatCard label="Kontrak berakhir bulan ini" nilai={d.habisBulan} catatan={`Bulan lalu: ${d.habisBulanLalu}`} icon={UserMinus} nada="danger" />
-        {config ? (
-          <StatCard label={`Berakhir ≤ ${jendela} hari`} nilai={d.kontrakHabis.length} catatan={`${d.berakhir7Hari} berakhir ≤ 7 hari`} icon={CalendarClock} nada="warning" />
+        {jendela.fokus ? (
+          <StatCard label={`Berakhir ≤ ${jendela.label}`} nilai={d.kontrakHabis.length} catatan={`${d.berakhir7Hari} berakhir ≤ 7 hari`} icon={CalendarClock} nada="warning" />
         ) : (
           <StatCard label="Berkas belum lengkap" nilai={d.berkasBelumLengkap} catatan={`dari ${d.totalAktif} karyawan aktif`} icon={ClipboardList} nada="warning" />
         )}
@@ -100,7 +100,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         <Info size={20} className="mt-0.5 shrink-0" />
         <p>
           Pada {namaBulan}, {d.masukBulan} karyawan masuk dan {d.habisBulan} kontrak berakhir. Saat ini ada {d.berkasBelumLengkap} berkas
-          belum lengkap dan {d.kontrakHabis.length} kontrak yang habis dalam {jendela} hari.
+          belum lengkap dan {d.kontrakHabis.length} kontrak yang habis dalam {jendela.label}.
         </p>
       </div>
 
@@ -176,7 +176,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         )}
 
         <section id="kontrak-habis" className="card scroll-mt-4 p-5">
-          <h2 className="mb-3 font-semibold">{config ? `Akan selesai dalam ${jendela} hari` : `Kontrak habis dalam ${jendela} hari`}</h2>
+          <h2 className="mb-3 font-semibold">{jendela.fokus ? `Akan selesai dalam ${jendela.label}` : `Kontrak habis dalam ${jendela.label}`}</h2>
           <ul className="divide-y divide-line text-sm">
             {d.kontrakHabis.map((r) => {
               const sisa = selisihHari(sekarang, r.akhir_kontrak!);
@@ -185,11 +185,13 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                 <li key={r.id} className="flex items-center justify-between gap-3 py-2.5">
                   <span className="min-w-0">
                     <span className="block truncate">{r.nama} ({r.np}){isSuperAdmin && !config ? ` · ${r.kategori?.nama}` : ""}</span>
-                    {info && <span className="block truncate text-xs text-muted">{[info.jenis, info.institusi].filter(Boolean).join(" · ")}</span>}
+                    <span className="block truncate text-xs text-muted">
+                      {info ? [info.jenis, info.institusi].filter(Boolean).join(" · ") : [r.unit_kerja, r.jabatan].filter(Boolean).join(" · ")}
+                    </span>
                   </span>
                   <span className="flex shrink-0 items-center gap-2">
                     <span className="text-muted">{formatTanggal(r.akhir_kontrak)}</span>
-                    <span className={sisa <= 7 ? "pill-danger" : "pill-warning"}>{sisa === 0 ? "Hari ini" : `${sisa} hari`}</span>
+                    <span className={sisa <= 7 ? "pill-danger" : sisa <= 30 ? "pill-warning" : "pill bg-primary-soft text-primary"}>{sisa === 0 ? "Hari ini" : `${sisa} hari`}</span>
                   </span>
                 </li>
               );
