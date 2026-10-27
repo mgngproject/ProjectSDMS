@@ -97,6 +97,7 @@ const JENDELA_KHUSUS: Record<string, Jendela> = {
   IDE: { label: "1 bulan", sampai: (h) => tambahBulan(h, 1), fokus: true },
   PKWT: { label: "2 bulan", sampai: (h) => tambahBulan(h, 2), fokus: true },
   BGN: { label: "2 bulan", sampai: (h) => tambahBulan(h, 2), fokus: true },
+  Inagov: { label: "2 bulan", sampai: (h) => tambahBulan(h, 2), fokus: true },
 };
 const JENDELA_UMUM: Jendela = { label: "60 hari", sampai: (h) => tambahHari(h, 60), fokus: false };
 
@@ -107,6 +108,7 @@ export function jendelaKategori(nama: string | null | undefined): Jendela {
   // Kolom standar yang pilihannya dibatasi untuk kategori tertentu (menggantikan isian bebas).
 const PILIHAN_STANDAR: Record<string, Record<string, string[]>> = {
   IDH: { level: ["Junior", "Middle", "Senior"] },
+  Inagov: { level: ["Senior", "Middle", "Junior"] },
 };
 
 export function pilihanStandar(nama: string | null | undefined): Record<string, string[]> {

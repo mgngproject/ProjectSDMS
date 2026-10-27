@@ -48,10 +48,12 @@ Kategori BGN memakai kolom standar ditambah **Level Jabatan** (Senior, Middle, J
 
 Kategori IDH memakai kolom standar, dengan **Level** berupa pilihan (Junior, Middle, Senior) dan tanpa Faskes; tidak ada tabel khusus.
 
+Kategori Inagov memakai kolom standar, dengan **Level** berupa pilihan (Senior, Middle, Junior); tidak ada tabel khusus.
+
 Kolom khusus kategori lain didaftarkan di `src/lib/kategori-config.ts`.
 
 ### Dashboard "akan selesai"
-Dashboard menampilkan daftar karyawan yang kontraknya akan berakhir dalam jendela waktu per kategori: Magang 30 hari, TPBW/TPP, PKWT, dan BGN 2 bulan serta IDE 1 bulan (bulan kalender), kategori lain 60 hari. Jendela diatur di `JENDELA_KHUSUS` pada `src/lib/kategori-config.ts`.
+Dashboard menampilkan daftar karyawan yang kontraknya akan berakhir dalam jendela waktu per kategori: Magang 30 hari, TPBW/TPP, PKWT, BGN, dan Inagov 2 bulan serta IDE 1 bulan (bulan kalender), kategori lain 60 hari. Jendela diatur di `JENDELA_KHUSUS` pada `src/lib/kategori-config.ts`.
 
 ## 3. Kategori dan Role
 
