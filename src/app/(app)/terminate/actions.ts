@@ -80,3 +80,36 @@ export async function bulkDeleteTerminate(formData: FormData) {
       : dengan("/terminate", "ok", `Berhasil menghapus ${data.length} data karyawan terminate`),
   );
 }
+
+type HasilAktif = { aktif: number; tanpa_kontrak_aktif: number };
+
+/** Mengaktifkan kembali karyawan terminate; mengembalikan pesan hasil. */
+async function aktifkan(ids: number[]): Promise<{ pesan: string; sukses: boolean }> {
+  if (ids.length === 0) return { pesan: "Tidak ada data yang dipilih", sukses: false };
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("aktifkan_kembali", { ids });
+  if (error) return { pesan: pesanGalat(error), sukses: false };
+
+  const hasil = data as HasilAktif;
+  if (hasil.aktif === 0) return { pesan: "Tidak ada karyawan yang bisa diaktifkan (sudah aktif atau Anda tidak memiliki akses)", sukses: false };
+
+  revalidatePath("/terminate");
+  revalidatePath("/karyawan");
+  revalidatePath("/kontrak");
+  revalidatePath("/dashboard");
+  const catatan =
+    hasil.tanpa_kontrak_aktif > 0
+      ? ` ${hasil.tanpa_kontrak_aktif} di antaranya belum punya kontrak yang berlaku; tambahkan kontrak baru di menu Karyawan > Kontrak.`
+      : "";
+  return { pesan: `${hasil.aktif} karyawan berhasil diaktifkan kembali.${catatan}`, sukses: true };
+}
+
+export async function aktifkanKembali(formData: FormData) {
+  const hasil = await aktifkan([Number(formData.get("id"))].filter(Boolean));
+  redirect(dengan("/terminate", hasil.sukses ? "ok" : "error", hasil.pesan));
+}
+
+export async function aktifkanKembaliBanyak(formData: FormData) {
+  const hasil = await aktifkan(formData.getAll("ids").map(Number).filter(Boolean));
+  redirect(dengan("/terminate", hasil.sukses ? "ok" : "error", hasil.pesan));
+}
