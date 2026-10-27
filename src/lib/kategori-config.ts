@@ -45,11 +45,11 @@ export const LABEL_INTI: Record<string, string> = {
 export const KATEGORI_CONFIG: Record<string, KategoriConfig> = {
   BGN: {
     tabel: "karyawan_bgn",
-    sembunyikan: [],
+    sembunyikan: ["faskes"],
     fields: [{ name: "level_jabatan", label: "Level Jabatan", type: "select", options: ["Senior", "Middle", "Junior", "PKWT Reguler"], required: true }],
     kolomTabel: [
       "np", "nama", "level_jabatan", "awal_kontrak", "akhir_kontrak", "masa_kerja", "masa_kontrak",
-      "unit_kerja", "jabatan", "level", "role", "gross_per_month",
+      "kode_bagan", "unit_kerja", "jabatan", "level", "role", "benefit_kesehatan", "gross_per_month", "kpi",
     ],
   },
   "TPBW/TPP": {
@@ -58,7 +58,7 @@ export const KATEGORI_CONFIG: Record<string, KategoriConfig> = {
     fields: [{ name: "status_tpbw", label: "Status", type: "select", options: ["TPBW", "TPP"], required: true }],
     kolomTabel: [
       "np", "nama", "status_tpbw", "awal_kontrak", "akhir_kontrak", "masa_kerja", "masa_kontrak",
-      "unit_kerja", "jabatan", "level", "role", "gross_per_month",
+      "kode_bagan", "unit_kerja", "jabatan", "level", "role", "benefit_kesehatan", "gross_per_month", "kpi",
     ],
   },
   Magang: {
