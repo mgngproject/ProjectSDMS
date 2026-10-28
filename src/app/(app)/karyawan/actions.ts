@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getProfile } from "@/lib/auth";
+import { periksaKodeBagan } from "@/lib/bagan";
+import { ambilBagan } from "@/lib/bagan-data";
 import { hariIni } from "@/lib/format";
 import { peringatanKuota } from "@/lib/kuota";
 import { ambilKuota, ambilPesertaMagang } from "@/lib/kuota-data";
@@ -85,10 +87,15 @@ export async function createKaryawan(formData: FormData) {
   const salahPilihan = periksaPilihanStandar(namaKat, { level: text(formData, "level") });
   if (salahPilihan) redirect(dengan("/karyawan/new", "error", salahPilihan));
 
+  const umum = kolomUmum(formData);
+  const bagan = periksaKodeBagan(await ambilBagan(supabase, true), umum.kode_bagan);
+  if (bagan.error) redirect(dengan("/karyawan/new", "error", bagan.error));
+  if (bagan.unit) umum.unit_kerja = bagan.unit;
+
   const { data: karyawan, error } = await supabase
     .from("karyawan")
     .insert({
-      ...kolomUmum(formData),
+      ...umum,
       kategori_id,
       folder_link: text(formData, "folder_link"),
       awal_kontrak: awal,
@@ -119,7 +126,7 @@ export async function createKaryawan(formData: FormData) {
   });
   if (kontrakError) redirect(dengan("/karyawan", "error", `Karyawan tersimpan, tetapi kontrak gagal dibuat: ${pesanGalat(kontrakError)}`));
 
-  const peringatan = await peringatanMagang(supabase, namaKat, { unit_kerja: text(formData, "unit_kerja"), penempatan: detail?.values.penempatan ?? null, awal, akhir }, karyawan.id);
+  const peringatan = await peringatanMagang(supabase, namaKat, { unit_kerja: umum.unit_kerja, penempatan: detail?.values.penempatan ?? null, awal, akhir }, karyawan.id);
   revalidatePath("/karyawan");
   redirect(dengan("/karyawan", "ok", `Data karyawan berhasil ditambahkan.${peringatan}`));
 }
@@ -136,6 +143,12 @@ export async function updateKaryawan(id: number, formData: FormData) {
   if (detail?.error) redirect(dengan(`/karyawan/${id}/edit`, "error", detail.error));
   const salahPilihan = periksaPilihanStandar(namaKat, { level: payload.level });
   if (salahPilihan) redirect(dengan(`/karyawan/${id}/edit`, "error", salahPilihan));
+
+  // Kode bagan dipilih dari daftar; kode lama yang tidak diubah tetap diterima
+  const { data: lama } = await supabase.from("karyawan").select("kode_bagan").eq("id", id).maybeSingle();
+  const bagan = periksaKodeBagan(await ambilBagan(supabase, true), payload.kode_bagan, lama?.kode_bagan);
+  if (bagan.error) redirect(dengan(`/karyawan/${id}/edit`, "error", bagan.error));
+  if (bagan.unit) payload.unit_kerja = bagan.unit;
 
   const { error } = await supabase.from("karyawan").update(payload).eq("id", id);
   if (error) redirect(dengan(`/karyawan/${id}/edit`, "error", pesanGalat(error)));

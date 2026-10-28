@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getProfile } from "@/lib/auth";
+import { cariBagan } from "@/lib/bagan";
+import { ambilBagan } from "@/lib/bagan-data";
 import { hariIni } from "@/lib/format";
 import {
   BATAS_BARIS, BATAS_BYTE, bacaDataDiri, bacaKaryawan, bacaSheetKontrak, bacaTerminate, bacaWorkbook,
@@ -70,6 +72,21 @@ export async function importExcel(formData: FormData) {
   // 1. Sheet Database: karyawan, kolom khusus kategori, dan kontrak
   const kar = bacaKaryawan(sheetDatabase, config, kat?.nama ?? null);
   galat.push(...kar.galat);
+  // Kode bagan harus ada di daftar bagan aktif (bila daftar sudah diisi); Unit Kerja mengikuti daftar
+  const baganAktif = await ambilBagan(supabase, true);
+  if (baganAktif.length > 0) {
+    kar.data = kar.data.filter((k) => {
+      if (!k.kode_bagan) return true;
+      const b = cariBagan(baganAktif, k.kode_bagan);
+      if (!b) {
+        galat.push(`Baris ${k.baris}: kode bagan "${k.kode_bagan}" tidak ada di daftar bagan atau sudah tidak aktif`);
+        return false;
+      }
+      k.kode_bagan = b.kode;
+      k.unit_kerja = b.nama_unit;
+      return true;
+    });
+  }
   const idDisentuh = new Set<number>();
 
   if (kar.data.length > 0) {

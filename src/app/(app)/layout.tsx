@@ -26,7 +26,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="flex min-h-screen flex-col md:flex-row">
-      <Sidebar kategori={menuKategori} tampilKuota={!isSuperAdmin && profile.kategori?.nama === "Magang"} nama={profile.nama} peran={peran} awalTertutup={awalTertutup} logout={logout} />
+      <Sidebar kategori={menuKategori} tampilBagan={isSuperAdmin} tampilKuota={!isSuperAdmin && profile.kategori?.nama === "Magang"} nama={profile.nama} peran={peran} awalTertutup={awalTertutup} logout={logout} />
       <main className="min-w-0 flex-1 space-y-5 p-4 md:p-8">{children}</main>
     </div>
   );

@@ -136,16 +136,16 @@ export default async function KuotaPage({ searchParams }: { searchParams: Promis
       </div>
 
       <form action={tambahKuota} className="card flex flex-wrap items-end gap-2 p-4">
-        <label className="space-y-1 text-sm">
+        <label className="flex flex-col gap-1 text-sm">
           <span className="text-xs text-muted">Unit kerja</span>
           <input className="input" name="unit_kerja" list="daftar-unit" required />
           <datalist id="daftar-unit">{daftarUnit.map((u) => <option key={u} value={u} />)}</datalist>
         </label>
-        <label className="space-y-1 text-sm">
+        <label className="flex flex-col gap-1 text-sm">
           <span className="text-xs text-muted">Penempatan</span>
           <select className="input" name="penempatan">{TEMPAT.map((t) => <option key={t}>{t}</option>)}</select>
         </label>
-        <label className="space-y-1 text-sm">
+        <label className="flex flex-col gap-1 text-sm">
           <span className="text-xs text-muted">Kuota</span>
           <input className="input !w-24" type="number" name="kuota" min={0} step={1} defaultValue={3} required />
         </label>
