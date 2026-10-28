@@ -87,11 +87,7 @@ src/
 ├── lib/                       # klien Supabase, auth, format tanggal
 └── middleware.ts              # menyegarkan sesi dan mengarahkan ke /login
 supabase/
-<<<<<<< HEAD
-├── migrations/                # 0001 tabel+RLS, 0002 hak akses, 0003 logika kontrak/monitoring, 0004 kolom Magang, 0005 kolom TPBW/TPP, 0006 import Excel (sinkron massal), 0007 kolom BGN, 0008 kolom IDE, 0009 salinan data IDE, 0010 hapus status IDE, 0011 hapus salinan status, 0012 tabel IDH, 0013 hapus faskes IDE, 0014 hapus faskes IDH, 0015 kolom TAD, 0016 salinan data TAD, 0017 pisah DELTA dan BDP
-=======
-├── migrations/                # 0001 tabel+RLS, 0002 hak akses, 0003 logika kontrak/monitoring, 0004 kolom Magang, 0005 kolom TPBW/TPP, 0006 import Excel (sinkron massal), 0007 kolom BGN, 0008 aktifkan kembali
->>>>>>> origin/main
+├── migrations/                # 0001 tabel+RLS, 0002 hak akses, 0003 logika kontrak/monitoring, 0004 kolom Magang, 0005 kolom TPBW/TPP, 0006 import Excel (sinkron massal), 0007 kolom BGN, 0008 aktifkan kembali, 0009 kolom IDE, 0010 salinan data IDE, 0011 hapus status IDE, 0012 hapus salinan status, 0013 tabel IDH, 0014 hapus faskes IDE, 0015 hapus faskes IDH, 0016 kolom TAD, 0017 salinan data TAD, 0018 pisah DELTA dan BDP
 └── seed.sql                   # daftar kategori
 scripts/create-users.mjs       # membuat akun awal
 legacy-laravel/                # kode Laravel lama (acuan)
@@ -104,11 +100,7 @@ Prasyarat: Node.js 20+ dan project Supabase.
 ### a. Siapkan Supabase
 
 1. Buat project di [supabase.com](https://supabase.com).
-<<<<<<< HEAD
-2. Buka **SQL Editor**, jalankan berurutan: `supabase/migrations/0001_init.sql`, `0002_grants.sql`, `0003_parity_laravel.sql`, `0004_magang.sql`, `0005_tpbw.sql`, `0006_impor_foto.sql`, `0007_bgn.sql`, `0008_ide.sql`, `0009_ide_salin.sql`, `0010_ide_hapus_status.sql`, `0011_ide_hapus_salinan_status.sql`, `0012_idh.sql`, `0013_ide_hapus_faskes.sql`, `0014_idh_hapus_faskes.sql`, `0015_tad.sql`, `0016_tad_salin.sql`, `0017_tad_pisah.sql`, lalu `supabase/seed.sql`.
-=======
-2. Buka **SQL Editor**, jalankan berurutan: `supabase/migrations/0001_init.sql`, `0002_grants.sql`, `0003_parity_laravel.sql`, `0004_magang.sql`, `0005_tpbw.sql`, `0006_impor_foto.sql`, `0007_bgn.sql`, `0008_aktifkan_kembali.sql`, lalu `supabase/seed.sql`.
->>>>>>> origin/main
+2. Buka **SQL Editor**, jalankan berurutan: `supabase/migrations/0001_init.sql`, `0002_grants.sql`, `0003_parity_laravel.sql`, `0004_magang.sql`, `0005_tpbw.sql`, `0006_impor_foto.sql`, `0007_bgn.sql`, `0008_aktifkan_kembali.sql`, `0009_ide.sql`, `0010_ide_salin.sql`, `0011_ide_hapus_status.sql`, `0012_ide_hapus_salinan_status.sql`, `0013_idh.sql`, `0014_ide_hapus_faskes.sql`, `0015_idh_hapus_faskes.sql`, `0016_tad.sql`, `0017_tad_salin.sql`, `0018_tad_pisah.sql`, lalu `supabase/seed.sql`.
 3. Ambil `Project URL`, `anon key`, dan `service_role key` dari **Project Settings → API**.
 
 ### b. Konfigurasi dan jalankan
