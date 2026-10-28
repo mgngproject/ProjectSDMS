@@ -11,7 +11,6 @@ async function simpan(karyawanId: number, field: string, value: boolean | string
   // Status Selesai hanya bila semua isian lengkap
   const { data } = await supabase.from("monitoring").select("*").eq("karyawan_id", karyawanId).single();
   if (data) await supabase.from("monitoring").update({ status: monitoringStatus(data) }).eq("karyawan_id", karyawanId);
-  revalidatePath("/monitoring");
   revalidatePath("/dashboard");
 }
 
