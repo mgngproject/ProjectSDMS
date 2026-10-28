@@ -12,6 +12,8 @@ type Props = {
   detail?: Detail | null;
   kategoriAwalId?: number;
   mode: "baru" | "ubah";
+  /** Daftar bagan aktif. Bila terisi, Kode Bagan dipilih dari daftar dan Unit Kerja terisi otomatis. */
+  bagan?: { kode: string; nama_unit: string }[];
 };
 
 function Field({ name, label, type = "text", defaultValue, required }: {
@@ -47,13 +49,16 @@ function DetailInput({ field, value }: { field: DetailField; value: string | nul
 }
 
 /** Isian karyawan: kolom standar dan, bila kategorinya punya, kolom khusus kategori. */
-export default function KaryawanFields({ kategori, isSuperAdmin, kategoriAdmin, karyawan: k, detail, mode, kategoriAwalId }: Props) {
+export default function KaryawanFields({ kategori, isSuperAdmin, kategoriAdmin, karyawan: k, detail, mode, kategoriAwalId, bagan = [] }: Props) {
   const [kategoriId, setKategoriId] = useState(String(k?.kategori_id ?? kategoriAwalId ?? ""));
   const namaTerpilih = isSuperAdmin ? kategori.find((c) => String(c.id) === kategoriId)?.nama : kategoriAdmin;
   const config = configKategori(namaTerpilih);
   const disembunyikan = kolomDisembunyikan(namaTerpilih);
   const pilihan = pilihanStandar(namaTerpilih);
   const tampil = (kolom: string) => !disembunyikan.includes(kolom);
+  const [kodeBagan, setKodeBagan] = useState(k?.kode_bagan ?? "");
+  const [unitKerja, setUnitKerja] = useState(k?.unit_kerja ?? "");
+  const unitDariDaftar = bagan.find((b) => b.kode === kodeBagan.trim().toUpperCase())?.nama_unit;
 
   return (
     <>
@@ -84,8 +89,32 @@ export default function KaryawanFields({ kategori, isSuperAdmin, kategoriAdmin, 
           <Field name="akhir_kontrak" label="Akhir Kontrak" type="date" required />
         </>
       )}
-      <Field name="kode_bagan" label="Kode Bagan" defaultValue={k?.kode_bagan} />
-      <Field name="unit_kerja" label="Unit Kerja" defaultValue={k?.unit_kerja} />
+      <div>
+        <label className="label" htmlFor="kode_bagan">Kode Bagan</label>
+        <input
+          className="input"
+          id="kode_bagan"
+          name="kode_bagan"
+          value={kodeBagan}
+          onChange={(e) => setKodeBagan(e.target.value)}
+          list={bagan.length ? "daftar-bagan" : undefined}
+          placeholder={bagan.length ? "Ketik kode atau nama unit" : undefined}
+          autoComplete="off"
+        />
+        {bagan.length > 0 && <datalist id="daftar-bagan">{bagan.map((b) => <option key={b.kode} value={b.kode}>{b.nama_unit}</option>)}</datalist>}
+      </div>
+      <div>
+        <label className="label" htmlFor="unit_kerja">Unit Kerja</label>
+        <input
+          className={`input ${unitDariDaftar ? "bg-soft" : ""}`}
+          id="unit_kerja"
+          name="unit_kerja"
+          value={unitDariDaftar ?? unitKerja}
+          onChange={(e) => setUnitKerja(e.target.value)}
+          readOnly={Boolean(unitDariDaftar)}
+        />
+        {unitDariDaftar && <p className="mt-1 text-xs text-muted">Terisi otomatis dari daftar bagan.</p>}
+      </div>
       {tampil("jabatan") && <Field name="jabatan" label="Jabatan" defaultValue={k?.jabatan} />}
       {tampil("level") && pilihan.level && (
         <div>

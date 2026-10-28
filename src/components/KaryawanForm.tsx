@@ -12,6 +12,8 @@ type Props = {
   kategoriAwalId?: number;
   /** `baru`: awal dan akhir kontrak wajib. `ubah`: tanggal kontrak diatur lewat menu Kontrak. */
   mode: "baru" | "ubah";
+  /** Daftar bagan aktif untuk pilihan Kode Bagan. */
+  bagan?: { kode: string; nama_unit: string }[];
   batal: string;
 };
 

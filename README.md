@@ -53,6 +53,9 @@ Kategori Inagov memakai kolom standar, dengan **Level** berupa pilihan (Senior, 
 ### Kuota Magang
 Menu **Kuota** (hanya PIC Magang; Super Admin tidak punya akses) mengatur batas peserta Magang yang aktif bersamaan per unit kerja di tiap penempatan (Jakarta atau Karawang), tabel `kuota_magang`. Hanya pasangan unit kerja dan penempatan yang memang ada yang dibuat. Satu peserta memakai satu slot selama seluruh masa kontraknya; jumlah terisi dihitung otomatis dari data karyawan (tidak disimpan), per bulan, dan bulan bisa digeser. Status: Tersedia, Hampir penuh (80% atau lebih), Penuh, Melebihi. Saat menambah peserta Magang, bila unit kerja belum punya kuota di penempatan itu atau penuh di salah satu bulan masa kontraknya, muncul peringatan, tetapi data tetap tersimpan. Nama unit kerja harus sama dengan isian Unit Kerja peserta (huruf besar-kecil diabaikan).
 
+### Kode Bagan
+Menu **Kode Bagan** (hanya Super Admin) memegang daftar bagan, tabel `bagan`: kode, nama unit, atasan (opsional), dan status aktif. Daftar diisi lewat import Excel (judul kolom **Kode**, **Nama Unit**, **Atasan**) atau satu per satu; kode diseragamkan menjadi huruf besar. Daftar ini menjadi satu-satunya acuan: di form karyawan, Kode Bagan dipilih dari daftar yang aktif dan Unit Kerja terisi otomatis (tidak bisa diketik bila kodenya dikenal). Karyawan lama dengan kode yang tidak dikenal tetap bisa disimpan selama kodenya tidak diubah, dan muncul di bagian **Perlu dibereskan** pada halaman Kode Bagan. Mengubah nama unit di daftar menyamakan Unit Kerja semua karyawan yang memakai kode itu; tombol **Samakan sekarang** menyamakan data lama. Import karyawan menolak baris dengan kode yang tidak ada di daftar aktif. Selama daftar masih kosong, semua isian berjalan seperti sebelumnya. Ganti kode, gabung, pecah, dan riwayat perubahan belum tersedia.
+
 Kolom khusus kategori lain didaftarkan di `src/lib/kategori-config.ts`.
 
 ### Dashboard "akan selesai"
@@ -96,7 +99,7 @@ src/
 ├── lib/                       # klien Supabase, auth, format tanggal
 └── middleware.ts              # menyegarkan sesi dan mengarahkan ke /login
 supabase/
-├── migrations/                # 0001 tabel+RLS, 0002 hak akses, 0003 logika kontrak/monitoring, 0004 kolom Magang, 0005 kolom TPBW/TPP, 0006 import Excel (sinkron massal), 0007 kolom BGN, 0008 aktifkan kembali, 0009 kuota Magang, 0010 kuota hanya untuk PIC Magang, 0011 kolom IDE, 0012 salinan data IDE, 0013 hapus status IDE, 0014 hapus salinan status, 0015 tabel IDH, 0016 hapus faskes IDE, 0017 hapus faskes IDH, 0018 kolom TAD, 0019 salinan data TAD, 0020 pisah DELTA dan BDP, 0021 remunerasi TAD
+├── migrations/                # 0001 tabel+RLS, 0002 hak akses, 0003 logika kontrak/monitoring, 0004 kolom Magang, 0005 kolom TPBW/TPP, 0006 import Excel (sinkron massal), 0007 kolom BGN, 0008 aktifkan kembali, 0009 kuota Magang, 0010 kuota hanya untuk PIC Magang, 0011 daftar bagan, 0011 kolom IDE, 0012 salinan data IDE, 0013 hapus status IDE, 0014 hapus salinan status, 0015 tabel IDH, 0016 hapus faskes IDE, 0017 hapus faskes IDH, 0018 kolom TAD, 0019 salinan data TAD, 0020 pisah DELTA dan BDP, 0021 remunerasi TAD
 └── seed.sql                   # daftar kategori
 scripts/create-users.mjs       # membuat akun awal
 legacy-laravel/                # kode Laravel lama (acuan)

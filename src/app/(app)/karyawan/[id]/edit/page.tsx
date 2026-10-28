@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Flash from "@/components/Flash";
 import KaryawanForm from "@/components/KaryawanForm";
 import { getProfile } from "@/lib/auth";
+import { ambilBagan } from "@/lib/bagan-data";
 import { configKategori } from "@/lib/kategori-config";
 import { createClient } from "@/lib/supabase/server";
 import type { Detail, Karyawan } from "@/lib/types";
@@ -25,6 +26,7 @@ export default async function EditKaryawanPage({
     supabase.from("kategori").select("id, nama").order("id"),
   ]);
   if (!karyawan) notFound();
+  const bagan = await ambilBagan(supabase, true);
 
   // Kolom khusus kategori (mis. Magang)
   const namaKategori = (kategori ?? []).find((c) => c.id === karyawan.kategori_id)?.nama;
@@ -44,6 +46,7 @@ export default async function EditKaryawanPage({
         kategori={kategori ?? []}
         isSuperAdmin={profile.role === "superadmin"}
         kategoriAdmin={profile.kategori?.nama}
+        bagan={bagan}
         karyawan={karyawan as Karyawan}
         detail={detail as Detail | null}
       />
