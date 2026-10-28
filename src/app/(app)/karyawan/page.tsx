@@ -87,7 +87,7 @@ export default async function KaryawanPage({ searchParams }: { searchParams: Pro
                 <tr key={r.id} className="hover:bg-soft/60">
                   <td className="td"><input type="checkbox" name="ids" value={r.id} /></td>
                   {kolom.map((k) => (
-                    <td key={k} className={`td ${k === "nama" ? "font-medium" : ""} ${k === "catatan_titipan" ? "min-w-48" : ""}`}>
+                    <td key={k} className={`td ${k === "nama" ? "font-medium" : ""}`}>
                       {nilaiKolom(r, k, config, true) ?? "-"}
                     </td>
                   ))}

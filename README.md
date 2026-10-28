@@ -40,7 +40,7 @@ Logikanya mengikuti versi Laravel.
 * **Export** — Excel dan PDF (A4 lanskap) untuk karyawan, terminate, dan data diri. Isi mengikuti kolom kategori.
 
 ### Kategori Magang
-Kategori Magang punya kolom khusus (tabel `karyawan_magang`): Kategori (Magenta / PKL / Maganghub), Universitas/Sekolah, Jurusan, Penempatan (Jakarta / Karawang), Status (Baru / Alih Status / Perpanjangan Maganghub), Awal dan Akhir Pendidikan, serta Catatan Titipan. Awal dan Akhir Kontrak tetap di data kontrak seperti kategori lain. Dashboard Magang menampilkan peserta yang berakhir dalam 30 hari dan sebaran per kategori, penempatan, dan status. Kolom standar yang tidak dipakai (jabatan, level, role, benefit, faskes, gross, KPI) disembunyikan.
+Kategori Magang punya kolom khusus (tabel `karyawan_magang`): Kategori (Magenta / PKL / Maganghub), Universitas/Sekolah, Jurusan, Penempatan (Jakarta / Karawang), Status (Baru / Alih Status / Perpanjangan Maganghub), Awal dan Akhir Pendidikan, serta Referensi (nama orang yang merekomendasikan, isian singkat). Awal dan Akhir Kontrak tetap di data kontrak seperti kategori lain. Dashboard Magang menampilkan peserta yang berakhir dalam 30 hari dan sebaran per kategori, penempatan, dan status. Kolom standar yang tidak dipakai (jabatan, level, role, benefit, faskes, gross, KPI) disembunyikan.
 
 Kategori TPBW/TPP memakai kolom standar ditambah **Status** (TPBW atau TPP), tabel `karyawan_tpbw`.
 
