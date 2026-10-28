@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getProfile } from "@/lib/auth";
 import { hariIni } from "@/lib/format";
+import { peringatanKuota } from "@/lib/kuota";
+import { ambilKuota, ambilPesertaMagang } from "@/lib/kuota-data";
 import { configKategori, periksaPilihanStandar, type KategoriConfig } from "@/lib/kategori-config";
 import { dengan, pesanGalat, text } from "@/lib/params";
 import { createClient } from "@/lib/supabase/server";
@@ -50,6 +52,19 @@ async function namaKategori(supabase: Awaited<ReturnType<typeof createClient>>, 
   if (!id) return null;
   const { data } = await supabase.from("kategori").select("nama").eq("id", id).maybeSingle();
   return data?.nama ?? null;
+}
+
+/** Peringatan (bukan penolakan) bila penempatan peserta Magang melebihi kuota unit kerjanya. */
+async function peringatanMagang(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  namaKat: string | null,
+  baru: { unit_kerja: string | null; penempatan: string | null; awal: string; akhir: string },
+  kecuali?: number,
+): Promise<string> {
+  if (namaKat !== "Magang") return "";
+  const [kuota, peserta] = await Promise.all([ambilKuota(supabase), ambilPesertaMagang(supabase, kecuali)]);
+  const pesan = peringatanKuota(kuota, peserta, baru);
+  return pesan ? ` Peringatan kuota: ${pesan}` : "";
 }
 
 export async function createKaryawan(formData: FormData) {
@@ -104,8 +119,9 @@ export async function createKaryawan(formData: FormData) {
   });
   if (kontrakError) redirect(dengan("/karyawan", "error", `Karyawan tersimpan, tetapi kontrak gagal dibuat: ${pesanGalat(kontrakError)}`));
 
+  const peringatan = await peringatanMagang(supabase, namaKat, { unit_kerja: text(formData, "unit_kerja"), penempatan: detail?.values.penempatan ?? null, awal, akhir }, karyawan.id);
   revalidatePath("/karyawan");
-  redirect(dengan("/karyawan", "ok", "Data karyawan berhasil ditambahkan"));
+  redirect(dengan("/karyawan", "ok", `Data karyawan berhasil ditambahkan.${peringatan}`));
 }
 
 export async function updateKaryawan(id: number, formData: FormData) {

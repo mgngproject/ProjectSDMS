@@ -1,5 +1,6 @@
 import { getProfile } from "@/lib/auth";
 import { excelResponse } from "@/lib/export";
+import { paramDariUrl } from "@/lib/filter";
 import { tabelKaryawan } from "@/lib/tabel";
 
 export async function GET(request: Request) {
@@ -7,5 +8,5 @@ export async function GET(request: Request) {
   const diminta = new URL(request.url).searchParams.get("kategori");
   // Admin selalu pada kategorinya; Super Admin boleh memilih satu kategori
   const namaKategori = profile.role === "superadmin" ? diminta : profile.kategori?.nama ?? null;
-  return excelResponse(namaKategori ? `Data${namaKategori.replace(/\W+/g, "")}` : "DataKaryawan", async (supabase) => (await tabelKaryawan(supabase, namaKategori, false)).baris);
+  return excelResponse(namaKategori ? `Data${namaKategori.replace(/\W+/g, "")}` : "DataKaryawan", async (supabase) => (await tabelKaryawan(supabase, namaKategori, false, paramDariUrl(request.url))).baris);
 }

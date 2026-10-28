@@ -31,16 +31,16 @@ Logikanya mengikuti versi Laravel.
 
 * **Login & hak akses** — admin hanya melihat dan mengelola data kategorinya; Super Admin melihat semua.
 * **Dashboard** — penunjuk bulan; karyawan aktif, masuk, kontrak habis, dan berkas belum lengkap; grafik masuk dan habis per bulan, pendidikan, 10 kampus teratas, dan per kategori; daftar kontrak habis ≤ 60 hari; filter kategori untuk Super Admin.
-* **Data Karyawan** — tambah (otomatis membuat Kontrak 1, data diri, dan monitoring), ubah, hapus, hapus massal, cari, filter masuk/habis per bulan dan tahun, masa kerja dan masa kontrak, export Excel.
+* **Data Karyawan** — Super Admin memilih kategori lewat submenu di sidebar (dengan jumlah karyawan aktif per kategori); tiap kategori menampilkan kolomnya sendiri, tambah (otomatis membuat Kontrak 1, data diri, dan monitoring), ubah, hapus, hapus massal, cari, filter masuk/habis per bulan dan tahun, masa kerja dan masa kontrak, export Excel.
 * **Kontrak** — riwayat per karyawan (tambah, ubah, hapus). Kontrak yang lewat otomatis selesai, kontrak aktif baru menutup yang lama, dan data karyawan ikut disinkronkan.
 * **Data Diri** — daftar dengan filter jenjang, ubah (KTP 16 digit dan unik), export Excel.
-* **Monitoring** — 10 kotak centang dan 3 isian (usulan remunerasi, SP, SKEP); status `Selesai` hanya bila semuanya lengkap, catatan menampilkan yang kurang; filter bulan dan status.
+* **Monitoring** — daftar ringkas (kemajuan n/13, status, berkas yang belum ada); klik baris membuka panel rincian per tahap (Perpanjangan, Persetujuan, Penetapan, Penyampaian, Administrasi) berisi 10 kotak centang dan 3 isian (usulan remunerasi, SP, SKEP); status `Selesai` hanya bila semuanya lengkap, catatan menampilkan yang kurang; filter bulan dan status.
 * **Terminate** — terminate dari karyawan, **aktifkan kembali** (satu atau banyak; kontrak terbaru yang masih berlaku kembali aktif), tambah langsung, ubah, hapus, hapus massal, filter, export Excel.
 * **Import Excel** — format sama dengan versi lama: sheet `Database` (karyawan dan kontrak berurutan `awal_kontrak`, `akhir_kontrak`, `awal_kontrak2`, ...), `Mail Merge` (data diri), `Terminate`, dan `Kontrak`. File tanpa nama sheet dibaca sebagai Database. Template per kategori bisa diunduh dari tombol Import. Maksimal 3 MB dan 1000 baris per sheet; baris yang salah dilaporkan dan dilewati.
 * **Export** — Excel dan PDF (A4 lanskap) untuk karyawan, terminate, dan data diri. Isi mengikuti kolom kategori.
 
 ### Kategori Magang
-Kategori Magang punya kolom khusus (tabel `karyawan_magang`): Kategori (Magenta / PKL / Maganghub), Universitas/Sekolah, Jurusan, Penempatan (Jakarta / Karawang), Status (Baru / Alih Status / Perpanjangan Maganghub), Awal dan Akhir Pendidikan, serta Catatan Titipan. Awal dan Akhir Kontrak tetap di data kontrak seperti kategori lain. Dashboard Magang menampilkan peserta yang berakhir dalam 30 hari dan sebaran per kategori, penempatan, dan status. Kolom standar yang tidak dipakai (jabatan, level, role, benefit, faskes, gross, KPI) disembunyikan.
+Kategori Magang punya kolom khusus (tabel `karyawan_magang`): Kategori (Magenta / PKL / Maganghub), Universitas/Sekolah, Jurusan, Penempatan (Jakarta / Karawang), Status (Baru / Alih Status / Perpanjangan Maganghub), Awal dan Akhir Pendidikan, serta Referensi (nama orang yang merekomendasikan, isian singkat). Awal dan Akhir Kontrak tetap di data kontrak seperti kategori lain. Dashboard Magang menampilkan peserta yang berakhir dalam 30 hari dan sebaran per kategori, penempatan, dan status. Kolom standar yang tidak dipakai (jabatan, level, role, benefit, faskes, gross, KPI) disembunyikan.
 
 Kategori TPBW/TPP memakai kolom standar ditambah **Status** (TPBW atau TPP), tabel `karyawan_tpbw`.
 
@@ -50,10 +50,19 @@ Kategori IDH memakai kolom standar, dengan **Level** berupa pilihan (Junior, Mid
 
 Kategori Inagov memakai kolom standar, dengan **Level** berupa pilihan (Senior, Middle, Junior); tidak ada tabel khusus.
 
+### Kuota Magang
+Menu **Kuota** (hanya PIC Magang; Super Admin tidak punya akses) mengatur batas peserta Magang yang aktif bersamaan per unit kerja di tiap penempatan (Jakarta atau Karawang), tabel `kuota_magang`. Hanya pasangan unit kerja dan penempatan yang memang ada yang dibuat. Satu peserta memakai satu slot selama seluruh masa kontraknya; jumlah terisi dihitung otomatis dari data karyawan (tidak disimpan), per bulan, dan bulan bisa digeser. Status: Tersedia, Hampir penuh (80% atau lebih), Penuh, Melebihi. Saat menambah peserta Magang, bila unit kerja belum punya kuota di penempatan itu atau penuh di salah satu bulan masa kontraknya, muncul peringatan, tetapi data tetap tersimpan. Nama unit kerja harus sama dengan isian Unit Kerja peserta (huruf besar-kecil diabaikan).
+
 Kolom khusus kategori lain didaftarkan di `src/lib/kategori-config.ts`.
 
 ### Dashboard "akan selesai"
 Dashboard menampilkan daftar karyawan yang kontraknya akan berakhir dalam jendela waktu per kategori: Magang 30 hari, TPBW/TPP, PKWT, BGN, dan Inagov 2 bulan serta IDE, IDH, dan TAD 1 bulan (bulan kalender), kategori lain 60 hari. Jendela diatur di `JENDELA_KHUSUS` pada `src/lib/kategori-config.ts`.
+
+### Filter
+Karyawan, Kontrak, Data Diri, Monitoring, dan Terminate memakai baris filter yang sama (`src/components/FilterBar.tsx`): kategori (Super Admin), cari nama/NP, periode (kontrak masuk, kontrak habis, atau tanggal keluar per bulan dan tahun), filter khusus halaman, tombol **Cari** dan **Reset**. Filter khusus: Karyawan (kolom khusus kategori seperti penempatan, status, level), Data Diri (jenjang, kelengkapan), Monitoring (status, berkas yang belum ada), Terminate (alasan keluar). Pilihan filter tersimpan di alamat halaman, dan Export Excel dan PDF mengikuti filter yang sedang dipakai.
+
+### Sidebar
+Sidebar menampilkan logo Peruri di atas dan bisa dibuka-tutup lewat tombol di sebelahnya (layar lebar). Saat tertutup hanya ikon yang tampil dan logo menjadi bunga saja; pilihan tersimpan di cookie `sidebar`. Logo ada di `public/` (versi biru-ungu untuk mode terang, putih untuk mode gelap, masing-masing penuh dan hanya bunga).
 
 ## 3. Kategori dan Role
 
@@ -87,7 +96,7 @@ src/
 ├── lib/                       # klien Supabase, auth, format tanggal
 └── middleware.ts              # menyegarkan sesi dan mengarahkan ke /login
 supabase/
-├── migrations/                # 0001 tabel+RLS, 0002 hak akses, 0003 logika kontrak/monitoring, 0004 kolom Magang, 0005 kolom TPBW/TPP, 0006 import Excel (sinkron massal), 0007 kolom BGN, 0008 aktifkan kembali, 0009 kolom IDE, 0010 salinan data IDE, 0011 hapus status IDE, 0012 hapus salinan status, 0013 tabel IDH, 0014 hapus faskes IDE, 0015 hapus faskes IDH, 0016 kolom TAD, 0017 salinan data TAD, 0018 pisah DELTA dan BDP, 0019 remunerasi TAD
+├── migrations/                # 0001 tabel+RLS, 0002 hak akses, 0003 logika kontrak/monitoring, 0004 kolom Magang, 0005 kolom TPBW/TPP, 0006 import Excel (sinkron massal), 0007 kolom BGN, 0008 aktifkan kembali, 0009 kuota Magang, 0010 kuota hanya untuk PIC Magang, 0011 kolom IDE, 0012 salinan data IDE, 0013 hapus status IDE, 0014 hapus salinan status, 0015 tabel IDH, 0016 hapus faskes IDE, 0017 hapus faskes IDH, 0018 kolom TAD, 0019 salinan data TAD, 0020 pisah DELTA dan BDP, 0021 remunerasi TAD
 └── seed.sql                   # daftar kategori
 scripts/create-users.mjs       # membuat akun awal
 legacy-laravel/                # kode Laravel lama (acuan)
@@ -100,7 +109,7 @@ Prasyarat: Node.js 20+ dan project Supabase.
 ### a. Siapkan Supabase
 
 1. Buat project di [supabase.com](https://supabase.com).
-2. Buka **SQL Editor**, jalankan berurutan: `supabase/migrations/0001_init.sql`, `0002_grants.sql`, `0003_parity_laravel.sql`, `0004_magang.sql`, `0005_tpbw.sql`, `0006_impor_foto.sql`, `0007_bgn.sql`, `0008_aktifkan_kembali.sql`, `0009_ide.sql`, `0010_ide_salin.sql`, `0011_ide_hapus_status.sql`, `0012_ide_hapus_salinan_status.sql`, `0013_idh.sql`, `0014_ide_hapus_faskes.sql`, `0015_idh_hapus_faskes.sql`, `0016_tad.sql`, `0017_tad_salin.sql`, `0018_tad_pisah.sql`, `0019_tad_remunerasi.sql`, lalu `supabase/seed.sql`.
+2. Buka **SQL Editor**, jalankan berurutan: `supabase/migrations/0001_init.sql`, `0002_grants.sql`, `0003_parity_laravel.sql`, `0004_magang.sql`, `0005_tpbw.sql`, `0006_impor_foto.sql`, `0007_bgn.sql`, `0008_aktifkan_kembali.sql`, `0009_kuota.sql`, `0010_kuota_hanya_pic.sql`, `0011_ide.sql`, `0012_ide_salin.sql`, `0013_ide_hapus_status.sql`, `0014_ide_hapus_salinan_status.sql`, `0015_idh.sql`, `0016_ide_hapus_faskes.sql`, `0017_idh_hapus_faskes.sql`, `0018_tad.sql`, `0019_tad_salin.sql`, `0020_tad_pisah.sql`, `0021_tad_remunerasi.sql`, lalu `supabase/seed.sql`.
 3. Ambil `Project URL`, `anon key`, dan `service_role key` dari **Project Settings → API**.
 
 ### b. Konfigurasi dan jalankan

@@ -1,35 +1,42 @@
 import PageHeader from "@/components/PageHeader";
 import Link from "next/link";
 import ConfirmSubmit from "@/components/ConfirmSubmit";
-import FilterBulanTahun from "@/components/FilterBulanTahun";
+import FilterBar from "@/components/FilterBar";
 import Flash from "@/components/Flash";
+import { getProfile } from "@/lib/auth";
+import { cocokDasar, cocokTerminate, paramFilter, queryString } from "@/lib/filter";
 import { formatTanggal, masaKerja } from "@/lib/format";
-import { filterBulanTahun } from "@/lib/params";
 import { createClient } from "@/lib/supabase/server";
 import type { Karyawan } from "@/lib/types";
 import { aktifkanKembali, aktifkanKembaliBanyak, bulkDeleteTerminate, deleteTerminate } from "./actions";
 
-type Params = { filter?: string; bulan?: string; tahun?: string; ok?: string; error?: string };
+type Params = Record<string, string | undefined>;
 
 export default async function TerminatePage({ searchParams }: { searchParams: Promise<Params> }) {
-  const p = await searchParams;
+  const sp = await searchParams;
+  const p = paramFilter(sp);
+  const profile = await getProfile();
+  const isSuperAdmin = profile.role === "superadmin";
   const supabase = await createClient();
+  const { data: daftarKategori } = await supabase.from("kategori").select("id, nama").order("id");
   const { data } = await supabase
     .from("karyawan")
     .select("*, kategori:kategori_id(nama)")
     .eq("status", "terminate")
     .order("tanggal_keluar", { ascending: false });
-  const rows = filterBulanTahun((data ?? []) as Karyawan[], p);
+  const rows = ((data ?? []) as Karyawan[]).filter((r) => cocokDasar(r, p, { kategoriBerlaku: isSuperAdmin, jenisBawaan: "keluar" }) && cocokTerminate(r, p));
 
   return (
     <div className="space-y-4">
       <PageHeader title="Data Terminate">
-          <a className="btn-secondary" href="/api/export/terminate">Export Excel</a>
-        <a className="btn-secondary" href="/api/pdf/terminate" target="_blank" rel="noreferrer">Export PDF</a>
+          <a className="btn-secondary" href={`/api/export/terminate${queryString(p)}`}>Export Excel</a>
+        <a className="btn-secondary" href={`/api/pdf/terminate${queryString(p)}`} target="_blank" rel="noreferrer">Export PDF</a>
           <Link className="btn" href="/terminate/new">Tambah Data Terminate</Link>
         </PageHeader>
-      <Flash ok={p.ok} error={p.error} />
-      <FilterBulanTahun filter={p.filter} bulan={p.bulan} tahun={p.tahun} />
+      <Flash ok={sp.ok} error={sp.error} />
+      <FilterBar key={JSON.stringify(p)} p={p} kategori={isSuperAdmin ? daftarKategori ?? [] : undefined} periode={["keluar", "masuk", "habis"]} resetHref="/terminate">
+        <input className="input max-w-[200px]" name="alasan" defaultValue={p.alasan ?? ""} placeholder="Alasan keluar" aria-label="Alasan keluar" />
+      </FilterBar>
 
       <form className="space-y-2">
         <div className="flex flex-wrap gap-2">

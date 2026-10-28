@@ -6,6 +6,8 @@ import { tambahBulan, tambahHari } from "@/lib/format";
 export type DetailField = {
   name: string;
   label: string;
+  /** Nama pada kotak filter bila berbeda dari label isian (mis. agar tidak sama dengan filter kategori utama). */
+  labelFilter?: string;
   type: "text" | "date" | "select" | "textarea" | "number";
   options?: string[];
   required?: boolean;
@@ -111,14 +113,14 @@ export const KATEGORI_CONFIG: Record<string, KategoriConfig> = {
     tabel: "karyawan_magang",
     sembunyikan: ["jabatan", "level", "role", "benefit_kesehatan", "faskes", "gross_per_month", "kpi"],
     fields: [
-      { name: "jenis", label: "Kategori", type: "select", options: ["Magenta", "PKL", "Maganghub"], required: true },
+      { name: "jenis", label: "Kategori", labelFilter: "jenis magang", type: "select", options: ["Magenta", "PKL", "Maganghub"], required: true },
       { name: "institusi", label: "Universitas/Sekolah", type: "text", required: true },
       { name: "jurusan", label: "Jurusan", type: "text" },
       { name: "penempatan", label: "Penempatan", type: "select", options: ["Jakarta", "Karawang"], required: true },
       { name: "status_magang", label: "Status", type: "select", options: ["Baru", "Alih Status", "Perpanjangan Maganghub"], required: true },
       { name: "awal_pendidikan", label: "Awal Pendidikan", type: "date" },
       { name: "akhir_pendidikan", label: "Akhir Pendidikan", type: "date" },
-      { name: "catatan_titipan", label: "Catatan Titipan", type: "textarea" },
+      { name: "catatan_titipan", label: "Referensi", type: "text" },
     ],
     kolomTabel: [
       "np", "nama", "jenis", "institusi", "jurusan", "awal_kontrak", "akhir_kontrak", "kode_bagan", "unit_kerja",
