@@ -35,7 +35,7 @@ Logikanya mengikuti versi Laravel.
 * **Kontrak** — riwayat per karyawan (tambah, ubah, hapus). Kontrak yang lewat otomatis selesai, kontrak aktif baru menutup yang lama, dan data karyawan ikut disinkronkan.
 * **Data Diri** — daftar dengan filter jenjang, ubah (KTP 16 digit dan unik), export Excel.
 * **Monitoring** — 10 kotak centang dan 3 isian (usulan remunerasi, SP, SKEP); status `Selesai` hanya bila semuanya lengkap, catatan menampilkan yang kurang; filter bulan dan status.
-* **Terminate** — terminate dari karyawan, tambah langsung, ubah, hapus, hapus massal, filter, export Excel.
+* **Terminate** — terminate dari karyawan, **aktifkan kembali** (satu atau banyak; kontrak terbaru yang masih berlaku kembali aktif), tambah langsung, ubah, hapus, hapus massal, filter, export Excel.
 * **Import Excel** — format sama dengan versi lama: sheet `Database` (karyawan dan kontrak berurutan `awal_kontrak`, `akhir_kontrak`, `awal_kontrak2`, ...), `Mail Merge` (data diri), `Terminate`, dan `Kontrak`. File tanpa nama sheet dibaca sebagai Database. Template per kategori bisa diunduh dari tombol Import. Maksimal 3 MB dan 1000 baris per sheet; baris yang salah dilaporkan dan dilewati.
 * **Export** — Excel dan PDF (A4 lanskap) untuk karyawan, terminate, dan data diri. Isi mengikuti kolom kategori.
 
@@ -87,7 +87,11 @@ src/
 ├── lib/                       # klien Supabase, auth, format tanggal
 └── middleware.ts              # menyegarkan sesi dan mengarahkan ke /login
 supabase/
+<<<<<<< HEAD
 ├── migrations/                # 0001 tabel+RLS, 0002 hak akses, 0003 logika kontrak/monitoring, 0004 kolom Magang, 0005 kolom TPBW/TPP, 0006 import Excel (sinkron massal), 0007 kolom BGN, 0008 kolom IDE, 0009 salinan data IDE, 0010 hapus status IDE, 0011 hapus salinan status, 0012 tabel IDH, 0013 hapus faskes IDE, 0014 hapus faskes IDH, 0015 kolom TAD, 0016 salinan data TAD, 0017 pisah DELTA dan BDP
+=======
+├── migrations/                # 0001 tabel+RLS, 0002 hak akses, 0003 logika kontrak/monitoring, 0004 kolom Magang, 0005 kolom TPBW/TPP, 0006 import Excel (sinkron massal), 0007 kolom BGN, 0008 aktifkan kembali
+>>>>>>> origin/main
 └── seed.sql                   # daftar kategori
 scripts/create-users.mjs       # membuat akun awal
 legacy-laravel/                # kode Laravel lama (acuan)
@@ -100,7 +104,11 @@ Prasyarat: Node.js 20+ dan project Supabase.
 ### a. Siapkan Supabase
 
 1. Buat project di [supabase.com](https://supabase.com).
+<<<<<<< HEAD
 2. Buka **SQL Editor**, jalankan berurutan: `supabase/migrations/0001_init.sql`, `0002_grants.sql`, `0003_parity_laravel.sql`, `0004_magang.sql`, `0005_tpbw.sql`, `0006_impor_foto.sql`, `0007_bgn.sql`, `0008_ide.sql`, `0009_ide_salin.sql`, `0010_ide_hapus_status.sql`, `0011_ide_hapus_salinan_status.sql`, `0012_idh.sql`, `0013_ide_hapus_faskes.sql`, `0014_idh_hapus_faskes.sql`, `0015_tad.sql`, `0016_tad_salin.sql`, `0017_tad_pisah.sql`, lalu `supabase/seed.sql`.
+=======
+2. Buka **SQL Editor**, jalankan berurutan: `supabase/migrations/0001_init.sql`, `0002_grants.sql`, `0003_parity_laravel.sql`, `0004_magang.sql`, `0005_tpbw.sql`, `0006_impor_foto.sql`, `0007_bgn.sql`, `0008_aktifkan_kembali.sql`, lalu `supabase/seed.sql`.
+>>>>>>> origin/main
 3. Ambil `Project URL`, `anon key`, dan `service_role key` dari **Project Settings → API**.
 
 ### b. Konfigurasi dan jalankan

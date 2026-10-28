@@ -59,8 +59,7 @@ export default async function KontrakPage({
                 <td className="td whitespace-nowrap">
                   <div className="flex items-center gap-2">
                     <Link className="link" href={`/kontrak/${c.id}/edit`}>Ubah</Link>
-                    <input type="hidden" name="karyawan_id" value={karyawan.id} />
-                    <ConfirmSubmit label="Hapus" message={`Hapus ${c.kontrak_ke}?`} formAction={deleteKontrak} name="id" value={c.id} />
+                    <ConfirmSubmit label="Hapus" message={`Hapus ${c.kontrak_ke}?`} formAction={deleteKontrak.bind(null, c.id, karyawan.id)} />
                   </div>
                 </td>
               </tr>

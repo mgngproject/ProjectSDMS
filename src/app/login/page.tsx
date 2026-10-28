@@ -1,6 +1,7 @@
-import { Lock, Mail } from "lucide-react";
+import { Mail } from "lucide-react";
 import Image from "next/image";
 import AsciiBackground from "@/components/AsciiBackground";
+import PasswordInput from "@/components/PasswordInput";
 import { login } from "./actions";
 
 const PESAN: Record<string, string> = {
@@ -43,10 +44,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         </div>
         <div>
           <label className="label" htmlFor="password">Password</label>
-          <div className="relative">
-            <Lock size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
-            <input className="input pl-9" id="password" name="password" type="password" required autoComplete="current-password" />
-          </div>
+          <PasswordInput id="password" name="password" />
         </div>
         <button className="btn w-full py-2.5" type="submit">Masuk</button>
       </form>

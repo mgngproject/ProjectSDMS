@@ -7,7 +7,7 @@ import { formatTanggal, masaKerja } from "@/lib/format";
 import { filterBulanTahun } from "@/lib/params";
 import { createClient } from "@/lib/supabase/server";
 import type { Karyawan } from "@/lib/types";
-import { bulkDeleteTerminate, deleteTerminate } from "./actions";
+import { aktifkanKembali, aktifkanKembaliBanyak, bulkDeleteTerminate, deleteTerminate } from "./actions";
 
 type Params = { filter?: string; bulan?: string; tahun?: string; ok?: string; error?: string };
 
@@ -32,7 +32,15 @@ export default async function TerminatePage({ searchParams }: { searchParams: Pr
       <FilterBulanTahun filter={p.filter} bulan={p.bulan} tahun={p.tahun} />
 
       <form className="space-y-2">
-        <ConfirmSubmit label="Hapus yang dipilih" message="Hapus semua data terminate yang dicentang?" formAction={bulkDeleteTerminate} />
+        <div className="flex flex-wrap gap-2">
+          <ConfirmSubmit
+            label="Aktifkan kembali yang dipilih"
+            message="Aktifkan kembali semua karyawan yang dicentang? Tanggal keluar dan alasan akan dihapus."
+            className="btn-secondary"
+            formAction={aktifkanKembaliBanyak}
+          />
+          <ConfirmSubmit label="Hapus yang dipilih" message="Hapus semua data terminate yang dicentang?" formAction={bulkDeleteTerminate} />
+        </div>
         <div className="card overflow-x-auto">
           <table className="min-w-full divide-y divide-line">
             <thead>
@@ -58,7 +66,13 @@ export default async function TerminatePage({ searchParams }: { searchParams: Pr
                   <td className="td whitespace-nowrap">
                     <div className="flex items-center gap-2">
                       <Link className="link" href={`/terminate/${r.id}/edit`}>Ubah</Link>
-                      <ConfirmSubmit label="Hapus" message={`Hapus data terminate ${r.nama}?`} formAction={deleteTerminate} name="id" value={r.id} />
+                      <ConfirmSubmit
+                        label="Aktifkan kembali"
+                        message={`Aktifkan kembali ${r.nama}? Tanggal keluar dan alasan akan dihapus.`}
+                        className="btn-secondary px-3 py-1 text-xs"
+                        formAction={aktifkanKembali.bind(null, r.id)}
+                      />
+                      <ConfirmSubmit label="Hapus" message={`Hapus data terminate ${r.nama}?`} formAction={deleteTerminate.bind(null, r.id)} />
                     </div>
                   </td>
                 </tr>

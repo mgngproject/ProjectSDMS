@@ -136,6 +136,7 @@ export function jendelaKategori(nama: string | null | undefined): Jendela {
 
   // Kolom standar yang pilihannya dibatasi untuk kategori tertentu (menggantikan isian bebas).
 const PILIHAN_STANDAR: Record<string, Record<string, string[]>> = {
+  IDE: { level: ["Junior", "Middle", "Senior"] },
   IDH: { level: ["Junior", "Middle", "Senior"] },
   Inagov: { level: ["Senior", "Middle", "Junior"] },
 };
@@ -156,6 +157,7 @@ export function periksaPilihanStandar(nama: string | null | undefined, nilai: Re
 
 // Kolom standar yang disembunyikan untuk kategori yang tidak punya tabel khusus.
 const SEMBUNYIKAN_STANDAR: Record<string, string[]> = {
+  IDE: ["faskes"],
   IDH: ["faskes"],
 };
 
