@@ -20,22 +20,3 @@ export function pesanGalat(error: { code?: string; message: string }): string {
 export function dengan(path: string, key: "ok" | "error", pesan: string): string {
   return `${path}${path.includes("?") ? "&" : "?"}${key}=${encodeURIComponent(pesan)}`;
 }
-
-/** Filter masuk/habis per bulan dan tahun seperti di daftar karyawan Laravel. */
-export function filterBulanTahun<T extends { awal_kontrak: string | null; akhir_kontrak: string | null }>(
-  rows: T[],
-  p: { filter?: string; bulan?: string; tahun?: string },
-): T[] {
-  if (p.filter !== "masuk" && p.filter !== "habis") return rows;
-  const kolom = p.filter === "masuk" ? "awal_kontrak" : "akhir_kontrak";
-  return rows.filter((r) => {
-    const tgl = r[kolom];
-    if (!tgl) return false;
-    const [y, m] = tgl.split("-");
-    if (p.bulan && Number(m) !== Number(p.bulan)) return false;
-    if (p.tahun && Number(y) !== Number(p.tahun)) return false;
-    return true;
-  });
-}
-
-export { hariIni };

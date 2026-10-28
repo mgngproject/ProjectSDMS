@@ -1,36 +1,41 @@
+import FilterBar, { PilihanFilter } from "@/components/FilterBar";
 import PageHeader from "@/components/PageHeader";
 import Link from "next/link";
 import Flash from "@/components/Flash";
+import { getProfile } from "@/lib/auth";
+import { JENJANG, cocokDasar, cocokDataDiri, paramFilter, queryString } from "@/lib/filter";
 import { formatTanggal } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import type { DataDiri } from "@/lib/types";
 
-type Row = DataDiri & { karyawan: { np: string; nama: string; status: string; kategori: { nama: string } | null } };
+type Row = DataDiri & { karyawan: { np: string; nama: string; status: string; awal_kontrak: string | null; akhir_kontrak: string | null; kategori: { nama: string } | null } };
 
-export default async function DataDiriPage({ searchParams }: { searchParams: Promise<{ jenjang?: string; ok?: string; error?: string }> }) {
-  const p = await searchParams;
+export default async function DataDiriPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
+  const sp = await searchParams;
+  const p = paramFilter(sp);
+  const profile = await getProfile();
+  const isSuperAdmin = profile.role === "superadmin";
   const supabase = await createClient();
+  const { data: daftarKategori } = await supabase.from("kategori").select("id, nama").order("id");
 
-  let query = supabase.from("data_diri").select("*, karyawan:karyawan_id!inner(np, nama, status, kategori:kategori_id(nama))").eq("karyawan.status", "aktif");
-  if (p.jenjang) query = query.or(`jenjang_1.eq.${p.jenjang},jenjang_2.eq.${p.jenjang}`);
+  let query = supabase.from("data_diri").select("*, karyawan:karyawan_id!inner(np, nama, status, awal_kontrak, akhir_kontrak, kategori:kategori_id(nama))").eq("karyawan.status", "aktif");
   const { data } = await query;
-  const rows = ((data ?? []) as unknown as Row[]).sort((a, b) => a.karyawan.nama.localeCompare(b.karyawan.nama));
+  const rows = ((data ?? []) as unknown as Row[])
+    .filter((d) => cocokDasar({ ...d.karyawan }, p, { kategoriBerlaku: isSuperAdmin, jenisBawaan: "habis" }) && cocokDataDiri(d, p))
+    .sort((a, b) => a.karyawan.nama.localeCompare(b.karyawan.nama));
 
   return (
     <div className="space-y-4">
       <PageHeader title="Data Diri Karyawan">
-        <a className="btn-secondary" href="/api/export/datadiri">Export Excel</a>
-        <a className="btn-secondary" href="/api/pdf/datadiri" target="_blank" rel="noreferrer">Export PDF</a>
+        <a className="btn-secondary" href={`/api/export/datadiri${queryString(p)}`}>Export Excel</a>
+        <a className="btn-secondary" href={`/api/pdf/datadiri${queryString(p)}`} target="_blank" rel="noreferrer">Export PDF</a>
       </PageHeader>
-      <Flash ok={p.ok} error={p.error} />
+      <Flash ok={sp.ok} error={sp.error} />
 
-      <form className="flex gap-2">
-        <select className="input w-auto" name="jenjang" defaultValue={p.jenjang ?? ""}>
-          <option value="">Semua jenjang</option>
-          {["SMA/SMK", "D3", "D4", "S1", "S2", "S3"].map((j) => <option key={j} value={j}>{j}</option>)}
-        </select>
-        <button className="btn-secondary" type="submit">Terapkan</button>
-      </form>
+      <FilterBar key={JSON.stringify(p)} p={p} kategori={isSuperAdmin ? daftarKategori ?? [] : undefined} resetHref="/datadiri">
+        <PilihanFilter name="jenjang" label="Semua jenjang" nilai={p.jenjang} options={JENJANG.map((j) => ({ value: j, label: j }))} />
+        <PilihanFilter name="kelengkapan" label="Semua kelengkapan" nilai={p.kelengkapan} options={[{ value: "lengkap", label: "Data lengkap" }, { value: "belum", label: "Belum lengkap" }]} />
+      </FilterBar>
 
       <div className="card overflow-x-auto">
         <table className="min-w-full divide-y divide-line">

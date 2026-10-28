@@ -1,41 +1,43 @@
+import FilterBar, { PilihanFilter } from "@/components/FilterBar";
 import PageHeader from "@/components/PageHeader";
 import MonitoringCheckbox from "@/components/MonitoringCheckbox";
 import MonitoringText from "@/components/MonitoringText";
-import { NAMA_BULAN, formatTanggal } from "@/lib/format";
+import { getProfile } from "@/lib/auth";
+import { cocokDasar, cocokMonitoring, paramFilter } from "@/lib/filter";
+import { formatTanggal } from "@/lib/format";
 import { MONITORING_CHECKBOX, MONITORING_TEXT, monitoringKurang, type MonitoringRow } from "@/lib/monitoring";
 import { createClient } from "@/lib/supabase/server";
 
-type Row = MonitoringRow & { karyawan: { np: string; nama: string; status: string; akhir_kontrak: string | null } };
+type Row = MonitoringRow & { karyawan: { np: string; nama: string; status: string; awal_kontrak: string | null; akhir_kontrak: string | null; kategori: { nama: string } | null } };
 
-export default async function MonitoringPage({ searchParams }: { searchParams: Promise<{ bulan?: string; status?: string }> }) {
-  const p = await searchParams;
+export default async function MonitoringPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
+  const p = paramFilter(await searchParams);
+  const profile = await getProfile();
+  const isSuperAdmin = profile.role === "superadmin";
   const supabase = await createClient();
+  const { data: daftarKategori } = await supabase.from("kategori").select("id, nama").order("id");
 
   const { data } = await supabase
     .from("monitoring")
-    .select("*, karyawan:karyawan_id!inner(np, nama, status, akhir_kontrak)")
+    .select("*, karyawan:karyawan_id!inner(np, nama, status, awal_kontrak, akhir_kontrak, kategori:kategori_id(nama))")
     .eq("karyawan.status", "aktif");
-  let rows = ((data ?? []) as unknown as Row[]).sort((a, b) => a.karyawan.nama.localeCompare(b.karyawan.nama));
-
-  if (p.bulan) rows = rows.filter((r) => r.karyawan.akhir_kontrak && Number(r.karyawan.akhir_kontrak.split("-")[1]) === Number(p.bulan));
-  if (p.status) rows = rows.filter((r) => r.status === p.status);
+  const rows = ((data ?? []) as unknown as Row[])
+    .filter((r) => cocokDasar(r.karyawan, p, { kategoriBerlaku: isSuperAdmin, jenisBawaan: "habis" }) && cocokMonitoring(r, p))
+    .sort((a, b) => a.karyawan.nama.localeCompare(b.karyawan.nama));
 
   return (
     <div className="space-y-4">
       <PageHeader title="Monitoring Berkas Karyawan" />
 
-      <form className="flex flex-wrap gap-2">
-        <select className="input w-auto" name="bulan" defaultValue={p.bulan ?? ""}>
-          <option value="">Semua bulan akhir kontrak</option>
-          {NAMA_BULAN.map((n, i) => <option key={n} value={i + 1}>{n}</option>)}
-        </select>
-        <select className="input w-auto" name="status" defaultValue={p.status ?? ""}>
-          <option value="">Semua status</option>
-          <option value="Selesai">Selesai</option>
-          <option value="Belum Lengkap">Belum Lengkap</option>
-        </select>
-        <button className="btn-secondary" type="submit">Terapkan</button>
-      </form>
+      <FilterBar key={JSON.stringify(p)} p={p} kategori={isSuperAdmin ? daftarKategori ?? [] : undefined} resetHref="/monitoring">
+        <PilihanFilter name="status" label="Semua status" nilai={p.status} options={[{ value: "Selesai", label: "Selesai" }, { value: "Belum Lengkap", label: "Belum Lengkap" }]} />
+        <PilihanFilter
+          name="kurang"
+          label="Semua berkas"
+          nilai={p.kurang}
+          options={[...Object.entries(MONITORING_CHECKBOX), ...Object.entries(MONITORING_TEXT)].map(([value, label]) => ({ value, label: `Belum ada: ${label}` }))}
+        />
+      </FilterBar>
 
       <div className="card overflow-x-auto">
         <table className="min-w-full divide-y divide-line">

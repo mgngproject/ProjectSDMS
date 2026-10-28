@@ -1,12 +1,12 @@
 import Link from "next/link";
 import ConfirmSubmit from "@/components/ConfirmSubmit";
-import FilterBulanTahun from "@/components/FilterBulanTahun";
+import FilterBar, { PilihanFilter } from "@/components/FilterBar";
 import Flash from "@/components/Flash";
 import PageHeader from "@/components/PageHeader";
 import { getProfile } from "@/lib/auth";
-import { KATEGORI_CONFIG, LABEL_INTI, configKategori, labelKolom } from "@/lib/kategori-config";
+import { filterPilihan, paramFilter, queryString, saringKaryawan } from "@/lib/filter";
+import { LABEL_INTI, configKategori, labelKolom } from "@/lib/kategori-config";
 import { KOLOM_STANDAR, nilaiKolom, normalisasi, type BarisKaryawan } from "@/lib/kolom";
-import { filterBulanTahun } from "@/lib/params";
 import { createClient } from "@/lib/supabase/server";
 import ImporForm from "@/components/ImporForm";
 import { bulkDeleteKaryawan, deleteKaryawan } from "./actions";
@@ -15,7 +15,7 @@ import { importExcel } from "./impor";
 // Import Excel dan pembaruan kontrak massal bisa memakan waktu
 export const maxDuration = 60;
 
-type Params = { q?: string; kategori?: string; filter?: string; bulan?: string; tahun?: string; ok?: string; error?: string };
+type Params = Record<string, string | undefined>;
 
 export default async function KaryawanPage({ searchParams }: { searchParams: Promise<Params> }) {
   const p = await searchParams;
@@ -35,18 +35,17 @@ export default async function KaryawanPage({ searchParams }: { searchParams: Pro
   const relasi = config ? `, detail:${config.tabel}(*)` : "";
   let query = supabase.from("karyawan").select(`*, kategori:kategori_id(nama)${relasi}`).eq("status", "aktif").order("nama");
   if (isSuperAdmin && kategoriDipilih) query = query.eq("kategori_id", kategoriDipilih.id);
-  if (p.q) {
-    const term = p.q.replace(/[,()%]/g, " ").trim();
-    query = query.or(`nama.ilike.%${term}%,np.ilike.%${term}%`);
-  }
   const { data } = await query;
-  const rows = filterBulanTahun(normalisasi((data ?? []) as unknown as BarisKaryawan[]), p);
+  // Kategori sudah disaring lewat kueri; cari, periode, dan pilihan kolom khusus disaring di sini
+  const rows = saringKaryawan(normalisasi((data ?? []) as unknown as BarisKaryawan[]), p, config, namaKategori, false);
+  const saring = paramFilter(p);
+  const pilihanKolom = filterPilihan(config, namaKategori);
 
   // Kategori dengan kolom khusus tidak menampilkan kolom "Kategori" (semua barisnya sama)
   const kolom = config ? config.kolomTabel : KOLOM_STANDAR;
-  const sufiks = isSuperAdmin && namaKategori ? `?kategori=${encodeURIComponent(namaKategori)}` : "";
-  const exportHref = `/api/export/karyawan${sufiks}`;
-  const pdfHref = `/api/pdf/karyawan${sufiks}`;
+  // Export dan PDF mengikuti filter yang sedang dipakai
+  const exportHref = `/api/export/karyawan${queryString(saring)}`;
+  const pdfHref = `/api/pdf/karyawan${queryString(saring)}`;
 
   return (
     <div className="space-y-4">
@@ -60,21 +59,16 @@ export default async function KaryawanPage({ searchParams }: { searchParams: Pro
       <Flash ok={p.ok} error={p.error} />
 
       {/* key: isian ikut diperbarui saat berpindah kategori lewat sidebar (navigasi tanpa muat ulang) */}
-      <div key={`${namaKategori}|${p.q}|${p.filter}|${p.bulan}|${p.tahun}`} className="flex flex-wrap gap-2">
-        <form className="flex gap-2">
-          {isSuperAdmin && (
-            <select className="input w-auto" name="kategori" defaultValue={namaKategori ?? ""}>
-              <option value="">Semua kategori</option>
-              {(daftarKategori ?? []).map((c) => (
-                <option key={c.id} value={c.nama}>{c.nama}{KATEGORI_CONFIG[c.nama] ? " (kolom khusus)" : ""}</option>
-              ))}
-            </select>
-          )}
-          <input className="input max-w-xs" name="q" defaultValue={p.q} placeholder="Cari nama / NP" />
-          <button className="btn-secondary" type="submit">Cari</button>
-        </form>
-        <FilterBulanTahun filter={p.filter} bulan={p.bulan} tahun={p.tahun} />
-      </div>
+      <FilterBar
+        key={JSON.stringify(saring)}
+        p={saring}
+        kategori={isSuperAdmin ? daftarKategori ?? [] : undefined}
+        resetHref={isSuperAdmin && namaKategori ? `/karyawan?kategori=${encodeURIComponent(namaKategori)}` : "/karyawan"}
+      >
+        {pilihanKolom.map((f) => (
+          <PilihanFilter key={f.name} name={`f_${f.name}`} label={`Semua ${f.label.toLowerCase()}`} nilai={p[`f_${f.name}`]} options={f.options.map((o) => ({ value: o, label: o }))} />
+        ))}
+      </FilterBar>
 
       <form className="space-y-2">
         <ConfirmSubmit label="Hapus yang dipilih" message="Hapus semua karyawan yang dicentang? Kontrak, data diri, dan monitoring ikut terhapus." formAction={bulkDeleteKaryawan} />
