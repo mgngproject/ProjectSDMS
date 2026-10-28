@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { configKategori, kolomDisembunyikan, pilihanStandar, type DetailField } from "@/lib/kategori-config";
 import type { Detail, Karyawan, Kategori } from "@/lib/types";
 
@@ -36,6 +36,8 @@ function DetailInput({ field, value }: { field: DetailField; value: string | nul
         </select>
       ) : field.type === "textarea" ? (
         <textarea className="input" id={id} name={id} rows={2} defaultValue={value ?? ""} required={field.required} />
+      ) : field.type === "number" ? (
+        <input className="input" id={id} name={id} type="number" min={0} step={1} defaultValue={value ?? ""} required={field.required} />
       ) : (
         <input className="input" id={id} name={id} type={field.type} defaultValue={value ?? ""} required={field.required} />
       )}
@@ -68,7 +70,12 @@ export default function KaryawanFields({ kategori, isSuperAdmin, kategoriAdmin, 
         )}
       </div>
 
-      {config && config.fields.map((f) => <DetailInput key={f.name} field={f} value={detail?.[f.name]} />)}
+      {config && config.fields.map((f) => (
+        <Fragment key={f.name}>
+          {f.bagian && <h3 className="border-t border-line pt-4 font-semibold sm:col-span-2">{f.bagian}</h3>}
+          <DetailInput field={f} value={detail?.[f.name]} />
+        </Fragment>
+      ))}
 
       {mode === "baru" && (
         <>

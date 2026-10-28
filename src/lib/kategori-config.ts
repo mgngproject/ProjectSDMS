@@ -6,9 +6,11 @@ import { tambahBulan, tambahHari } from "@/lib/format";
 export type DetailField = {
   name: string;
   label: string;
-  type: "text" | "date" | "select" | "textarea";
+  type: "text" | "date" | "select" | "textarea" | "number";
   options?: string[];
   required?: boolean;
+  /** Judul bagian pada form; ditampilkan sekali di atas field pertama bagian itu. */
+  bagian?: string;
 };
 
 export type KategoriConfig = {
@@ -76,6 +78,18 @@ export const KATEGORI_CONFIG: Record<string, KategoriConfig> = {
     fields: [
       { name: "sbu", label: "SBU", type: "select", options: ["SBU CS", "SBU DIGITAL", "SBU HSS", "Support Bisnis"], required: true },
       { name: "tad", label: "TAD", type: "select", options: ["KCA", "DELTA", "BDP"], required: true },
+      { name: "upah_per_bulan", label: "Upah per Bulan", type: "number", bagian: "Remunerasi" },
+      { name: "jamsostek", label: "Jamsostek", type: "number" },
+      { name: "bpjs_kesehatan", label: "BPJS Kesehatan", type: "number" },
+      { name: "kak", label: "KAK", type: "number" },
+      { name: "tunjangan_keterampilan", label: "Tunjangan Keterampilan", type: "number" },
+      { name: "tunjangan_transportasi", label: "Tunjangan Transportasi", type: "number" },
+      { name: "tarif_premi_gilir", label: "Tarif Premi Gilir", type: "number" },
+      { name: "uang_makan_ramadhan", label: "Uang Makan Ramadhan", type: "number" },
+      { name: "perlengkapan_sarana_kerja", label: "Perlengkapan dan Sarana Kerja", type: "number" },
+      { name: "tunjangan_kesiagaan", label: "Tunjangan Kesiagaan dan Kesigapan", type: "number" },
+      { name: "pemberian_pulsa", label: "Pemberian Pulsa", type: "number" },
+      { name: "insentif_bantuan_transport", label: "Insentif dan Bantuan Transport", type: "number" },
     ],
     kolomTabel: ["np", "nama", "sbu", "tad", "awal_kontrak", "kode_bagan", "unit_kerja", "kategori"],
   },

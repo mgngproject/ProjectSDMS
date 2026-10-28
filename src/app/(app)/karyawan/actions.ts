@@ -38,6 +38,7 @@ function bacaDetail(config: KategoriConfig, f: FormData): { values: Record<strin
     const v = text(f, `detail_${field.name}`);
     if (field.required && !v) return { values, error: `${field.label} wajib diisi.` };
     if (v && field.type === "select" && !field.options?.includes(v)) return { values, error: `${field.label} tidak valid.` };
+    if (v && field.type === "number" && !/^\d{1,15}$/.test(v)) return { values, error: `${field.label} harus berupa angka bulat (tanpa titik atau koma).` };
     values[field.name] = v;
   }
   const { awal_pendidikan: awal, akhir_pendidikan: akhir } = values;
