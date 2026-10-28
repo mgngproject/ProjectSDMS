@@ -21,6 +21,7 @@ const accounts = [
   ["Magang", "PIC Magang", "picmagang@peruri.com", "PASSWORD_MAGANG"],
   ["PKWT", "PIC PKWT", "picpkwt@peruri.com", "PASSWORD_PKWT"],
   ["Inagov", "Admin Inagov", "admininagov@peruri.com", "PASSWORD_INAGOV"],
+  ["TAD", "Admin TAD", "admintad@peruri.com", "PASSWORD_TAD"],
   [null, "Super Admin", "superadminsdms@peruri.com", "PASSWORD_SUPERADMIN"],
 ];
 

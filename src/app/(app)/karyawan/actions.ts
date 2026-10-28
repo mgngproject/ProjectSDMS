@@ -40,6 +40,7 @@ function bacaDetail(config: KategoriConfig, f: FormData): { values: Record<strin
     const v = text(f, `detail_${field.name}`);
     if (field.required && !v) return { values, error: `${field.label} wajib diisi.` };
     if (v && field.type === "select" && !field.options?.includes(v)) return { values, error: `${field.label} tidak valid.` };
+    if (v && field.type === "number" && !/^\d{1,15}$/.test(v)) return { values, error: `${field.label} harus berupa angka bulat (tanpa titik atau koma).` };
     values[field.name] = v;
   }
   const { awal_pendidikan: awal, akhir_pendidikan: akhir } = values;
@@ -100,7 +101,7 @@ export async function createKaryawan(formData: FormData) {
   if (error || !karyawan) redirect(dengan("/karyawan/new", "error", pesanGalat(error ?? { message: "Gagal menyimpan." })));
 
   if (config && detail) {
-    const { error: detailError } = await supabase.from(config.tabel).insert({ karyawan_id: karyawan.id, ...detail.values });
+    const { error: detailError } = await supabase.from(config.tabel).upsert({ karyawan_id: karyawan.id, ...detail.values }, { onConflict: "karyawan_id" });
     if (detailError) {
       await supabase.from("karyawan").delete().eq("id", karyawan.id);
       redirect(dengan("/karyawan/new", "error", pesanGalat(detailError)));

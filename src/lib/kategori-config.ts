@@ -8,9 +8,11 @@ export type DetailField = {
   label: string;
   /** Nama pada kotak filter bila berbeda dari label isian (mis. agar tidak sama dengan filter kategori utama). */
   labelFilter?: string;
-  type: "text" | "date" | "select" | "textarea";
+  type: "text" | "date" | "select" | "textarea" | "number";
   options?: string[];
   required?: boolean;
+  /** Judul bagian pada form; ditampilkan sekali di atas field pertama bagian itu. */
+  bagian?: string;
 };
 
 export type KategoriConfig = {
@@ -45,6 +47,24 @@ export const LABEL_INTI: Record<string, string> = {
 };
 
 export const KATEGORI_CONFIG: Record<string, KategoriConfig> = {
+  IDE: {
+    tabel: "karyawan_ide",
+    sembunyikan: ["faskes"],
+    fields: [],
+    kolomTabel: [
+      "np", "nama", "awal_kontrak", "akhir_kontrak", "masa_kerja", "masa_kontrak",
+      "unit_kerja", "jabatan", "level", "role", "benefit_kesehatan", "gross_per_month",
+    ],
+  },
+  IDH: {
+    tabel: "karyawan_idh",
+    sembunyikan: ["faskes"],
+    fields: [],
+    kolomTabel: [
+      "np", "nama", "awal_kontrak", "akhir_kontrak", "masa_kerja", "masa_kontrak",
+      "unit_kerja", "jabatan", "level", "role", "benefit_kesehatan", "gross_per_month",
+    ],
+  },
   BGN: {
     tabel: "karyawan_bgn",
     sembunyikan: ["faskes"],
@@ -52,6 +72,32 @@ export const KATEGORI_CONFIG: Record<string, KategoriConfig> = {
     kolomTabel: [
       "np", "nama", "level_jabatan", "awal_kontrak", "akhir_kontrak", "masa_kerja", "masa_kontrak",
       "kode_bagan", "unit_kerja", "jabatan", "level", "role", "benefit_kesehatan", "gross_per_month", "kpi",
+    ],
+  },
+  TAD: {
+    tabel: "karyawan_tad",
+    sembunyikan: ["jabatan", "level", "role", "benefit_kesehatan", "faskes", "gross_per_month", "kpi"],
+    fields: [
+      { name: "sbu", label: "SBU", type: "select", options: ["SBU CS", "SBU DIGITAL", "SBU HSS", "Support Bisnis"], required: true },
+      { name: "tad", label: "TAD", type: "select", options: ["KCA", "DELTA", "BDP"], required: true },
+      { name: "upah_per_bulan", label: "Upah per Bulan", type: "number", bagian: "Remunerasi" },
+      { name: "jamsostek", label: "Jamsostek", type: "number" },
+      { name: "bpjs_kesehatan", label: "BPJS Kesehatan", type: "number" },
+      { name: "kak", label: "KAK", type: "number" },
+      { name: "tunjangan_keterampilan", label: "Tunjangan Keterampilan", type: "number" },
+      { name: "tunjangan_transportasi", label: "Tunjangan Transportasi", type: "number" },
+      { name: "tarif_premi_gilir", label: "Tarif Premi Gilir", type: "number" },
+      { name: "uang_makan_ramadhan", label: "Uang Makan Ramadhan", type: "number" },
+      { name: "perlengkapan_sarana_kerja", label: "Perlengkapan dan Sarana Kerja", type: "number" },
+      { name: "tunjangan_kesiagaan", label: "Tunjangan Kesiagaan dan Kesigapan", type: "number" },
+      { name: "pemberian_pulsa", label: "Pemberian Pulsa", type: "number" },
+      { name: "insentif_bantuan_transport", label: "Insentif dan Bantuan Transport", type: "number" },
+    ],
+    kolomTabel: [
+      "np", "nama", "sbu", "tad", "awal_kontrak", "kode_bagan", "unit_kerja", "kategori",
+      "upah_per_bulan", "jamsostek", "bpjs_kesehatan", "kak", "tunjangan_keterampilan", "tunjangan_transportasi",
+      "tarif_premi_gilir", "uang_makan_ramadhan", "perlengkapan_sarana_kerja", "tunjangan_kesiagaan",
+      "pemberian_pulsa", "insentif_bantuan_transport",
     ],
   },
   "TPBW/TPP": {
@@ -97,9 +143,11 @@ const JENDELA_KHUSUS: Record<string, Jendela> = {
   Magang: { label: "30 hari", sampai: (h) => tambahHari(h, 30), fokus: true },
   "TPBW/TPP": { label: "2 bulan", sampai: (h) => tambahBulan(h, 2), fokus: true },
   IDE: { label: "1 bulan", sampai: (h) => tambahBulan(h, 1), fokus: true },
+  IDH: { label: "1 bulan", sampai: (h) => tambahBulan(h, 1), fokus: true },
   PKWT: { label: "2 bulan", sampai: (h) => tambahBulan(h, 2), fokus: true },
   BGN: { label: "2 bulan", sampai: (h) => tambahBulan(h, 2), fokus: true },
   Inagov: { label: "2 bulan", sampai: (h) => tambahBulan(h, 2), fokus: true },
+  TAD: { label: "1 bulan", sampai: (h) => tambahBulan(h, 1), fokus: true },
 };
 const JENDELA_UMUM: Jendela = { label: "60 hari", sampai: (h) => tambahHari(h, 60), fokus: false };
 
@@ -109,6 +157,7 @@ export function jendelaKategori(nama: string | null | undefined): Jendela {
 
   // Kolom standar yang pilihannya dibatasi untuk kategori tertentu (menggantikan isian bebas).
 const PILIHAN_STANDAR: Record<string, Record<string, string[]>> = {
+  IDE: { level: ["Junior", "Middle", "Senior"] },
   IDH: { level: ["Junior", "Middle", "Senior"] },
   Inagov: { level: ["Senior", "Middle", "Junior"] },
 };
@@ -129,6 +178,7 @@ export function periksaPilihanStandar(nama: string | null | undefined, nilai: Re
 
 // Kolom standar yang disembunyikan untuk kategori yang tidak punya tabel khusus.
 const SEMBUNYIKAN_STANDAR: Record<string, string[]> = {
+  IDE: ["faskes"],
   IDH: ["faskes"],
 };
 

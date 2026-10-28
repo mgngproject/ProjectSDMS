@@ -56,7 +56,7 @@ Menu **Kuota** (hanya PIC Magang; Super Admin tidak punya akses) mengatur batas 
 Kolom khusus kategori lain didaftarkan di `src/lib/kategori-config.ts`.
 
 ### Dashboard "akan selesai"
-Dashboard menampilkan daftar karyawan yang kontraknya akan berakhir dalam jendela waktu per kategori: Magang 30 hari, TPBW/TPP, PKWT, BGN, dan Inagov 2 bulan serta IDE 1 bulan (bulan kalender), kategori lain 60 hari. Jendela diatur di `JENDELA_KHUSUS` pada `src/lib/kategori-config.ts`.
+Dashboard menampilkan daftar karyawan yang kontraknya akan berakhir dalam jendela waktu per kategori: Magang 30 hari, TPBW/TPP, PKWT, BGN, dan Inagov 2 bulan serta IDE, IDH, dan TAD 1 bulan (bulan kalender), kategori lain 60 hari. Jendela diatur di `JENDELA_KHUSUS` pada `src/lib/kategori-config.ts`.
 
 ### Filter
 Karyawan, Kontrak, Data Diri, Monitoring, dan Terminate memakai baris filter yang sama (`src/components/FilterBar.tsx`): kategori (Super Admin), cari nama/NP, periode (kontrak masuk, kontrak habis, atau tanggal keluar per bulan dan tahun), filter khusus halaman, tombol **Cari** dan **Reset**. Filter khusus: Karyawan (kolom khusus kategori seperti penempatan, status, level), Data Diri (jenjang, kelengkapan), Monitoring (status, berkas yang belum ada), Terminate (alasan keluar). Pilihan filter tersimpan di alamat halaman, dan Export Excel dan PDF mengikuti filter yang sedang dipakai.
@@ -75,6 +75,7 @@ Sidebar menampilkan logo Peruri di atas dan bisa dibuka-tutup lewat tombol di se
 | Magang   | PIC Magang   |
 | PKWT     | PIC PKWT     |
 | Inagov   | Admin Inagov |
+| TAD      | Admin TAD    |
 | —        | Super Admin (semua kategori) |
 
 Tabel `profiles` menyimpan `role` (`admin` atau `superadmin`) dan `kategori_id`. Admin wajib punya kategori; Super Admin tidak terikat kategori. Pembatasan data ditegakkan di database lewat RLS (lihat `supabase/migrations/0001_init.sql`), jadi tetap berlaku walau ada yang memanggil API Supabase langsung.
@@ -95,7 +96,7 @@ src/
 ├── lib/                       # klien Supabase, auth, format tanggal
 └── middleware.ts              # menyegarkan sesi dan mengarahkan ke /login
 supabase/
-├── migrations/                # 0001 tabel+RLS, 0002 hak akses, 0003 logika kontrak/monitoring, 0004 kolom Magang, 0005 kolom TPBW/TPP, 0006 import Excel (sinkron massal), 0007 kolom BGN, 0008 aktifkan kembali, 0009 kuota Magang, 0010 kuota hanya untuk PIC Magang
+├── migrations/                # 0001 tabel+RLS, 0002 hak akses, 0003 logika kontrak/monitoring, 0004 kolom Magang, 0005 kolom TPBW/TPP, 0006 import Excel (sinkron massal), 0007 kolom BGN, 0008 aktifkan kembali, 0009 kuota Magang, 0010 kuota hanya untuk PIC Magang, 0011 kolom IDE, 0012 salinan data IDE, 0013 hapus status IDE, 0014 hapus salinan status, 0015 tabel IDH, 0016 hapus faskes IDE, 0017 hapus faskes IDH, 0018 kolom TAD, 0019 salinan data TAD, 0020 pisah DELTA dan BDP, 0021 remunerasi TAD
 └── seed.sql                   # daftar kategori
 scripts/create-users.mjs       # membuat akun awal
 legacy-laravel/                # kode Laravel lama (acuan)
@@ -108,7 +109,7 @@ Prasyarat: Node.js 20+ dan project Supabase.
 ### a. Siapkan Supabase
 
 1. Buat project di [supabase.com](https://supabase.com).
-2. Buka **SQL Editor**, jalankan berurutan: `supabase/migrations/0001_init.sql`, `0002_grants.sql`, `0003_parity_laravel.sql`, `0004_magang.sql`, `0005_tpbw.sql`, `0006_impor_foto.sql`, `0007_bgn.sql`, `0008_aktifkan_kembali.sql`, `0009_kuota.sql`, `0010_kuota_hanya_pic.sql`, lalu `supabase/seed.sql`.
+2. Buka **SQL Editor**, jalankan berurutan: `supabase/migrations/0001_init.sql`, `0002_grants.sql`, `0003_parity_laravel.sql`, `0004_magang.sql`, `0005_tpbw.sql`, `0006_impor_foto.sql`, `0007_bgn.sql`, `0008_aktifkan_kembali.sql`, `0009_kuota.sql`, `0010_kuota_hanya_pic.sql`, `0011_ide.sql`, `0012_ide_salin.sql`, `0013_ide_hapus_status.sql`, `0014_ide_hapus_salinan_status.sql`, `0015_idh.sql`, `0016_ide_hapus_faskes.sql`, `0017_idh_hapus_faskes.sql`, `0018_tad.sql`, `0019_tad_salin.sql`, `0020_tad_pisah.sql`, `0021_tad_remunerasi.sql`, lalu `supabase/seed.sql`.
 3. Ambil `Project URL`, `anon key`, dan `service_role key` dari **Project Settings → API**.
 
 ### b. Konfigurasi dan jalankan
@@ -127,7 +128,7 @@ Isi password tiap akun lewat variabel lingkungan (tidak disimpan di repo), lalu 
 
 ```bash
 PASSWORD_IDE=... PASSWORD_IDH=... PASSWORD_BGN=... PASSWORD_TPBW=... \
-PASSWORD_MAGANG=... PASSWORD_PKWT=... PASSWORD_INAGOV=... PASSWORD_SUPERADMIN=... \
+PASSWORD_MAGANG=... PASSWORD_PKWT=... PASSWORD_INAGOV=... PASSWORD_TAD=... PASSWORD_SUPERADMIN=... \
 node --env-file=.env scripts/create-users.mjs
 ```
 
