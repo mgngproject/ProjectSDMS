@@ -50,16 +50,17 @@ export default async function KaryawanPage({ searchParams }: { searchParams: Pro
 
   return (
     <div className="space-y-4">
-      <PageHeader title="Data Karyawan">
+      <PageHeader title={isSuperAdmin && namaKategori ? `Data Karyawan · ${namaKategori}` : "Data Karyawan"}>
         <ImporForm action={importExcel} kategori={isSuperAdmin ? daftarKategori ?? [] : undefined} kategoriDipilih={namaKategori} />
         <a className="btn-secondary" href={exportHref}>Export Excel</a>
         <a className="btn-secondary" href={pdfHref} target="_blank" rel="noreferrer">Export PDF</a>
-        <Link className="btn" href="/karyawan/new">Tambah Karyawan</Link>
+        <Link className="btn" href={`/karyawan/new${isSuperAdmin && namaKategori ? `?kategori=${encodeURIComponent(namaKategori)}` : ""}`}>Tambah Karyawan</Link>
       </PageHeader>
 
       <Flash ok={p.ok} error={p.error} />
 
-      <div className="flex flex-wrap gap-2">
+      {/* key: isian ikut diperbarui saat berpindah kategori lewat sidebar (navigasi tanpa muat ulang) */}
+      <div key={`${namaKategori}|${p.q}|${p.filter}|${p.bulan}|${p.tahun}`} className="flex flex-wrap gap-2">
         <form className="flex gap-2">
           {isSuperAdmin && (
             <select className="input w-auto" name="kategori" defaultValue={namaKategori ?? ""}>
