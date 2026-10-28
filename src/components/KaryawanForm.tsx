@@ -8,6 +8,8 @@ type Props = {
   kategoriAdmin?: string | null;
   karyawan?: Karyawan;
   detail?: Detail | null;
+  /** Kategori yang terpilih sejak awal (mis. dari submenu Super Admin). */
+  kategoriAwalId?: number;
   /** `baru`: awal dan akhir kontrak wajib. `ubah`: tanggal kontrak diatur lewat menu Kontrak. */
   mode: "baru" | "ubah";
   batal: string;

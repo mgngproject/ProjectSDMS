@@ -10,6 +10,7 @@ type Props = {
   kategoriAdmin?: string | null;
   karyawan?: Karyawan;
   detail?: Detail | null;
+  kategoriAwalId?: number;
   mode: "baru" | "ubah";
 };
 
@@ -44,8 +45,8 @@ function DetailInput({ field, value }: { field: DetailField; value: string | nul
 }
 
 /** Isian karyawan: kolom standar dan, bila kategorinya punya, kolom khusus kategori. */
-export default function KaryawanFields({ kategori, isSuperAdmin, kategoriAdmin, karyawan: k, detail, mode }: Props) {
-  const [kategoriId, setKategoriId] = useState(String(k?.kategori_id ?? ""));
+export default function KaryawanFields({ kategori, isSuperAdmin, kategoriAdmin, karyawan: k, detail, mode, kategoriAwalId }: Props) {
+  const [kategoriId, setKategoriId] = useState(String(k?.kategori_id ?? kategoriAwalId ?? ""));
   const namaTerpilih = isSuperAdmin ? kategori.find((c) => String(c.id) === kategoriId)?.nama : kategoriAdmin;
   const config = configKategori(namaTerpilih);
   const disembunyikan = kolomDisembunyikan(namaTerpilih);
@@ -57,7 +58,7 @@ export default function KaryawanFields({ kategori, isSuperAdmin, kategoriAdmin, 
       <Field name="np" label="NP" defaultValue={k?.np} required />
       <Field name="nama" label="Nama" defaultValue={k?.nama} required />
       <div>
-        <label className="label" htmlFor="kategori_id">Kategori</label>
+        <label className="label" htmlFor="kategori_id">{config?.fields.some((f) => f.label === "Kategori") ? "Kategori Utama" : "Kategori"}</label>
         {isSuperAdmin ? (
           <select className="input" id="kategori_id" name="kategori_id" value={kategoriId} onChange={(e) => setKategoriId(e.target.value)} required>
             <option value="">-- Pilih Kategori --</option>

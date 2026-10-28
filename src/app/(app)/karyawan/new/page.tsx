@@ -5,8 +5,8 @@ import { getProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { createKaryawan } from "../actions";
 
-export default async function NewKaryawanPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
-  const { error } = await searchParams;
+export default async function NewKaryawanPage({ searchParams }: { searchParams: Promise<{ error?: string; kategori?: string }> }) {
+  const { error, kategori: kategoriAwal } = await searchParams;
   const profile = await getProfile();
   const supabase = await createClient();
   const { data: kategori } = await supabase.from("kategori").select("id, nama").order("id");
@@ -22,6 +22,7 @@ export default async function NewKaryawanPage({ searchParams }: { searchParams: 
         kategori={kategori ?? []}
         isSuperAdmin={profile.role === "superadmin"}
         kategoriAdmin={profile.kategori?.nama}
+        kategoriAwalId={(kategori ?? []).find((c) => c.nama === kategoriAwal)?.id}
       />
     </div>
   );

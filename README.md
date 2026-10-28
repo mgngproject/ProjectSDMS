@@ -31,7 +31,7 @@ Logikanya mengikuti versi Laravel.
 
 * **Login & hak akses** — admin hanya melihat dan mengelola data kategorinya; Super Admin melihat semua.
 * **Dashboard** — penunjuk bulan; karyawan aktif, masuk, kontrak habis, dan berkas belum lengkap; grafik masuk dan habis per bulan, pendidikan, 10 kampus teratas, dan per kategori; daftar kontrak habis ≤ 60 hari; filter kategori untuk Super Admin.
-* **Data Karyawan** — tambah (otomatis membuat Kontrak 1, data diri, dan monitoring), ubah, hapus, hapus massal, cari, filter masuk/habis per bulan dan tahun, masa kerja dan masa kontrak, export Excel.
+* **Data Karyawan** — Super Admin memilih kategori lewat submenu di sidebar (dengan jumlah karyawan aktif per kategori); tiap kategori menampilkan kolomnya sendiri, tambah (otomatis membuat Kontrak 1, data diri, dan monitoring), ubah, hapus, hapus massal, cari, filter masuk/habis per bulan dan tahun, masa kerja dan masa kontrak, export Excel.
 * **Kontrak** — riwayat per karyawan (tambah, ubah, hapus). Kontrak yang lewat otomatis selesai, kontrak aktif baru menutup yang lama, dan data karyawan ikut disinkronkan.
 * **Data Diri** — daftar dengan filter jenjang, ubah (KTP 16 digit dan unik), export Excel.
 * **Monitoring** — 10 kotak centang dan 3 isian (usulan remunerasi, SP, SKEP); status `Selesai` hanya bila semuanya lengkap, catatan menampilkan yang kurang; filter bulan dan status.

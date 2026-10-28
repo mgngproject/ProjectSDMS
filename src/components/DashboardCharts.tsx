@@ -28,6 +28,10 @@ function Kolom({ data, kunci, warna }: { data: Record<string, string | number>[]
   );
 }
 
+function Kosong() {
+  return <div className="flex h-full items-center justify-center text-sm text-muted">Belum ada data.</div>;
+}
+
 export function GrafikBulanan({ data, warna = WARNA[0] }: { data: number[]; warna?: string }) {
   return (
     <div className="h-64 w-full">
@@ -47,7 +51,7 @@ export function GrafikKategori({ data }: { data: { nama: string; total: number }
 export function GrafikKampus({ data }: { data: { nama: string; S1: number; S2: number }[] }) {
   return (
     <div className="h-72 w-full">
-      <Kolom data={data} kunci={["S1", "S2"]} warna={[WARNA[0], WARNA[1]]} />
+      {data.every((d) => d.S1 + d.S2 === 0) ? <Kosong /> : <Kolom data={data} kunci={["S1", "S2"]} warna={[WARNA[0], WARNA[1]]} />}
     </div>
   );
 }
@@ -55,7 +59,7 @@ export function GrafikKampus({ data }: { data: { nama: string; S1: number; S2: n
 export function GrafikPendidikan({ data }: { data: { nama: string; total: number }[] }) {
   return (
     <div className="h-64 w-full">
-      <ResponsiveContainer>
+      {data.every((d) => d.total === 0) ? <Kosong /> : <ResponsiveContainer>
         <PieChart>
           <Pie data={data} dataKey="total" nameKey="nama" innerRadius={50} outerRadius={85} paddingAngle={2} stroke="none">
             {data.map((_, i) => <Cell key={i} fill={WARNA[i % WARNA.length]} />)}
@@ -63,7 +67,7 @@ export function GrafikPendidikan({ data }: { data: { nama: string; total: number
           <Tooltip {...TOOLTIP} />
           <Legend />
         </PieChart>
-      </ResponsiveContainer>
+      </ResponsiveContainer>}
     </div>
   );
 }
