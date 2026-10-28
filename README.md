@@ -55,6 +55,9 @@ Kolom khusus kategori lain didaftarkan di `src/lib/kategori-config.ts`.
 ### Dashboard "akan selesai"
 Dashboard menampilkan daftar karyawan yang kontraknya akan berakhir dalam jendela waktu per kategori: Magang 30 hari, TPBW/TPP, PKWT, BGN, dan Inagov 2 bulan serta IDE 1 bulan (bulan kalender), kategori lain 60 hari. Jendela diatur di `JENDELA_KHUSUS` pada `src/lib/kategori-config.ts`.
 
+### Sidebar
+Sidebar menampilkan logo Peruri di atas dan bisa dibuka-tutup lewat tombol di sebelahnya (layar lebar). Saat tertutup hanya ikon yang tampil dan logo menjadi bunga saja; pilihan tersimpan di cookie `sidebar`. Logo ada di `public/` (versi biru-ungu untuk mode terang, putih untuk mode gelap, masing-masing penuh dan hanya bunga).
+
 ## 3. Kategori dan Role
 
 | Kategori | Akun         |

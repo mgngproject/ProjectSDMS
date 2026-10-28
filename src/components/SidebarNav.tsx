@@ -19,6 +19,8 @@ export type KategoriMenu = { nama: string; jumlah: number };
 type Props = {
   /** Hanya untuk Super Admin: submenu Karyawan per kategori. Admin kategori tidak memakainya. */
   kategori?: KategoriMenu[];
+  /** Sidebar tertutup (layar lebar): hanya ikon, tanpa tulisan dan submenu. */
+  ringkas?: boolean;
 };
 
 const kelasItem = (aktif: boolean) =>
@@ -26,7 +28,7 @@ const kelasItem = (aktif: boolean) =>
     aktif ? "bg-primary-soft text-primary" : "text-muted hover:bg-soft hover:text-ink"
   }`;
 
-export default function SidebarNav({ kategori }: Props) {
+export default function SidebarNav({ kategori, ringkas = false }: Props) {
   const path = usePathname();
   const pilihan = useSearchParams().get("kategori");
   const diKaryawan = path === "/karyawan" || path.startsWith("/karyawan/");
@@ -41,15 +43,17 @@ export default function SidebarNav({ kategori }: Props) {
       {MENU.map(({ href, label, icon: Icon }) => {
         const aktif = path === href || path.startsWith(`${href}/`);
         const punyaSubmenu = href === "/karyawan" && kategori && kategori.length > 0;
+        const submenuTampil = punyaSubmenu && !ringkas;
 
         return (
           <div key={href} className="flex flex-col gap-1">
             <div className="relative flex items-center">
               <Link
                 href={href}
-                className={`${kelasItem(aktif && !punyaSubmenu)} flex-1 ${aktif && punyaSubmenu ? "text-primary" : ""}`}
+                title={ringkas ? label : undefined}
+                className={`${kelasItem(aktif && !submenuTampil)} flex-1 ${aktif && submenuTampil ? "text-primary" : ""} ${ringkas ? "md:justify-center md:px-0" : ""}`}
                 onClick={(e) => {
-                  if (!punyaSubmenu) return;
+                  if (!submenuTampil) return;
                   // Sudah di halaman Karyawan dengan submenu terbuka: klik menutupnya tanpa pindah halaman
                   if (diKaryawan && terbuka) {
                     e.preventDefault();
@@ -59,11 +63,11 @@ export default function SidebarNav({ kategori }: Props) {
                   }
                 }}
               >
-                {aktif && !punyaSubmenu && <span className="absolute inset-y-1 left-0 hidden w-1 rounded-full bg-primary md:block" />}
-                <Icon size={18} />
-                {label}
+                {aktif && !submenuTampil && <span className="absolute inset-y-1 left-0 hidden w-1 rounded-full bg-primary md:block" />}
+                <Icon size={18} className="shrink-0" />
+                <span className={ringkas ? "md:sr-only" : ""}>{label}</span>
               </Link>
-              {punyaSubmenu && (
+              {submenuTampil && (
                 <button
                   type="button"
                   onClick={() => setTerbuka((v) => !v)}
@@ -76,7 +80,7 @@ export default function SidebarNav({ kategori }: Props) {
               )}
             </div>
 
-            {punyaSubmenu && terbuka && (
+            {submenuTampil && terbuka && (
               <div className="ml-4 hidden flex-col gap-0.5 border-l border-line pl-2 md:flex">
                 {[{ nama: null as string | null, jumlah: total }, ...kategori!].map((k) => {
                   const subAktif = diKaryawan && path === "/karyawan" && (k.nama ?? null) === (pilihan || null);
