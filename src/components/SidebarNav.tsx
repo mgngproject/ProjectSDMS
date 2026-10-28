@@ -3,7 +3,7 @@
 import { BarChart3, CalendarClock, ChevronDown, FileText, LayoutDashboard, UserMinus, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const MENU = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -30,9 +30,10 @@ export default function SidebarNav({ kategori }: Props) {
   const path = usePathname();
   const pilihan = useSearchParams().get("kategori");
   const diKaryawan = path === "/karyawan" || path.startsWith("/karyawan/");
-  // Submenu terbuka otomatis saat berada di halaman Karyawan; tombol panah membukanya secara manual
-  const [terbukaManual, setTerbukaManual] = useState(false);
-  const terbuka = diKaryawan || terbukaManual;
+  // Submenu terbuka saat masuk ke halaman Karyawan dan tertutup saat keluar; setelah itu bisa dibuka/ditutup
+  // lewat panah atau dengan mengklik "Karyawan" ketika sudah berada di halamannya
+  const [terbuka, setTerbuka] = useState(diKaryawan);
+  useEffect(() => setTerbuka(diKaryawan), [diKaryawan]);
   const total = (kategori ?? []).reduce((n, k) => n + k.jumlah, 0);
 
   return (
@@ -44,7 +45,20 @@ export default function SidebarNav({ kategori }: Props) {
         return (
           <div key={href} className="flex flex-col gap-1">
             <div className="relative flex items-center">
-              <Link href={href} className={`${kelasItem(aktif && !punyaSubmenu)} flex-1 ${aktif && punyaSubmenu ? "text-primary" : ""}`}>
+              <Link
+                href={href}
+                className={`${kelasItem(aktif && !punyaSubmenu)} flex-1 ${aktif && punyaSubmenu ? "text-primary" : ""}`}
+                onClick={(e) => {
+                  if (!punyaSubmenu) return;
+                  // Sudah di halaman Karyawan dengan submenu terbuka: klik menutupnya tanpa pindah halaman
+                  if (diKaryawan && terbuka) {
+                    e.preventDefault();
+                    setTerbuka(false);
+                  } else {
+                    setTerbuka(true);
+                  }
+                }}
+              >
                 {aktif && !punyaSubmenu && <span className="absolute inset-y-1 left-0 hidden w-1 rounded-full bg-primary md:block" />}
                 <Icon size={18} />
                 {label}
@@ -52,7 +66,7 @@ export default function SidebarNav({ kategori }: Props) {
               {punyaSubmenu && (
                 <button
                   type="button"
-                  onClick={() => setTerbukaManual((v) => !v)}
+                  onClick={() => setTerbuka((v) => !v)}
                   aria-label={terbuka ? "Tutup submenu Karyawan" : "Buka submenu Karyawan"}
                   aria-expanded={terbuka}
                   className="absolute right-2 hidden rounded-lg p-1.5 text-muted transition hover:bg-soft hover:text-ink md:block"
