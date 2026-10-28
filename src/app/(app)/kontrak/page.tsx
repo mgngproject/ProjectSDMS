@@ -1,13 +1,20 @@
+import FilterBar from "@/components/FilterBar";
 import PageHeader from "@/components/PageHeader";
 import Link from "next/link";
+import { getProfile } from "@/lib/auth";
+import { cocokDasar, paramFilter } from "@/lib/filter";
 import { formatTanggal, masaKerja, masaKontrak } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import type { Karyawan, Kontrak } from "@/lib/types";
 
 type Row = Karyawan & { kontrak_aktif: Kontrak[] };
 
-export default async function RiwayatKontrakPage() {
+export default async function RiwayatKontrakPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
+  const p = paramFilter(await searchParams);
+  const profile = await getProfile();
+  const isSuperAdmin = profile.role === "superadmin";
   const supabase = await createClient();
+  const { data: daftarKategori } = await supabase.from("kategori").select("id, nama").order("id");
   await supabase.rpc("expire_kontrak");
 
   const { data } = await supabase
@@ -16,11 +23,12 @@ export default async function RiwayatKontrakPage() {
     .eq("status", "aktif")
     .eq("kontrak.status", "aktif")
     .order("nama");
-  const rows = (data ?? []) as unknown as Row[];
+  const rows = ((data ?? []) as unknown as Row[]).filter((r) => cocokDasar(r, p, { kategoriBerlaku: isSuperAdmin, jenisBawaan: "habis" }));
 
   return (
     <div className="space-y-4">
       <PageHeader title="Riwayat Kontrak" />
+      <FilterBar key={JSON.stringify(p)} p={p} kategori={isSuperAdmin ? daftarKategori ?? [] : undefined} resetHref="/kontrak" />
       <div className="card overflow-x-auto">
         <table className="min-w-full divide-y divide-line">
           <thead>
