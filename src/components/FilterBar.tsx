@@ -57,7 +57,7 @@ export default function FilterBar({ p, kategori, periode = ["masuk", "habis"], r
 /** Pilihan filter tambahan: kotak pilihan dengan nama parameter sendiri. */
 export function PilihanFilter({ name, label, options, nilai }: { name: string; label: string; options: { value: string; label: string }[]; nilai?: string }) {
   return (
-    <select className="input w-auto" name={name} defaultValue={nilai ?? ""} aria-label={label}>
+    <select className="input w-auto max-w-full" name={name} defaultValue={nilai ?? ""} aria-label={label}>
       <option value="">{label}</option>
       {options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
     </select>

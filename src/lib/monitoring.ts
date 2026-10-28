@@ -37,3 +37,14 @@ export function monitoringKurang(m: Record<string, unknown>): string[] {
 export function monitoringStatus(m: Record<string, unknown>): "Selesai" | "Belum Lengkap" {
   return monitoringKurang(m).length === 0 ? "Selesai" : "Belum Lengkap";
 }
+
+/** Pengelompokan isian per tahap, dipakai panel rincian di halaman Monitoring. */
+export const MONITORING_TAHAP: { nama: string; fields: string[] }[] = [
+  { nama: "Perpanjangan", fields: ["nde_konfirmasi", "nde_jawaban", "nde_laporan"] },
+  { nama: "Persetujuan", fields: ["usulan_remunerasi", "offering_letter", "izin_prinsip_nde", "izin_prinsip_manual"] },
+  { nama: "Penetapan", fields: ["sp", "skep"] },
+  { nama: "Penyampaian", fields: ["nde_penyampaian_unit_kerja", "nde_penyampaian_sdmo"] },
+  { nama: "Administrasi", fields: ["upload_ess", "data_diri"] },
+];
+
+export const MONITORING_LABEL: Record<string, string> = { ...MONITORING_CHECKBOX, ...MONITORING_TEXT };
