@@ -50,6 +50,9 @@ Kategori IDH memakai kolom standar, dengan **Level** berupa pilihan (Junior, Mid
 
 Kategori Inagov memakai kolom standar, dengan **Level** berupa pilihan (Senior, Middle, Junior); tidak ada tabel khusus.
 
+### Kuota Magang
+Menu **Kuota** (hanya Super Admin dan PIC Magang) mengatur batas peserta Magang yang aktif bersamaan per unit kerja di tiap penempatan (Jakarta atau Karawang), tabel `kuota_magang`. Hanya pasangan unit kerja dan penempatan yang memang ada yang dibuat. Satu peserta memakai satu slot selama seluruh masa kontraknya; jumlah terisi dihitung otomatis dari data karyawan (tidak disimpan), per bulan, dan bulan bisa digeser. Status: Tersedia, Hampir penuh (80% atau lebih), Penuh, Melebihi. Saat menambah peserta Magang, bila unit kerja belum punya kuota di penempatan itu atau penuh di salah satu bulan masa kontraknya, muncul peringatan, tetapi data tetap tersimpan. Nama unit kerja harus sama dengan isian Unit Kerja peserta (huruf besar-kecil diabaikan).
+
 Kolom khusus kategori lain didaftarkan di `src/lib/kategori-config.ts`.
 
 ### Dashboard "akan selesai"
@@ -92,7 +95,7 @@ src/
 ├── lib/                       # klien Supabase, auth, format tanggal
 └── middleware.ts              # menyegarkan sesi dan mengarahkan ke /login
 supabase/
-├── migrations/                # 0001 tabel+RLS, 0002 hak akses, 0003 logika kontrak/monitoring, 0004 kolom Magang, 0005 kolom TPBW/TPP, 0006 import Excel (sinkron massal), 0007 kolom BGN, 0008 aktifkan kembali
+├── migrations/                # 0001 tabel+RLS, 0002 hak akses, 0003 logika kontrak/monitoring, 0004 kolom Magang, 0005 kolom TPBW/TPP, 0006 import Excel (sinkron massal), 0007 kolom BGN, 0008 aktifkan kembali, 0009 kuota Magang
 └── seed.sql                   # daftar kategori
 scripts/create-users.mjs       # membuat akun awal
 legacy-laravel/                # kode Laravel lama (acuan)
@@ -105,7 +108,7 @@ Prasyarat: Node.js 20+ dan project Supabase.
 ### a. Siapkan Supabase
 
 1. Buat project di [supabase.com](https://supabase.com).
-2. Buka **SQL Editor**, jalankan berurutan: `supabase/migrations/0001_init.sql`, `0002_grants.sql`, `0003_parity_laravel.sql`, `0004_magang.sql`, `0005_tpbw.sql`, `0006_impor_foto.sql`, `0007_bgn.sql`, `0008_aktifkan_kembali.sql`, lalu `supabase/seed.sql`.
+2. Buka **SQL Editor**, jalankan berurutan: `supabase/migrations/0001_init.sql`, `0002_grants.sql`, `0003_parity_laravel.sql`, `0004_magang.sql`, `0005_tpbw.sql`, `0006_impor_foto.sql`, `0007_bgn.sql`, `0008_aktifkan_kembali.sql`, `0009_kuota.sql`, lalu `supabase/seed.sql`.
 3. Ambil `Project URL`, `anon key`, dan `service_role key` dari **Project Settings → API**.
 
 ### b. Konfigurasi dan jalankan

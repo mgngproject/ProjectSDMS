@@ -1,6 +1,6 @@
 "use client";
 
-import { BarChart3, CalendarClock, ChevronDown, FileText, LayoutDashboard, UserMinus, Users } from "lucide-react";
+import { BarChart3, CalendarClock, ChevronDown, FileText, Gauge, LayoutDashboard, UserMinus, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -12,6 +12,7 @@ const MENU = [
   { href: "/datadiri", label: "Data Diri", icon: BarChart3 },
   { href: "/monitoring", label: "Monitoring", icon: CalendarClock },
   { href: "/terminate", label: "Terminate", icon: UserMinus },
+  { href: "/kuota", label: "Kuota", icon: Gauge },
 ];
 
 export type KategoriMenu = { nama: string; jumlah: number };
@@ -21,6 +22,8 @@ type Props = {
   kategori?: KategoriMenu[];
   /** Sidebar tertutup (layar lebar): hanya ikon, tanpa tulisan dan submenu. */
   ringkas?: boolean;
+  /** Menu Kuota hanya untuk Super Admin dan PIC Magang. */
+  tampilKuota?: boolean;
 };
 
 const kelasItem = (aktif: boolean) =>
@@ -28,7 +31,7 @@ const kelasItem = (aktif: boolean) =>
     aktif ? "bg-primary-soft text-primary" : "text-muted hover:bg-soft hover:text-ink"
   }`;
 
-export default function SidebarNav({ kategori, ringkas = false }: Props) {
+export default function SidebarNav({ kategori, ringkas = false, tampilKuota = false }: Props) {
   const path = usePathname();
   const pilihan = useSearchParams().get("kategori");
   const diKaryawan = path === "/karyawan" || path.startsWith("/karyawan/");
@@ -40,7 +43,7 @@ export default function SidebarNav({ kategori, ringkas = false }: Props) {
 
   return (
     <nav className="flex gap-1 overflow-x-auto md:flex-col md:overflow-visible">
-      {MENU.map(({ href, label, icon: Icon }) => {
+      {MENU.filter((m) => m.href !== "/kuota" || tampilKuota).map(({ href, label, icon: Icon }) => {
         const aktif = path === href || path.startsWith(`${href}/`);
         const punyaSubmenu = href === "/karyawan" && kategori && kategori.length > 0;
         const submenuTampil = punyaSubmenu && !ringkas;
