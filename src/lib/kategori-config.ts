@@ -77,7 +77,7 @@ export const KATEGORI_CONFIG: Record<string, KategoriConfig> = {
       { name: "sbu", label: "SBU", type: "select", options: ["SBU CS", "SBU DIGITAL", "SBU HSS", "Support Bisnis"], required: true },
       { name: "tad", label: "TAD", type: "select", options: ["KCA", "DELTA", "BDP"], required: true },
     ],
-    kolomTabel: ["np", "nama", "sbu", "tad", "awal_kontrak", "akhir_kontrak", "kode_bagan", "unit_kerja", "kategori"],
+    kolomTabel: ["np", "nama", "sbu", "tad", "awal_kontrak", "kode_bagan", "unit_kerja", "kategori"],
   },
   "TPBW/TPP": {
     tabel: "karyawan_tpbw",
