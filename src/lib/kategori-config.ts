@@ -74,7 +74,7 @@ export const KATEGORI_CONFIG: Record<string, KategoriConfig> = {
       { name: "status_magang", label: "Status", type: "select", options: ["Baru", "Alih Status", "Perpanjangan Maganghub"], required: true },
       { name: "awal_pendidikan", label: "Awal Pendidikan", type: "date" },
       { name: "akhir_pendidikan", label: "Akhir Pendidikan", type: "date" },
-      { name: "catatan_titipan", label: "Catatan Titipan", type: "textarea" },
+      { name: "catatan_titipan", label: "Referensi", type: "text" },
     ],
     kolomTabel: [
       "np", "nama", "jenis", "institusi", "jurusan", "awal_kontrak", "akhir_kontrak", "kode_bagan", "unit_kerja",
