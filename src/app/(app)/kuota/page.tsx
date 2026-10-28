@@ -16,8 +16,8 @@ const CHIP = { success: "bg-success-soft text-success", warning: "bg-warning-sof
 export default async function KuotaPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
   const sp = await searchParams;
   const profile = await getProfile();
-  // Kuota hanya untuk Super Admin dan PIC Magang
-  if (profile.role !== "superadmin" && profile.kategori?.nama !== "Magang") redirect("/dashboard");
+  // Kuota hanya untuk PIC Magang
+  if (profile.role === "superadmin" || profile.kategori?.nama !== "Magang") redirect("/dashboard");
 
   const supabase = await createClient();
   const [kuota, peserta] = await Promise.all([ambilKuota(supabase), ambilPesertaMagang(supabase)]);

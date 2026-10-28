@@ -22,7 +22,7 @@ type Props = {
   kategori?: KategoriMenu[];
   /** Sidebar tertutup (layar lebar): hanya ikon, tanpa tulisan dan submenu. */
   ringkas?: boolean;
-  /** Menu Kuota hanya untuk Super Admin dan PIC Magang. */
+  /** Menu Kuota hanya untuk PIC Magang. */
   tampilKuota?: boolean;
 };
 
