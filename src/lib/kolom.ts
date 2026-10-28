@@ -24,6 +24,7 @@ export function nilaiKolom(row: BarisKaryawan, key: string, config: KategoriConf
   const field = config?.fields.find((f) => f.name === key);
   if (field) {
     const v = row.detail?.[key] ?? null;
+    if (v != null && field.type === "number") return format ? formatRupiah(Number(v)) : Number(v);
     return v && field.type === "date" && format ? formatTanggal(v) : v;
   }
   switch (key) {

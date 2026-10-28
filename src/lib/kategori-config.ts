@@ -91,7 +91,12 @@ export const KATEGORI_CONFIG: Record<string, KategoriConfig> = {
       { name: "pemberian_pulsa", label: "Pemberian Pulsa", type: "number" },
       { name: "insentif_bantuan_transport", label: "Insentif dan Bantuan Transport", type: "number" },
     ],
-    kolomTabel: ["np", "nama", "sbu", "tad", "awal_kontrak", "kode_bagan", "unit_kerja", "kategori"],
+    kolomTabel: [
+      "np", "nama", "sbu", "tad", "awal_kontrak", "kode_bagan", "unit_kerja", "kategori",
+      "upah_per_bulan", "jamsostek", "bpjs_kesehatan", "kak", "tunjangan_keterampilan", "tunjangan_transportasi",
+      "tarif_premi_gilir", "uang_makan_ramadhan", "perlengkapan_sarana_kerja", "tunjangan_kesiagaan",
+      "pemberian_pulsa", "insentif_bantuan_transport",
+    ],
   },
   "TPBW/TPP": {
     tabel: "karyawan_tpbw",
