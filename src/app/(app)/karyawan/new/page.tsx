@@ -14,7 +14,7 @@ export default async function NewKaryawanPage({ searchParams }: { searchParams: 
   const bagan = await ambilBagan(supabase, true);
 
   return (
-    <div className="space-y-4">
+    <div className="mx-auto w-full max-w-3xl space-y-4">
       <PageHeader title="Tambah Karyawan" />
       <Flash error={error} />
       <KaryawanForm
