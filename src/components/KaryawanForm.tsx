@@ -19,9 +19,10 @@ type Props = {
 
 export default function KaryawanForm({ action, batal, ...fields }: Props) {
   return (
-    <form action={action} className="card grid max-w-3xl gap-4 p-5 sm:grid-cols-2">
+    <form action={action} className="card p-5">
       <KaryawanFields {...fields} />
-      <div className="flex gap-2 sm:col-span-2">
+      {/* Tombol menempel di bawah layar saat form panjang digulir */}
+      <div className="sticky bottom-0 -mx-5 -mb-5 mt-5 flex gap-2 rounded-b-2xl border-t border-line bg-card/90 px-5 py-3 backdrop-blur">
         <button className="btn" type="submit">Simpan</button>
         <a className="btn-secondary" href={batal}>Batal</a>
       </div>
