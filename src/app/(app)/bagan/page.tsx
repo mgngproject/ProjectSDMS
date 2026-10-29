@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import ConfirmSubmit from "@/components/ConfirmSubmit";
+import GantiKodeBagan from "@/components/GantiKodeBagan";
 import Flash from "@/components/Flash";
 import ImporBaganForm from "@/components/ImporBaganForm";
 import PageHeader from "@/components/PageHeader";
@@ -8,20 +9,19 @@ import { getProfile } from "@/lib/auth";
 import { cariBagan, normKode } from "@/lib/bagan";
 import { ambilBagan } from "@/lib/bagan-data";
 import { createClient } from "@/lib/supabase/server";
-import { hapusBagan, importBagan, samakanSemuaUnit, tambahBagan, ubahBagan, ubahStatusBagan } from "./actions";
+import { gantiKodeBagan, hapusBagan, importBagan, samakanSemuaUnit, tambahBagan, ubahBagan, ubahStatusBagan } from "./actions";
 
-type Pegawai = { id: number; np: string; nama: string; kode_bagan: string | null; unit_kerja: string | null; kategori: { nama: string } | null };
+type Pegawai = { id: number; np: string; nama: string; status: string; kode_bagan: string | null; unit_kerja: string | null; kategori: { nama: string } | null };
 
 const BATAS_DAFTAR = 100;
 
-/** Seluruh karyawan aktif, dibaca per halaman 1000 baris karena batas bawaan Supabase. */
-async function semuaKaryawanAktif(supabase: Awaited<ReturnType<typeof createClient>>): Promise<Pegawai[]> {
+/** Seluruh karyawan (semua status), dibaca per halaman 1000 baris karena batas bawaan Supabase. */
+async function semuaKaryawan(supabase: Awaited<ReturnType<typeof createClient>>): Promise<Pegawai[]> {
   const hasil: Pegawai[] = [];
   for (let dari = 0; ; dari += 1000) {
     const { data } = await supabase
       .from("karyawan")
-      .select("id, np, nama, kode_bagan, unit_kerja, kategori:kategori_id(nama)")
-      .eq("status", "aktif")
+      .select("id, np, nama, status, kode_bagan, unit_kerja, kategori:kategori_id(nama)")
       .order("id")
       .range(dari, dari + 999);
     const bagian = (data ?? []) as unknown as Pegawai[];
@@ -37,7 +37,14 @@ export default async function BaganPage({ searchParams }: { searchParams: Promis
   if (profile.role !== "superadmin") redirect("/dashboard");
 
   const supabase = await createClient();
-  const [daftar, pegawai] = await Promise.all([ambilBagan(supabase), semuaKaryawanAktif(supabase)]);
+  const [daftar, semuaPegawai] = await Promise.all([ambilBagan(supabase), semuaKaryawan(supabase)]);
+  const pegawai = semuaPegawai.filter((p) => p.status === "aktif");
+  // Pemakai kode dari semua status, untuk pratinjau Ganti kode (yang diganti kodenya termasuk yang sudah keluar)
+  const pemakaiSemua = new Map<string, Pegawai[]>();
+  for (const p of semuaPegawai) {
+    const k = normKode(p.kode_bagan);
+    if (k) pemakaiSemua.set(k, [...(pemakaiSemua.get(k) ?? []), p]);
+  }
   const q = (sp.q ?? "").trim().toLowerCase();
 
   const pemakai = new Map<string, number>();
@@ -116,6 +123,16 @@ export default async function BaganPage({ searchParams }: { searchParams: Promis
                 <td className="td tabular-nums">{pemakai.get(b.kode) ?? 0}</td>
                 <td className="td"><span className={b.aktif ? "pill-success" : "pill-warning"}>{b.aktif ? "Aktif" : "Tidak aktif"}</span></td>
                 <td className="td">
+                  <div className="flex gap-2">
+                  <GantiKodeBagan
+                    action={gantiKodeBagan.bind(null, b.id)}
+                    kode={b.kode}
+                    nama={b.nama_unit}
+                    jumlah={(pemakaiSemua.get(b.kode) ?? []).length}
+                    contoh={[...(pemakaiSemua.get(b.kode) ?? [])].sort((x, y) => Number(y.status === "aktif") - Number(x.status === "aktif")).slice(0, 6).map((x) => x.nama)}
+                    bawahan={daftar.filter((x) => normKode(x.induk_kode) === b.kode).map((x) => ({ kode: x.kode, nama: x.nama_unit }))}
+                    semuaKode={daftar.map((x) => x.kode)}
+                  />
                   <form className="flex gap-2">
                     <ConfirmSubmit
                       label={b.aktif ? "Nonaktifkan" : "Aktifkan"}
@@ -125,6 +142,7 @@ export default async function BaganPage({ searchParams }: { searchParams: Promis
                     />
                     <ConfirmSubmit label="Hapus" message={`Hapus kode ${b.kode}?`} formAction={hapusBagan.bind(null, b.id)} />
                   </form>
+                  </div>
                 </td>
               </tr>
             ))}
