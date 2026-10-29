@@ -72,7 +72,11 @@ export async function ubahAkun(id: string, formData: FormData) {
   if (akses.error) selesai("error", akses.error);
   if (id === saya.id && akses.role !== "superadmin") selesai("error", "Anda tidak dapat mencabut peran Super Admin dari akun Anda sendiri.");
 
-  const { error } = await createAdminClient().from("profiles").update({ nama, role: akses.role, kategori_id: akses.kategori_id }).eq("id", id);
+  // upsert: akun Auth yang belum punya profil ikut dilengkapi
+  const { error } = await createAdminClient().from("profiles").upsert(
+    { id, nama, role: akses.role, kategori_id: akses.kategori_id },
+    { onConflict: "id", ignoreDuplicates: false },
+  );
   if (error) selesai("error", pesanGalat(error));
   selesai("ok", "Akun disimpan. Perubahan akses berlaku saat pengguna memuat ulang halaman.");
 }

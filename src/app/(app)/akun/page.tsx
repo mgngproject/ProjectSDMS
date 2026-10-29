@@ -7,7 +7,7 @@ import { adminTersedia, createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { ubahAkun, resetPassword, tambahAkun, ubahStatusAkun } from "./actions";
 
-type Baris = { id: string; email: string; nonaktif: boolean; nama: string; role: "admin" | "superadmin"; kategori_id: number | null; terakhir: string | null };
+type Baris = { id: string; email: string; nonaktif: boolean; nama: string; role: "admin" | "superadmin"; kategori_id: number | null; terakhir: string | null; adaProfil: boolean };
 
 const aksesNilai = (r: { role: string; kategori_id: number | null }) => (r.role === "superadmin" ? "super" : String(r.kategori_id ?? ""));
 
@@ -43,7 +43,6 @@ export default async function AkunPage({ searchParams }: { searchParams: Promise
           adaProfil: !!p,
         };
       })
-      .filter((r) => r.adaProfil)
       .sort((a, b) => (a.role === b.role ? a.email.localeCompare(b.email) : a.role === "superadmin" ? -1 : 1));
   }
 
@@ -87,12 +86,14 @@ export default async function AkunPage({ searchParams }: { searchParams: Promise
                     <td className="td font-medium">
                       {r.email}
                       {r.id === profile.id && <span className="pill ml-2 bg-primary-soft text-primary">Anda</span>}
-                      <div className="text-xs font-normal text-muted">{r.role === "superadmin" ? "Super Admin" : `Admin ${namaKategori.get(r.kategori_id ?? 0) ?? "-"}`}</div>
+                      <div className="text-xs font-normal text-muted">
+                        {!r.adaProfil ? <span className="text-danger">Belum punya profil: isi nama dan akses lalu Simpan</span> : r.role === "superadmin" ? "Super Admin" : `Admin ${namaKategori.get(r.kategori_id ?? 0) ?? "-"}`}
+                      </div>
                     </td>
                     <td className="td">
                       <form action={ubahAkun.bind(null, r.id)} className="flex flex-wrap items-center gap-2">
                         <input className="input min-w-40 flex-1" name="nama" defaultValue={r.nama} aria-label={`Nama ${r.email}`} required />
-                        <select className="input !w-auto" name="akses" defaultValue={aksesNilai(r)} aria-label={`Akses ${r.email}`} required>{opsiAkses}</select>
+                        <select className="input !w-auto" name="akses" defaultValue={r.adaProfil ? aksesNilai(r) : ""} aria-label={`Akses ${r.email}`} required>{opsiAkses}</select>
                         <button className="btn-secondary !px-3 !py-1.5" type="submit">Simpan</button>
                       </form>
                     </td>
