@@ -63,6 +63,23 @@ export async function ubahBagan(id: number, formData: FormData) {
   selesai("ok", `Kode ${bagan.kode} disimpan. Unit kerja karyawan ikut disamakan.`);
 }
 
+/** Mengganti kode satu unit; kode di daftar, atasan unit bawahan, dan kode semua karyawan berubah bersama (fungsi database, atomik). */
+export async function gantiKodeBagan(id: number, formData: FormData) {
+  await pastikanSuperAdmin();
+  const baru = normKode(text(formData, "kode_baru"));
+  if (!baru) selesai("error", "Kode baru wajib diisi.");
+  const supabase = await createClient();
+  const { data: bagan } = await supabase.from("bagan").select("kode").eq("id", id).maybeSingle();
+  if (!bagan) return selesai("error", "Kode tidak ditemukan.");
+  const { data, error } = await supabase.rpc("ganti_kode_bagan", { p_lama: bagan.kode, p_baru: baru });
+  if (error) {
+    if (error.code === "PGRST202") selesai("error", "Fungsi ganti kode belum ada di database. Jalankan migrasi 0012_ganti_kode_bagan.sql di Supabase SQL Editor.");
+    selesai("error", error.message);
+  }
+  const hasil = (data ?? {}) as { karyawan?: number; bawahan?: number };
+  selesai("ok", `Kode ${bagan.kode} diganti menjadi ${baru}. ${hasil.karyawan ?? 0} karyawan dan ${hasil.bawahan ?? 0} unit bawahan ikut diperbarui.`);
+}
+
 export async function ubahStatusBagan(id: number, aktif: boolean, _formData: FormData) {
   await pastikanSuperAdmin();
   const supabase = await createClient();

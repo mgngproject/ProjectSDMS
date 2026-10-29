@@ -36,7 +36,7 @@ export default async function EditKaryawanPage({
     : { data: null };
 
   return (
-    <div className="space-y-4">
+    <div className="mx-auto w-full max-w-3xl space-y-4">
       <PageHeader title="Ubah Karyawan" />
       <Flash error={error} />
       <KaryawanForm
