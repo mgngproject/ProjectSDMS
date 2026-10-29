@@ -1,6 +1,7 @@
 import { CalendarClock, ChevronLeft, ChevronRight, ClipboardList, FolderOpen, Info, UserMinus, UserPlus, Users } from "lucide-react";
 import Link from "next/link";
 import { GrafikBulanan, GrafikKampus, GrafikKategori, GrafikPendidikan, GrafikSebaran } from "@/components/DashboardCharts";
+import DashboardSuperAdmin from "@/components/DashboardSuperAdmin";
 import PageHeader from "@/components/PageHeader";
 import StatCard from "@/components/StatCard";
 import { getProfile } from "@/lib/auth";
@@ -21,6 +22,17 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const profile = await getProfile();
   const isSuperAdmin = profile.role === "superadmin";
   const supabase = await createClient();
+
+  // Super Admin memakai dashboard analitik (Ringkasan dan Profil); dashboard PIC di bawah tidak berubah
+  if (isSuperAdmin) {
+    return (
+      <div className="space-y-5">
+        <PageHeader title="Dashboard" />
+        <DashboardSuperAdmin supabase={supabase} />
+      </div>
+    );
+  }
+
   await supabase.rpc("expire_kontrak");
 
   const sekarang = hariIni();

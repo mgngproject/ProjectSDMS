@@ -17,6 +17,10 @@
   --danger-soft: 253 228 234;
   --warning: 176 118 16;
   --warning-soft: 252 239 214;
+  /* Warna grafik: urutan tetap per slot, sudah dicek untuk buta warna dan kontras (terang dan gelap) */
+  --chart-1: #2a78d6; --chart-2: #eb6834; --chart-3: #1baf7a; --chart-4: #eda100;
+  --chart-5: #e87ba4; --chart-6: #008300; --chart-7: #6250d6; --chart-lain: #898781;
+  --chart-grid: #e1e0d9; --chart-axis: #c3c2b7; --chart-tick: #898781;
 }
 
 .dark {
@@ -34,6 +38,9 @@
   --danger-soft: 66 28 40;
   --warning: 240 180 70;
   --warning-soft: 62 46 18;
+  --chart-1: #3987e5; --chart-2: #d95926; --chart-3: #199e70; --chart-4: #c98500;
+  --chart-5: #d55181; --chart-6: #008300; --chart-7: #9085e9; --chart-lain: #898781;
+  --chart-grid: #2c2c2a; --chart-axis: #383835; --chart-tick: #898781;
 }
 
 @layer base {
