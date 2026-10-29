@@ -68,6 +68,9 @@ Form Tambah dan Ubah karyawan berada di tengah halaman dengan judul sejajar, isi
 ### Filter
 Karyawan, Kontrak, Data Diri, Monitoring, dan Terminate memakai baris filter yang sama (`src/components/FilterBar.tsx`): kategori (Super Admin), cari nama/NP, periode (kontrak masuk, kontrak habis, atau tanggal keluar per bulan dan tahun), filter khusus halaman, tombol **Cari** dan **Reset**. Filter khusus: Karyawan (kolom khusus kategori seperti penempatan, status, level), Data Diri (jenjang, kelengkapan), Monitoring (status, berkas yang belum ada), Terminate (alasan keluar). Pilihan filter tersimpan di alamat halaman, dan Export Excel dan PDF mengikuti filter yang sedang dipakai.
 
+### Ikon tab
+Ikon tab browser memakai bunga logo Peruri (`src/app/icon.png`, `apple-icon.png`, dan `favicon.ico`) di atas latar putih bersudut membulat agar terlihat di tab terang maupun gelap.
+
 ### Sidebar
 Sidebar menampilkan logo Peruri di atas dan bisa dibuka-tutup lewat tombol di sebelahnya (layar lebar). Saat tertutup hanya ikon yang tampil dan logo menjadi bunga saja; pilihan tersimpan di cookie `sidebar`. Logo ada di `public/` (versi biru-ungu untuk mode terang, putih untuk mode gelap, masing-masing penuh dan hanya bunga).
 
