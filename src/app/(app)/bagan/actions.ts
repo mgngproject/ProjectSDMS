@@ -110,7 +110,10 @@ export async function importBagan(formData: FormData) {
   if (rows.length === 0) selesai("error", "File tidak berisi data.");
   if (rows.length > BATAS_BARIS * 5) selesai("error", `Terlalu banyak baris (maksimal ${BATAS_BARIS * 5}).`);
 
+  const ganti = formData.get("ganti") === "1";
   const { data, galat } = bacaBagan(rows);
+  // Mengganti seluruh daftar menghapus kode yang tidak ada di file; file yang sebagian barisnya bermasalah tidak boleh dipakai untuk itu
+  if (ganti && galat.length > 0) selesai("error", `Daftar tidak diganti karena ada baris bermasalah. Perbaiki dulu: ${galat.slice(0, 5).join("; ")}${galat.length > 5 ? "; ..." : ""}`);
   if (data.length === 0) selesai("error", `Tidak ada baris yang bisa dibaca. Judul kolom yang dikenali: Kode, Nama Unit, Atasan. ${galat.slice(0, 5).join("; ")}`);
 
   const supabase = await createClient();
@@ -122,13 +125,25 @@ export async function importBagan(formData: FormData) {
   });
 
   for (let i = 0; i < data.length; i += 200) {
+    // Saat mengganti seluruh daftar, semua kode di file juga diaktifkan kembali
     const { error } = await supabase
       .from("bagan")
-      .upsert(data.slice(i, i + 200).map(({ kode, nama_unit, induk_kode }) => ({ kode, nama_unit, induk_kode })), { onConflict: "kode" });
+      .upsert(data.slice(i, i + 200).map(({ kode, nama_unit, induk_kode }) => ({ kode, nama_unit, induk_kode, ...(ganti ? { aktif: true } : {}) })), { onConflict: "kode" });
     if (error) selesai("error", `Gagal menyimpan: ${pesanGalat(error)}`);
   }
   for (const d of [...baru, ...berubah]) await samakanUnit(supabase, d.kode, d.nama_unit);
 
+  let dihapus = 0;
+  if (ganti) {
+    const dalamFile = new Set(data.map((d) => d.kode));
+    const lama = [...ada.keys()].filter((k) => !dalamFile.has(k));
+    for (let i = 0; i < lama.length; i += 200) {
+      const { error } = await supabase.from("bagan").delete().in("kode", lama.slice(i, i + 200));
+      if (error) selesai("error", `Kode baru sudah disimpan, tetapi kode lama gagal dihapus: ${pesanGalat(error)}`);
+    }
+    dihapus = lama.length;
+  }
+
   const catatan = galat.length ? ` ${galat.length} baris dilewati: ${galat.slice(0, 5).join("; ")}${galat.length > 5 ? "; ..." : ""}` : "";
-  selesai(galat.length ? "error" : "ok", `${baru.length} kode baru, ${berubah.length} diperbarui, ${data.length - baru.length - berubah.length} tidak berubah.${catatan}`);
+  selesai(galat.length ? "error" : "ok", `${baru.length} kode baru, ${berubah.length} diperbarui, ${data.length - baru.length - berubah.length} tidak berubah${ganti ? `, ${dihapus} kode lama dihapus` : ""}.${ganti && dihapus ? " Karyawan yang masih memakai kode lama muncul di Perlu dibereskan." : ""}${catatan}`);
 }
