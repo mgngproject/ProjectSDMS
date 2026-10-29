@@ -1,8 +1,8 @@
-import { FileSpreadsheet } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import ConfirmSubmit from "@/components/ConfirmSubmit";
 import Flash from "@/components/Flash";
+import ImporBaganForm from "@/components/ImporBaganForm";
 import PageHeader from "@/components/PageHeader";
 import { getProfile } from "@/lib/auth";
 import { cariBagan, normKode } from "@/lib/bagan";
@@ -59,16 +59,7 @@ export default async function BaganPage({ searchParams }: { searchParams: Promis
   return (
     <div className="space-y-4">
       <PageHeader title="Kode Bagan">
-        <details className="group relative">
-          <summary className="btn-secondary cursor-pointer list-none"><FileSpreadsheet size={16} /> Import Excel</summary>
-          <form action={importBagan} className="card absolute right-0 z-20 mt-2 w-80 space-y-3 p-4">
-            <p className="text-sm text-muted">
-              Judul kolom: <b>Kode</b>, <b>Nama Unit</b>, dan (opsional) <b>Atasan</b>. Kode yang sudah ada diperbarui, yang baru ditambahkan. Unit kerja karyawan ikut disamakan.
-            </p>
-            <input className="input" name="file" type="file" accept=".xlsx,.xls,.csv" required aria-label="File daftar bagan" />
-            <button className="btn" type="submit">Import</button>
-          </form>
-        </details>
+        <ImporBaganForm action={importBagan} jumlahKode={daftar.length} />
       </PageHeader>
       <Flash ok={sp.ok} error={sp.error} />
 
