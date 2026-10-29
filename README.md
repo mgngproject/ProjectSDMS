@@ -150,7 +150,7 @@ Akun yang passwordnya tidak diisi akan dilewati. Email akun ada di `scripts/crea
 
 4. Klik **Deploy**. Setiap push ke `main` akan men-deploy ulang otomatis.
 
-`SUPABASE_SERVICE_ROLE_KEY` **jangan** dimasukkan ke Vercel. Kunci itu melewati RLS dan hanya dipakai skrip lokal.
+Menu **Akun** (hanya Super Admin) membuat dan mengelola akun dari aplikasi, dan butuh `SUPABASE_SERVICE_ROLE_KEY` di Vercel (Settings → Environment Variables, pilih Production dan Preview, tanpa awalan `NEXT_PUBLIC_`). Kunci itu melewati RLS: hanya dibaca server action yang lebih dulu memastikan penggunanya Super Admin, dan tidak pernah dikirim ke browser. Tanpa kunci ini menu Akun menampilkan petunjuk dan fitur lain tetap berjalan.
 
 ## 7. Perintah
 

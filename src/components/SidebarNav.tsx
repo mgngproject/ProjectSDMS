@@ -1,6 +1,6 @@
 "use client";
 
-import { BarChart3, CalendarClock, ChevronDown, FileText, Gauge, LayoutDashboard, Network, UserMinus, Users } from "lucide-react";
+import { BarChart3, CalendarClock, ChevronDown, FileText, Gauge, LayoutDashboard, Network, UserCog, UserMinus, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -14,6 +14,7 @@ const MENU = [
   { href: "/terminate", label: "Terminate", icon: UserMinus },
   { href: "/kuota", label: "Kuota", icon: Gauge },
   { href: "/bagan", label: "Kode Bagan", icon: Network },
+  { href: "/akun", label: "Akun", icon: UserCog },
 ];
 
 export type KategoriMenu = { nama: string; jumlah: number };
@@ -27,6 +28,8 @@ type Props = {
   tampilKuota?: boolean;
   /** Menu Kode Bagan hanya untuk Super Admin. */
   tampilBagan?: boolean;
+  /** Menu Akun hanya untuk Super Admin. */
+  tampilAkun?: boolean;
 };
 
 const kelasItem = (aktif: boolean) =>
@@ -34,7 +37,7 @@ const kelasItem = (aktif: boolean) =>
     aktif ? "bg-primary-soft text-primary" : "text-muted hover:bg-soft hover:text-ink"
   }`;
 
-export default function SidebarNav({ kategori, ringkas = false, tampilKuota = false, tampilBagan = false }: Props) {
+export default function SidebarNav({ kategori, ringkas = false, tampilKuota = false, tampilBagan = false, tampilAkun = false }: Props) {
   const path = usePathname();
   const pilihan = useSearchParams().get("kategori");
   const diKaryawan = path === "/karyawan" || path.startsWith("/karyawan/");
@@ -46,7 +49,7 @@ export default function SidebarNav({ kategori, ringkas = false, tampilKuota = fa
 
   return (
     <nav className="flex gap-1 overflow-x-auto md:flex-col md:overflow-visible">
-      {MENU.filter((m) => (m.href !== "/kuota" || tampilKuota) && (m.href !== "/bagan" || tampilBagan)).map(({ href, label, icon: Icon }) => {
+      {MENU.filter((m) => (m.href !== "/kuota" || tampilKuota) && (m.href !== "/bagan" || tampilBagan) && (m.href !== "/akun" || tampilAkun)).map(({ href, label, icon: Icon }) => {
         const aktif = path === href || path.startsWith(`${href}/`);
         const punyaSubmenu = href === "/karyawan" && kategori && kategori.length > 0;
         const submenuTampil = punyaSubmenu && !ringkas;
