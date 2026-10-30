@@ -58,7 +58,7 @@ export async function tambahAkun(formData: FormData) {
   });
   if (profError) {
     await admin.auth.admin.deleteUser(data!.user!.id);
-    selesai("error", `Gagal menyimpan profil: ${pesanGalat(profError)}`);
+    selesai("error", `Gagal menyimpan profil: ${pesanGalat(profError)}${profError.code === "42501" ? " Jalankan migrasi 0022_akun_service_role.sql di Supabase." : ""}`);
   }
   selesai("ok", `Akun ${email} dibuat.`);
 }

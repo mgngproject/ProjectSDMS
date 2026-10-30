@@ -22,14 +22,17 @@ export default async function AkunPage({ searchParams }: { searchParams: Promise
   const namaKategori = new Map((kategori ?? []).map((k) => [k.id, k.nama]));
 
   let baris: Baris[] = [];
+  let galatBaca: string | null = null;
   if (adminTersedia()) {
     const admin = createAdminClient();
-    const [{ data: users }, { data: profiles }] = await Promise.all([
+    const [{ data: users, error: galatUser }, { data: profiles, error: galatProfil }] = await Promise.all([
       admin.auth.admin.listUsers({ page: 1, perPage: 1000 }),
       admin.from("profiles").select("id, nama, role, kategori_id"),
     ]);
+    if (galatUser) galatBaca = `Gagal membaca daftar akun: ${galatUser.message}`;
+    else if (galatProfil) galatBaca = `Gagal membaca profil: ${galatProfil.message}${galatProfil.code === "42501" ? " Jalankan migrasi 0022_akun_service_role.sql di Supabase." : ""}`;
     const profil = new Map((profiles ?? []).map((p) => [p.id, p]));
-    baris = (users?.users ?? [])
+    baris = galatBaca ? [] : (users?.users ?? [])
       .map((u) => {
         const p = profil.get(u.id);
         return {
@@ -57,7 +60,7 @@ export default async function AkunPage({ searchParams }: { searchParams: Promise
   return (
     <div className="space-y-4">
       <PageHeader title="Akun" />
-      <Flash ok={sp.ok} error={sp.error} />
+      <Flash ok={sp.ok} error={sp.error ?? galatBaca ?? undefined} />
 
       {!adminTersedia() ? (
         <p className="rounded-xl bg-warning-soft p-4 text-sm text-warning">
