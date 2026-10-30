@@ -11,6 +11,7 @@ type Props = {
   kategori?: KategoriMenu[];
   tampilKuota?: boolean;
   tampilBagan?: boolean;
+  tampilAkun?: boolean;
   nama: string;
   peran: string;
   /** Keadaan awal dari cookie, agar halaman langsung tampil sesuai pilihan terakhir tanpa berkedip. */
@@ -22,7 +23,7 @@ type Props = {
  * Sidebar: logo Peruri di atas, menu, dan kartu pengguna. Pada layar lebar bisa dibuka-tutup;
  * tertutup hanya menampilkan ikon dan logo berupa bunga saja. Pada layar kecil selalu penuh.
  */
-export default function Sidebar({ kategori, tampilKuota, tampilBagan, nama, peran, awalTertutup, logout }: Props) {
+export default function Sidebar({ kategori, tampilKuota, tampilBagan, tampilAkun, nama, peran, awalTertutup, logout }: Props) {
   const [tertutup, setTertutup] = useState(awalTertutup);
 
   function ganti() {
@@ -64,7 +65,7 @@ export default function Sidebar({ kategori, tampilKuota, tampilBagan, nama, pera
       </div>
 
       <Suspense fallback={null}>
-        <SidebarNav kategori={kategori} ringkas={tertutup} tampilKuota={tampilKuota} tampilBagan={tampilBagan} />
+        <SidebarNav kategori={kategori} ringkas={tertutup} tampilKuota={tampilKuota} tampilBagan={tampilBagan} tampilAkun={tampilAkun} />
       </Suspense>
 
       <div className={`mt-auto flex items-center gap-3 rounded-2xl bg-primary-soft p-3 ${tertutup ? "md:flex-col md:p-2" : ""}`}>

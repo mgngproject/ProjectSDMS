@@ -106,7 +106,7 @@ src/
 ├── lib/                       # klien Supabase, auth, format tanggal
 └── middleware.ts              # menyegarkan sesi dan mengarahkan ke /login
 supabase/
-├── migrations/                # 0001 tabel+RLS, 0002 hak akses, 0003 logika kontrak/monitoring, 0004 kolom Magang, 0005 kolom TPBW/TPP, 0006 import Excel (sinkron massal), 0007 kolom BGN, 0008 aktifkan kembali, 0009 kuota Magang, 0010 kuota hanya untuk PIC Magang, 0011 daftar bagan, 0012 ganti kode bagan, 0011 kolom IDE, 0012 salinan data IDE, 0013 hapus status IDE, 0014 hapus salinan status, 0015 tabel IDH, 0016 hapus faskes IDE, 0017 hapus faskes IDH, 0018 kolom TAD, 0019 salinan data TAD, 0020 pisah DELTA dan BDP, 0021 remunerasi TAD
+├── migrations/                # 0001 tabel+RLS, 0002 hak akses, 0003 logika kontrak/monitoring, 0004 kolom Magang, 0005 kolom TPBW/TPP, 0006 import Excel (sinkron massal), 0007 kolom BGN, 0008 aktifkan kembali, 0009 kuota Magang, 0010 kuota hanya untuk PIC Magang, 0011 daftar bagan, 0012 ganti kode bagan, 0011 kolom IDE, 0012 salinan data IDE, 0013 hapus status IDE, 0014 hapus salinan status, 0015 tabel IDH, 0016 hapus faskes IDE, 0017 hapus faskes IDH, 0018 kolom TAD, 0019 salinan data TAD, 0020 pisah DELTA dan BDP, 0021 remunerasi TAD, 0022 hak service_role untuk menu Akun
 └── seed.sql                   # daftar kategori
 scripts/create-users.mjs       # membuat akun awal
 legacy-laravel/                # kode Laravel lama (acuan)
@@ -119,7 +119,7 @@ Prasyarat: Node.js 20+ dan project Supabase.
 ### a. Siapkan Supabase
 
 1. Buat project di [supabase.com](https://supabase.com).
-2. Buka **SQL Editor**, jalankan berurutan: `supabase/migrations/0001_init.sql`, `0002_grants.sql`, `0003_parity_laravel.sql`, `0004_magang.sql`, `0005_tpbw.sql`, `0006_impor_foto.sql`, `0007_bgn.sql`, `0008_aktifkan_kembali.sql`, `0009_kuota.sql`, `0010_kuota_hanya_pic.sql`, `0011_ide.sql`, `0012_ide_salin.sql`, `0013_ide_hapus_status.sql`, `0014_ide_hapus_salinan_status.sql`, `0015_idh.sql`, `0016_ide_hapus_faskes.sql`, `0017_idh_hapus_faskes.sql`, `0018_tad.sql`, `0019_tad_salin.sql`, `0020_tad_pisah.sql`, `0021_tad_remunerasi.sql`, lalu `supabase/seed.sql`.
+2. Buka **SQL Editor**, jalankan berurutan: `supabase/migrations/0001_init.sql`, `0002_grants.sql`, `0003_parity_laravel.sql`, `0004_magang.sql`, `0005_tpbw.sql`, `0006_impor_foto.sql`, `0007_bgn.sql`, `0008_aktifkan_kembali.sql`, `0009_kuota.sql`, `0010_kuota_hanya_pic.sql`, `0011_ide.sql`, `0012_ide_salin.sql`, `0013_ide_hapus_status.sql`, `0014_ide_hapus_salinan_status.sql`, `0015_idh.sql`, `0016_ide_hapus_faskes.sql`, `0017_idh_hapus_faskes.sql`, `0018_tad.sql`, `0019_tad_salin.sql`, `0020_tad_pisah.sql`, `0021_tad_remunerasi.sql`, `0022_akun_service_role.sql`, lalu `supabase/seed.sql`.
 3. Ambil `Project URL`, `anon key`, dan `service_role key` dari **Project Settings → API**.
 
 ### b. Konfigurasi dan jalankan
@@ -157,7 +157,7 @@ Akun yang passwordnya tidak diisi akan dilewati. Email akun ada di `scripts/crea
 
 4. Klik **Deploy**. Setiap push ke `main` akan men-deploy ulang otomatis.
 
-`SUPABASE_SERVICE_ROLE_KEY` **jangan** dimasukkan ke Vercel. Kunci itu melewati RLS dan hanya dipakai skrip lokal.
+Menu **Akun** (hanya Super Admin) membuat dan mengelola akun dari aplikasi, dan butuh `SUPABASE_SERVICE_ROLE_KEY` di Vercel (Settings → Environment Variables, pilih Production dan Preview, tanpa awalan `NEXT_PUBLIC_`). Kunci itu melewati RLS: hanya dibaca server action yang lebih dulu memastikan penggunanya Super Admin, dan tidak pernah dikirim ke browser. Tanpa kunci ini menu Akun menampilkan petunjuk dan fitur lain tetap berjalan.
 
 ## 7. Perintah
 
