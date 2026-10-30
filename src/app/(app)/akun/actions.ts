@@ -98,3 +98,11 @@ export async function ubahStatusAkun(id: string, aktif: boolean, _formData: Form
   if (error) selesai("error", `Gagal mengubah status: ${error.message}`);
   selesai("ok", aktif ? "Akun diaktifkan." : "Akun dinonaktifkan. Sesi yang sedang berjalan berakhir paling lama sekitar 1 jam.");
 }
+
+export async function keluarkanSesi(id: string, _formData: FormData) {
+  const saya = await pastikanSuperAdmin();
+  if (id === saya.id) selesai("error", "Anda tidak dapat mengeluarkan sesi Anda sendiri dari sini. Gunakan tombol keluar di sidebar.");
+  const { error } = await createAdminClient().rpc("keluarkan_sesi", { uid: id });
+  if (error) selesai("error", `Gagal mengeluarkan sesi: ${error.message}${error.code === "42883" || error.code === "PGRST202" ? " Jalankan migrasi 0023_keluarkan_sesi.sql di Supabase." : ""}`);
+  selesai("ok", "Sesi akun dihapus. Pengguna harus login lagi; akses yang sedang berjalan berakhir paling lama sekitar 1 jam.");
+}

@@ -5,9 +5,18 @@ import PageHeader from "@/components/PageHeader";
 import { getProfile } from "@/lib/auth";
 import { adminTersedia, createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
-import { ubahAkun, resetPassword, tambahAkun, ubahStatusAkun } from "./actions";
+import { keluarkanSesi, ubahAkun, resetPassword, tambahAkun, ubahStatusAkun } from "./actions";
 
 type Baris = { id: string; email: string; nonaktif: boolean; nama: string; role: "admin" | "superadmin"; kategori_id: number | null; terakhir: string | null; adaProfil: boolean };
+
+const HARI = 86_400_000;
+
+/** Waktu login terakhir dalam WIB, dan penanda bila akun belum pernah atau sudah lama tidak dipakai. */
+function loginTerakhir(iso: string | null): { teks: string; tanda: string | null } {
+  if (!iso) return { teks: "Belum pernah", tanda: "Belum pernah login" };
+  const teks = new Date(iso).toLocaleString("id-ID", { timeZone: "Asia/Jakarta", day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+  return { teks, tanda: Date.now() - new Date(iso).getTime() > 30 * HARI ? "Lebih dari 30 hari" : null };
+}
 
 const aksesNilai = (r: { role: string; kategori_id: number | null }) => (r.role === "superadmin" ? "super" : String(r.kategori_id ?? ""));
 
@@ -82,7 +91,7 @@ export default async function AkunPage({ searchParams }: { searchParams: Promise
 
           <div className="card overflow-x-auto">
             <table className="min-w-full divide-y divide-line">
-              <thead><tr><th className="th">Email</th><th className="th">Nama dan akses</th><th className="th">Status</th><th className="th">Ganti password</th><th className="th" /></tr></thead>
+              <thead><tr><th className="th">Email</th><th className="th">Nama dan akses</th><th className="th">Status</th><th className="th">Login terakhir</th><th className="th">Ganti password</th><th className="th" /></tr></thead>
               <tbody className="divide-y divide-line">
                 {baris.map((r) => (
                   <tr key={r.id}>
@@ -101,6 +110,17 @@ export default async function AkunPage({ searchParams }: { searchParams: Promise
                       </form>
                     </td>
                     <td className="td"><span className={r.nonaktif ? "pill-danger" : "pill-success"}>{r.nonaktif ? "Nonaktif" : "Aktif"}</span></td>
+                    <td className="td whitespace-nowrap">
+                      {(() => {
+                        const l = loginTerakhir(r.terakhir);
+                        return (
+                          <>
+                            <div className="text-sm">{l.teks}</div>
+                            {l.tanda && <span className="pill-warning mt-1">{l.tanda}</span>}
+                          </>
+                        );
+                      })()}
+                    </td>
                     <td className="td">
                       <form action={resetPassword.bind(null, r.id)} className="flex items-center gap-2">
                         <input className="input !w-40" name="password" type="password" minLength={8} autoComplete="new-password" placeholder="Password baru" aria-label={`Password baru ${r.email}`} required />
@@ -109,7 +129,13 @@ export default async function AkunPage({ searchParams }: { searchParams: Promise
                     </td>
                     <td className="td">
                       {r.id !== profile.id && (
-                        <form>
+                        <form className="flex flex-wrap gap-2">
+                          <ConfirmSubmit
+                            label="Keluarkan sesi"
+                            className="btn-secondary !px-3 !py-1.5"
+                            message={`Keluarkan ${r.email} dari semua perangkat? Pengguna harus login lagi.`}
+                            formAction={keluarkanSesi.bind(null, r.id)}
+                          />
                           <ConfirmSubmit
                             label={r.nonaktif ? "Aktifkan" : "Nonaktifkan"}
                             className={r.nonaktif ? "btn-secondary !px-3 !py-1.5" : "btn-danger"}
@@ -121,7 +147,7 @@ export default async function AkunPage({ searchParams }: { searchParams: Promise
                     </td>
                   </tr>
                 ))}
-                {baris.length === 0 && <tr><td className="td text-center text-muted" colSpan={5}>Belum ada akun.</td></tr>}
+                {baris.length === 0 && <tr><td className="td text-center text-muted" colSpan={6}>Belum ada akun.</td></tr>}
               </tbody>
             </table>
           </div>
