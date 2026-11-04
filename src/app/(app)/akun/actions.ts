@@ -81,16 +81,6 @@ export async function ubahAkun(id: string, formData: FormData) {
   selesai("ok", "Akun disimpan. Perubahan akses berlaku saat pengguna memuat ulang halaman.");
 }
 
-export async function resetPassword(id: string, formData: FormData) {
-  await pastikanSuperAdmin();
-  const password = text(formData, "password");
-  const salah = cekPassword(password);
-  if (salah) selesai("error", salah);
-  const { error } = await createAdminClient().auth.admin.updateUserById(id, { password: password! });
-  if (error) selesai("error", `Gagal mengganti password: ${error.message}`);
-  selesai("ok", "Password diganti. Sampaikan password baru kepada pemilik akun.");
-}
-
 export async function ubahStatusAkun(id: string, aktif: boolean, _formData: FormData) {
   const saya = await pastikanSuperAdmin();
   if (!aktif && id === saya.id) selesai("error", "Anda tidak dapat menonaktifkan akun Anda sendiri.");
