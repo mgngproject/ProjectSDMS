@@ -31,7 +31,9 @@ export async function middleware(request: NextRequest) {
     url.pathname = "/login";
     return NextResponse.redirect(url);
   }
-  if (user && isPublic && !request.nextUrl.searchParams.has("error")) {
+  // Halaman ganti password tetap bisa dibuka walau sedang masuk
+  const bebas = request.nextUrl.pathname.startsWith("/login/ganti-password") || request.nextUrl.searchParams.has("error") || request.nextUrl.searchParams.has("ok");
+  if (user && isPublic && !bebas) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     return NextResponse.redirect(url);
