@@ -4,7 +4,17 @@ import { Eye, EyeOff, Lock } from "lucide-react";
 import { useState } from "react";
 
 /** Isian password dengan tombol untuk menampilkan atau menyembunyikan isinya. */
-export default function PasswordInput({ id, name }: { id: string; name: string }) {
+export default function PasswordInput({
+  id,
+  name,
+  autoComplete = "current-password",
+  minLength,
+}: {
+  id: string;
+  name: string;
+  autoComplete?: "current-password" | "new-password";
+  minLength?: number;
+}) {
   const [tampil, setTampil] = useState(false);
 
   return (
@@ -16,7 +26,8 @@ export default function PasswordInput({ id, name }: { id: string; name: string }
         name={name}
         type={tampil ? "text" : "password"}
         required
-        autoComplete="current-password"
+        minLength={minLength}
+        autoComplete={autoComplete}
       />
       <button
         type="button"

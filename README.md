@@ -159,6 +159,8 @@ Akun yang passwordnya tidak diisi akan dilewati. Email akun ada di `scripts/crea
 
 Menu **Akun** (hanya Super Admin) membuat dan mengelola akun dari aplikasi, dan butuh `SUPABASE_SERVICE_ROLE_KEY` di Vercel (Settings → Environment Variables, pilih Production dan Preview, tanpa awalan `NEXT_PUBLIC_`). Kunci itu melewati RLS: hanya dibaca server action yang lebih dulu memastikan penggunanya Super Admin, dan tidak pernah dikirim ke browser. Tanpa kunci ini menu Akun menampilkan petunjuk dan fitur lain tetap berjalan.
 
+Password tidak lagi diganti oleh Super Admin. Setiap pengguna mengganti password-nya sendiri lewat tautan **Ganti password** di halaman login (`/login/ganti-password`): isi email, password lama, dan password baru (min. 8 karakter). Setelah berhasil, sesi di browser itu diakhiri dan pengguna masuk lagi dengan password baru.
+
 ## 7. Perintah
 
 ```bash
