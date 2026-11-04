@@ -46,11 +46,11 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
           </div>
         </div>
         <div>
-          <div className="flex items-baseline justify-between">
-            <label className="label" htmlFor="password">Password</label>
+          <label className="label" htmlFor="password">Password</label>
+          <PasswordInput id="password" name="password" />
+          <div className="mt-1.5 text-right">
             <Link href="/login/ganti-password" className="text-xs text-primary hover:underline">Ganti password</Link>
           </div>
-          <PasswordInput id="password" name="password" />
         </div>
         <button className="btn w-full py-2.5" type="submit">Masuk</button>
       </form>
