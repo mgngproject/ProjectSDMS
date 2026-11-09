@@ -5,7 +5,8 @@ import PageHeader from "@/components/PageHeader";
 import { getProfile } from "@/lib/auth";
 import { adminTersedia, createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
-import { ubahAkun, tambahAkun, ubahStatusAkun } from "./actions";
+import ResetPasswordForm from "@/components/ResetPasswordForm";
+import { resetPassword, ubahAkun, tambahAkun, ubahStatusAkun } from "./actions";
 
 type Baris = { id: string; email: string; nonaktif: boolean; nama: string; role: "admin" | "superadmin"; kategori_id: number | null; terakhir: string | null; adaProfil: boolean };
 
@@ -69,7 +70,7 @@ export default async function AkunPage({ searchParams }: { searchParams: Promise
       ) : (
         <>
           <p className="text-sm text-muted">
-            Buat, ubah akses, dan nonaktifkan akun pengguna. Akun yang dinonaktifkan tidak bisa masuk, datanya tetap tersimpan. Password diganti sendiri oleh pemilik akun lewat tautan <b>Ganti password</b> di halaman masuk.
+            Buat, ubah akses, dan nonaktifkan akun pengguna. Akun yang dinonaktifkan tidak bisa masuk, datanya tetap tersimpan. Password diganti sendiri oleh pemilik akun lewat tautan <b>Ganti password</b> di halaman masuk. Bila PIC lupa password, isi password sementara (tombol acak membuatkannya), klik <b>Reset</b>, sampaikan ke PIC, lalu minta PIC segera menggantinya sendiri.
           </p>
 
           <form action={tambahAkun} className="card grid gap-3 p-4 sm:grid-cols-2 xl:grid-cols-5">
@@ -82,7 +83,7 @@ export default async function AkunPage({ searchParams }: { searchParams: Promise
 
           <div className="card overflow-x-auto">
             <table className="min-w-full divide-y divide-line">
-              <thead><tr><th className="th">Email</th><th className="th">Nama dan akses</th><th className="th">Status</th><th className="th" /></tr></thead>
+              <thead><tr><th className="th">Email</th><th className="th">Nama dan akses</th><th className="th">Status</th><th className="th">Reset password (lupa)</th><th className="th" /></tr></thead>
               <tbody className="divide-y divide-line">
                 {baris.map((r) => (
                   <tr key={r.id}>
@@ -101,6 +102,7 @@ export default async function AkunPage({ searchParams }: { searchParams: Promise
                       </form>
                     </td>
                     <td className="td"><span className={r.nonaktif ? "pill-danger" : "pill-success"}>{r.nonaktif ? "Nonaktif" : "Aktif"}</span></td>
+                    <td className="td"><ResetPasswordForm email={r.email} action={resetPassword.bind(null, r.id)} /></td>
                     <td className="td">
                       {r.id !== profile.id && (
                         <form>
@@ -115,7 +117,7 @@ export default async function AkunPage({ searchParams }: { searchParams: Promise
                     </td>
                   </tr>
                 ))}
-                {baris.length === 0 && <tr><td className="td text-center text-muted" colSpan={4}>Belum ada akun.</td></tr>}
+                {baris.length === 0 && <tr><td className="td text-center text-muted" colSpan={5}>Belum ada akun.</td></tr>}
               </tbody>
             </table>
           </div>

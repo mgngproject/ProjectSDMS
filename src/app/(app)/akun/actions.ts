@@ -81,6 +81,17 @@ export async function ubahAkun(id: string, formData: FormData) {
   selesai("ok", "Akun disimpan. Perubahan akses berlaku saat pengguna memuat ulang halaman.");
 }
 
+/** Reset oleh Super Admin untuk PIC yang lupa password; PIC lalu menggantinya sendiri di halaman login. */
+export async function resetPassword(id: string, formData: FormData) {
+  await pastikanSuperAdmin();
+  const password = text(formData, "password");
+  const salah = cekPassword(password);
+  if (salah) selesai("error", salah);
+  const { error } = await createAdminClient().auth.admin.updateUserById(id, { password: password! });
+  if (error) selesai("error", `Gagal me-reset password: ${error.message}`);
+  selesai("ok", "Password sementara disimpan. Sampaikan kepada PIC dan minta segera menggantinya lewat Ganti password di halaman login.");
+}
+
 export async function ubahStatusAkun(id: string, aktif: boolean, _formData: FormData) {
   const saya = await pastikanSuperAdmin();
   if (!aktif && id === saya.id) selesai("error", "Anda tidak dapat menonaktifkan akun Anda sendiri.");

@@ -161,6 +161,8 @@ Menu **Akun** (hanya Super Admin) membuat dan mengelola akun dari aplikasi, dan 
 
 Password tidak diganti dari menu Akun. Setiap pengguna (PIC kategori maupun Super Admin) menggantinya sendiri lewat tautan **Ganti password** di halaman masuk (`/login/ganti-password`): isi email, password lama, dan password baru (minimal 8 karakter, diulang dua kali). Password lama diverifikasi lebih dulu, lalu semua sesi akun itu diakhiri sehingga pengguna masuk ulang dengan password baru. Fitur ini tidak butuh `SUPABASE_SERVICE_ROLE_KEY`.
 
+Bila PIC lupa password, tautan **Lupa password?** di halaman masuk (`/login/lupa-password`) mengarahkannya ke Super Admin. Super Admin mengisi password sementara di kolom **Reset password** menu Akun (tombol acak membuatkannya, tombol salin menyalinnya), klik **Reset**, menyampaikannya ke PIC, lalu PIC menggantinya sendiri lewat **Ganti password**.
+
 ## 7. Perintah
 
 ```bash
