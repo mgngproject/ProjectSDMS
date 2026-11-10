@@ -1,4 +1,6 @@
 import FilterBar from "@/components/FilterBar";
+import Flash from "@/components/Flash";
+import ImporPerpanjanganForm from "@/components/ImporPerpanjanganForm";
 import PageHeader from "@/components/PageHeader";
 import Link from "next/link";
 import { getProfile } from "@/lib/auth";
@@ -6,11 +8,13 @@ import { cocokDasar, paramFilter } from "@/lib/filter";
 import { formatTanggal, masaKerja, masaKontrak } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import type { Karyawan, Kontrak } from "@/lib/types";
+import { importPerpanjangan } from "./impor";
 
 type Row = Karyawan & { kontrak_aktif: Kontrak[] };
 
 export default async function RiwayatKontrakPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
-  const p = paramFilter(await searchParams);
+  const sp = await searchParams;
+  const p = paramFilter(sp);
   const profile = await getProfile();
   const isSuperAdmin = profile.role === "superadmin";
   const supabase = await createClient();
@@ -27,7 +31,10 @@ export default async function RiwayatKontrakPage({ searchParams }: { searchParam
 
   return (
     <div className="space-y-4">
-      <PageHeader title="Riwayat Kontrak" />
+      <PageHeader title="Riwayat Kontrak">
+        {isSuperAdmin && <ImporPerpanjanganForm action={importPerpanjangan} />}
+      </PageHeader>
+      <Flash ok={sp.ok} error={sp.error} />
       <FilterBar key={JSON.stringify(p)} p={p} kategori={isSuperAdmin ? daftarKategori ?? [] : undefined} resetHref="/kontrak" />
       <div className="card overflow-x-auto">
         <table className="min-w-full divide-y divide-line">

@@ -39,10 +39,14 @@ export function parseTanggal(v: Sel | undefined): string | null {
   const s = String(v).trim();
   let m = s.match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/);
   if (m) return valid(+m[1], +m[2], +m[3]);
-  m = s.match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})$/);
-  if (m) return valid(+m[3], +m[2], +m[1]);
-  m = s.match(/^(\d{1,2})\s+([A-Za-z]+)\.?\s+(\d{4})$/);
-  if (m && BULAN[m[2].toLowerCase()]) return valid(+m[3], BULAN[m[2].toLowerCase()], +m[1]);
+  m = s.match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4}|\d{2})$/);
+  if (m) {
+    const tahun = m[3].length === 2 ? 2000 + +m[3] : +m[3];
+    // Utamakan hari/bulan; bila bagian kedua > 12 berarti format bulan/hari (mis. 12/31/2027)
+    return +m[2] > 12 ? valid(tahun, +m[1], +m[2]) : valid(tahun, +m[2], +m[1]);
+  }
+  m = s.match(/^(\d{1,2})[\s-]+([A-Za-z]+)\.?[\s-]+(\d{4}|\d{2})$/);
+  if (m && BULAN[m[2].toLowerCase()]) return valid(m[3].length === 2 ? 2000 + +m[3] : +m[3], BULAN[m[2].toLowerCase()], +m[1]);
   return null;
 }
 
@@ -244,4 +248,54 @@ export function bacaDataDiri(rows: Baris[]): DataDiriImpor[] {
       },
     }];
   });
+}
+
+export type PerpanjanganImpor = {
+  baris: number;
+  np: string;
+  kontrak_ke: string | null;
+  awal_kontrak: string;
+  akhir_kontrak: string;
+  penilaian: string | null;
+  folder_link: string | null;
+};
+
+/**
+ * Laporan perpanjangan: satu baris = satu kontrak baru untuk satu NP.
+ * Kolom: NP, Nama (opsional), Kontrak Ke (opsional), Awal Kontrak, Akhir Kontrak, Penilaian, Folder.
+ */
+export function bacaPerpanjangan(rows: Baris[]): Hasil<PerpanjanganImpor> {
+  const data: PerpanjanganImpor[] = [];
+  const galat: string[] = [];
+  rows.forEach((r, i) => {
+    const baris = i + 2;
+    const np = teks(r.np);
+    if (!np) {
+      if (Object.values(r).some((v) => v != null && v !== "")) galat.push(`Baris ${baris}: NP kosong`);
+      return;
+    }
+    const awalMentah = r.awal_kontrak ?? r.awal_kontrak_baru ?? r.awal ?? null;
+    const akhirMentah = r.akhir_kontrak ?? r.akhir_kontrak_baru ?? r.akhir ?? null;
+    const awal = parseTanggal(awalMentah);
+    const akhir = parseTanggal(akhirMentah);
+    const tampil = (v: Sel) => (v == null || v === "" ? "kosong" : `"${v}"`);
+    if (!awal) return void galat.push(`Baris ${baris} (NP ${np}): Awal Kontrak ${tampil(awalMentah)} tidak bisa dibaca sebagai tanggal`);
+    if (!akhir) return void galat.push(`Baris ${baris} (NP ${np}): Akhir Kontrak ${tampil(akhirMentah)} tidak bisa dibaca sebagai tanggal`);
+    if (akhir <= awal) return void galat.push(`Baris ${baris} (NP ${np}): akhir kontrak harus setelah awal kontrak`);
+    // Link tanpa "https://" (mis. drive.google.com/...) dilengkapi otomatis
+    const folderMentah = teks(r.folder ?? r.folder_link ?? r.link_folder);
+    const folder = folderMentah && !/^https?:\/\//i.test(folderMentah) && /^[\w-]+(\.[\w-]+)+\/?\S*$/.test(folderMentah) ? `https://${folderMentah}` : folderMentah;
+    if (folder && !/^https?:\/\/\S+$/.test(folder)) galat.push(`Baris ${baris} (NP ${np}): Folder "${folderMentah}" bukan link, dikosongkan`);
+    const ke = teks(r.kontrak_ke ?? r.kontrak);
+    data.push({
+      baris,
+      np,
+      kontrak_ke: ke ? (/^\d+$/.test(ke) ? `Kontrak ${ke}` : ke) : null,
+      awal_kontrak: awal,
+      akhir_kontrak: akhir,
+      penilaian: teks(r.penilaian),
+      folder_link: folder && /^https?:\/\/\S+$/.test(folder) ? folder : null,
+    });
+  });
+  return { data, galat };
 }
