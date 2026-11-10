@@ -48,9 +48,8 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         <div>
           <label className="label" htmlFor="password">Password</label>
           <PasswordInput id="password" name="password" />
-          <div className="mt-1.5 flex justify-between">
-            <Link href="/login/lupa-password" className="text-xs text-muted hover:text-ink hover:underline">Lupa password?</Link>
-            <Link href="/login/ganti-password" className="text-xs text-primary hover:underline">Ganti password</Link>
+          <div className="mt-1.5 text-right">
+            <Link href="/login/lupa-password" className="text-xs text-primary hover:underline">Lupa password?</Link>
           </div>
         </div>
         <button className="btn w-full py-2.5" type="submit">Masuk</button>

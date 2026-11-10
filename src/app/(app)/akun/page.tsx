@@ -70,7 +70,7 @@ export default async function AkunPage({ searchParams }: { searchParams: Promise
       ) : (
         <>
           <p className="text-sm text-muted">
-            Buat, ubah akses, dan nonaktifkan akun pengguna. Akun yang dinonaktifkan tidak bisa masuk, datanya tetap tersimpan. Password diganti sendiri oleh pemilik akun lewat tautan <b>Ganti password</b> di halaman masuk. Bila PIC lupa password, isi password sementara (tombol acak membuatkannya), klik <b>Reset</b>, sampaikan ke PIC, lalu minta PIC segera menggantinya sendiri.
+            Buat, ubah akses, dan nonaktifkan akun pengguna. Akun yang dinonaktifkan tidak bisa masuk, datanya tetap tersimpan. PIC yang lupa password memulihkannya sendiri lewat tautan <b>Lupa password?</b> di halaman masuk (kode dikirim ke email akun). Bila PIC tidak bisa membuka emailnya, isi password sementara (tombol acak membuatkannya), klik <b>Reset</b>, lalu sampaikan ke PIC.
           </p>
 
           <form action={tambahAkun} className="card grid gap-3 p-4 sm:grid-cols-2 xl:grid-cols-5">
