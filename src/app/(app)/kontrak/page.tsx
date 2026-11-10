@@ -4,7 +4,7 @@ import ImporPerpanjanganForm from "@/components/ImporPerpanjanganForm";
 import PageHeader from "@/components/PageHeader";
 import Link from "next/link";
 import { getProfile } from "@/lib/auth";
-import { cocokDasar, paramFilter } from "@/lib/filter";
+import { cocokDasar, paramFilter, queryString } from "@/lib/filter";
 import { formatTanggal, masaKerja, masaKontrak } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import type { Karyawan, Kontrak } from "@/lib/types";
@@ -32,7 +32,12 @@ export default async function RiwayatKontrakPage({ searchParams }: { searchParam
   return (
     <div className="space-y-4">
       <PageHeader title="Riwayat Kontrak">
-        {isSuperAdmin && <ImporPerpanjanganForm action={importPerpanjangan} />}
+        {isSuperAdmin && (
+          <>
+            <a className="btn-secondary" href={`/api/export/kontrak${queryString(p)}`}>Export Excel</a>
+            <ImporPerpanjanganForm action={importPerpanjangan} />
+          </>
+        )}
       </PageHeader>
       <Flash ok={sp.ok} error={sp.error} />
       <FilterBar key={JSON.stringify(p)} p={p} kategori={isSuperAdmin ? daftarKategori ?? [] : undefined} resetHref="/kontrak" />
