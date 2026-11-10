@@ -4,10 +4,10 @@ import { MONITORING_CHECKBOX, MONITORING_TEXT } from "@/lib/monitoring";
 
 export type ParamFilter = Record<string, string | undefined>;
 
-/** Parameter alamat tanpa pesan (ok/error/impor), agar hanya berisi pilihan filter. */
+/** Parameter alamat tanpa pesan (ok/error), agar hanya berisi pilihan filter. */
 export function paramFilter(sp: Record<string, string | undefined>): ParamFilter {
-  const { ok, error, impor, ...sisa } = sp;
-  void ok; void error; void impor;
+  const { ok, error, ...sisa } = sp;
+  void ok; void error;
   return sisa;
 }
 

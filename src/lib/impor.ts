@@ -143,7 +143,7 @@ export function bacaKaryawan(rows: Baris[], config: KategoriConfig | null, namaK
     if (!np) return; // baris kosong dilewati diam-diam, seperti di Laravel
     const nama = teks(r.nama);
     if (!nama) return void galat.push(catatan(S, "dilewati", "Wajib diisi", { baris, np, kolom: "Nama" }));
-    if (dilihat.has(np)) return void galat.push(catatan(S, "dilewati", "NP ganda di file", { baris, np, kolom: "NP", nilai: np }));
+    if (dilihat.has(np)) return void galat.push(catatan(S, "dilewati", "Ganda di file", { baris, np, kolom: "NP", nilai: np }));
     dilihat.add(np);
 
     const kontrak = bacaKontrakBerurutan(r, (kolom, nilai, pesan) => galat.push(catatan(S, "peringatan", pesan, { baris, np, kolom, nilai })));
@@ -157,7 +157,7 @@ export function bacaKaryawan(rows: Baris[], config: KategoriConfig | null, namaK
     for (const f of config?.fields ?? []) {
       const nilai = f.type === "date" ? parseTanggal(r[slug(f.label)] ?? r[f.name]) : teks(r[slug(f.label)] ?? r[f.name]);
       if (nilai && f.type === "select" && !f.options?.map((o) => o.toLowerCase()).includes(nilai.toLowerCase())) {
-        return void galat.push(catatan(S, "dilewati", "Pilihan tidak valid", { baris, np, kolom: f.label, nilai }));
+        return void galat.push(catatan(S, "dilewati", "Tidak sesuai pilihan", { baris, np, kolom: f.label, nilai }));
       }
       if (f.required && !nilai) {
         const mentah = r[slug(f.label)] ?? r[f.name];
@@ -175,7 +175,7 @@ export function bacaKaryawan(rows: Baris[], config: KategoriConfig | null, namaK
     const opsiLevel = pilihan.level;
     if (opsiLevel) {
       const cocok = opsiLevel.find((o) => o.toLowerCase() === level?.toLowerCase());
-      if (!cocok) return void galat.push(catatan(S, "dilewati", level ? "Pilihan tidak valid" : "Wajib diisi", { baris, np, kolom: "Level", nilai: level }));
+      if (!cocok) return void galat.push(catatan(S, "dilewati", level ? "Tidak sesuai pilihan" : "Wajib diisi", { baris, np, kolom: "Level", nilai: level }));
       level = cocok;
     }
 
@@ -307,7 +307,7 @@ export function bacaPerpanjangan(rows: Baris[]): HasilBaca<PerpanjanganImpor> {
     // Link tanpa "https://" (mis. drive.google.com/...) dilengkapi otomatis
     const folderMentah = teks(r.folder ?? r.folder_link ?? r.link_folder);
     const folder = folderMentah && !/^https?:\/\//i.test(folderMentah) && /^[\w-]+(\.[\w-]+)+\/?\S*$/.test(folderMentah) ? `https://${folderMentah}` : folderMentah;
-    if (folder && !/^https?:\/\/\S+$/.test(folder)) galat.push(catatan(S, "peringatan", "Bukan link", { baris, np, kolom: "Folder", nilai: folderMentah }));
+    if (folder && !/^https?:\/\/\S+$/.test(folder)) galat.push(catatan(S, "peringatan", "Bukan link (dikosongkan)", { baris, np, kolom: "Folder", nilai: folderMentah }));
     const ke = teks(r.kontrak_ke ?? r.kontrak);
     data.push({
       baris,

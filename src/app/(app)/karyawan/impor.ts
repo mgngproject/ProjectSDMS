@@ -10,8 +10,7 @@ import {
   BATAS_BARIS, BATAS_BYTE, bacaDataDiri, bacaKaryawan, bacaSheetKontrak, bacaTerminate, bacaWorkbook,
   type Baris, type Kontrak,
 } from "@/lib/impor";
-import { catatan, type Catatan } from "@/lib/catatan-impor";
-import { simpanCatatan } from "@/lib/catatan-impor-cookie";
+import { catatan, ringkasCatatan, type Catatan } from "@/lib/catatan-impor";
 import { configKategori } from "@/lib/kategori-config";
 import { dengan, pesanGalat } from "@/lib/params";
 import { createClient } from "@/lib/supabase/server";
@@ -41,8 +40,7 @@ async function petaNpKeId(supabase: Klien, daftarNp: string[]): Promise<Map<stri
 export async function importExcel(formData: FormData) {
   const profile = await getProfile();
   const berkas = formData.get("file");
-  const kembali = (kunci: "ok" | "error", pesan: string, idCatatan: string | null = null): never =>
-    redirect(dengan("/karyawan", kunci, pesan.slice(0, 900)) + (idCatatan ? `&impor=${idCatatan}#laporan-impor` : ""));
+  const kembali = (kunci: "ok" | "error", pesan: string): never => redirect(dengan("/karyawan", kunci, pesan.slice(0, 900)));
 
   if (!(berkas instanceof File) || berkas.size === 0) kembali("error", "Pilih file Excel terlebih dahulu.");
   const file = berkas as File;
@@ -82,7 +80,7 @@ export async function importExcel(formData: FormData) {
       if (!k.kode_bagan) return true;
       const b = cariBagan(baganAktif, k.kode_bagan);
       if (!b) {
-        galat.push(catatan("Database", "dilewati", "Kode bagan tidak terdaftar", { baris: k.baris, np: k.np, kolom: "Kode Bagan", nilai: k.kode_bagan }));
+        galat.push(catatan("Database", "dilewati", "Tidak terdaftar", { baris: k.baris, np: k.np, kolom: "Kode Bagan", nilai: k.kode_bagan }));
         return false;
       }
       k.kode_bagan = b.kode;
@@ -154,7 +152,7 @@ export async function importExcel(formData: FormData) {
       for (const r of data ?? []) ada.set(r.np, r.status);
     }
     const siap = t.data.filter((x) => {
-      if (ada.get(x.np) === "aktif") { galat.push(catatan("Terminate", "dilewati", "Karyawan masih aktif", { baris: x.baris, np: x.np, kolom: "NP", nilai: x.np })); return false; }
+      if (ada.get(x.np) === "aktif") { galat.push(catatan("Terminate", "dilewati", "Karyawan masih aktif", { baris: x.baris, np: x.np })); return false; }
       if (!ada.has(x.np) && !x.nama) { galat.push(catatan("Terminate", "dilewati", "Wajib diisi untuk NP baru", { baris: x.baris, np: x.np, kolom: "Nama" })); return false; }
       return true;
     });
@@ -184,7 +182,7 @@ export async function importExcel(formData: FormData) {
       if (error) galat.push(catatan("Kontrak", "gagal", pesanGalat(error)));
       else { hitung.kontrak += baris.length; ids.forEach((id) => idDisentuh.add(id)); }
     }
-    for (const d of daftar) if (!peta.has(d.np)) galat.push(catatan("Kontrak", "dilewati", "NP tidak terdaftar", { baris: d.baris, np: d.np, kolom: "NP", nilai: d.np }));
+    for (const d of daftar) if (!peta.has(d.np)) galat.push(catatan("Kontrak", "dilewati", "Tidak terdaftar", { baris: d.baris, np: d.np, kolom: "NP", nilai: d.np }));
   }
 
   // 4. Samakan data karyawan dengan kontrak yang baru
@@ -200,7 +198,7 @@ export async function importExcel(formData: FormData) {
       if (d.peringatan) galat.push(d.peringatan);
     }
     const baris = dd.filter((d) => peta.has(d.np)).map((d) => ({ karyawan_id: peta.get(d.np)!, ktp: d.ktp, ...d.nilai }));
-    for (const d of dd) if (!peta.has(d.np)) galat.push(catatan("Mail Merge", "dilewati", "NP tidak terdaftar", { baris: d.baris, np: d.np, kolom: "NP", nilai: d.np }));
+    for (const d of dd) if (!peta.has(d.np)) galat.push(catatan("Mail Merge", "dilewati", "Tidak terdaftar", { baris: d.baris, np: d.np, kolom: "NP", nilai: d.np }));
     const ddPerId = new Map(dd.filter((d) => peta.has(d.np)).map((d) => [peta.get(d.np)!, d]));
     for (const bagian of potong(baris)) {
       const { error } = await supabase.from("data_diri").upsert(bagian, { onConflict: "karyawan_id" });
@@ -220,8 +218,7 @@ export async function importExcel(formData: FormData) {
   revalidatePath("/kontrak");
 
   const ringkas = `Import selesai: ${hitung.karyawan} karyawan, ${hitung.kontrak} kontrak, ${hitung.terminate} terminate, ${hitung.dataDiri} data diri.`;
-  const idCatatan = await simpanCatatan(galat);
-  const dilewati = galat.length ? ` Ada ${galat.length} data yang salah, lihat tabel di bawah.` : "";
+  const dilewati = galat.length ? ringkasCatatan(galat) : "";
   const sukses = hitung.karyawan + hitung.kontrak + hitung.terminate + hitung.dataDiri > 0;
-  return kembali(sukses ? "ok" : "error", sukses ? ringkas + dilewati : `Tidak ada data yang diimport.${dilewati}`, idCatatan);
+  return kembali(sukses ? "ok" : "error", sukses ? ringkas + dilewati : `Tidak ada data yang diimport.${dilewati}`);
 }
