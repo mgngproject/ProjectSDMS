@@ -1,6 +1,6 @@
 "use client";
 
-import { BarChart3, CalendarClock, ChevronDown, FileText, Gauge, LayoutDashboard, Network, UserCog, UserMinus, Users } from "lucide-react";
+import { ArrowLeftRight, BarChart3, CalendarClock, ChevronDown, FileText, Gauge, LayoutDashboard, Network, UserCog, UserMinus, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -9,6 +9,7 @@ const MENU = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/karyawan", label: "Karyawan", icon: Users },
   { href: "/kontrak", label: "Kontrak", icon: FileText },
+  { href: "/mutasi", label: "Mutasi", icon: ArrowLeftRight },
   { href: "/datadiri", label: "Data Diri", icon: BarChart3 },
   { href: "/monitoring", label: "Monitoring", icon: CalendarClock },
   { href: "/terminate", label: "Terminate", icon: UserMinus },
