@@ -1,5 +1,6 @@
 import FilterBar from "@/components/FilterBar";
 import Flash from "@/components/Flash";
+import LaporanImpor from "@/components/LaporanImpor";
 import ImporPerpanjanganForm from "@/components/ImporPerpanjanganForm";
 import PageHeader from "@/components/PageHeader";
 import Link from "next/link";
@@ -35,6 +36,7 @@ export default async function RiwayatKontrakPage({ searchParams }: { searchParam
         {isSuperAdmin && <ImporPerpanjanganForm action={importPerpanjangan} />}
       </PageHeader>
       <Flash ok={sp.ok} error={sp.error} />
+      <div id="laporan-impor"><LaporanImpor id={sp.impor} /></div>
       <FilterBar key={JSON.stringify(p)} p={p} kategori={isSuperAdmin ? daftarKategori ?? [] : undefined} resetHref="/kontrak" />
       <div className="card overflow-x-auto">
         <table className="min-w-full divide-y divide-line">

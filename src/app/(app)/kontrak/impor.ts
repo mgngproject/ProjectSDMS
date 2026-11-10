@@ -5,6 +5,8 @@ import { redirect } from "next/navigation";
 import { getProfile } from "@/lib/auth";
 import { hariIni } from "@/lib/format";
 import { BATAS_BARIS, BATAS_BYTE, bacaPerpanjangan, bacaWorkbook, type Baris, type PerpanjanganImpor } from "@/lib/impor";
+import { catatan } from "@/lib/catatan-impor";
+import { simpanCatatan } from "@/lib/catatan-impor-cookie";
 import { dengan, pesanGalat } from "@/lib/params";
 import { createClient } from "@/lib/supabase/server";
 
@@ -20,7 +22,8 @@ type KontrakLama = { karyawan_id: number; awal_kontrak: string | null; status: s
  * yang sudah ada di riwayat dilewati sehingga file yang sama aman diimport ulang.
  */
 export async function importPerpanjangan(formData: FormData) {
-  const kembali = (kunci: "ok" | "error", pesan: string): never => redirect(dengan("/kontrak", kunci, pesan.slice(0, 900)));
+  const kembali = (kunci: "ok" | "error", pesan: string, idCatatan: string | null = null): never =>
+    redirect(dengan("/kontrak", kunci, pesan.slice(0, 900)) + (idCatatan ? `&impor=${idCatatan}#laporan-impor` : ""));
   const profile = await getProfile();
   if (profile.role !== "superadmin") kembali("error", "Hanya Super Admin yang dapat mengimport laporan perpanjangan.");
 
@@ -42,7 +45,7 @@ export async function importPerpanjangan(formData: FormData) {
   if (rows.length > BATAS_BARIS) kembali("error", `Terlalu banyak baris (maksimal ${BATAS_BARIS}).`);
 
   const { data: dibaca, galat } = bacaPerpanjangan(rows);
-  if (dibaca.length === 0) kembali("error", `Tidak ada baris yang bisa diimport. ${galat.slice(0, 5).join("; ")}`);
+  if (dibaca.length === 0) kembali("error", "Tidak ada baris yang bisa diimport. Lihat tabel Rincian kesalahan import di bawah.", await simpanCatatan(galat));
 
   const supabase = await createClient();
   const daftarNp = [...new Set(dibaca.map((d) => d.np))];
@@ -75,14 +78,22 @@ export async function importPerpanjangan(formData: FormData) {
 
   for (const [np, daftar] of perNp) {
     const k = karyawan.get(np);
-    if (!k) { galat.push(`NP ${np} tidak ditemukan di data karyawan`); dilewati += daftar.length; continue; }
-    if (k.status !== "aktif") { galat.push(`NP ${np} sudah terminate, dilewati`); dilewati += daftar.length; continue; }
+    if (!k) {
+      for (const d of daftar) galat.push(catatan("Perpanjangan", "dilewati", "NP tidak ditemukan di Data Karyawan (tambahkan karyawannya dulu)", { baris: d.baris, np, kolom: "NP", nilai: np }));
+      dilewati += daftar.length;
+      continue;
+    }
+    if (k.status !== "aktif") {
+      for (const d of daftar) galat.push(catatan("Perpanjangan", "dilewati", "Karyawan sudah terminate, kontrak tidak bisa diperpanjang", { baris: d.baris, np, kolom: "NP", nilai: np }));
+      dilewati += daftar.length;
+      continue;
+    }
 
     const lama = riwayat.get(k.id) ?? [];
     const awalLama = new Set(lama.map((x) => x.awal_kontrak));
     const urut = [...daftar].sort((a, b) => a.awal_kontrak.localeCompare(b.awal_kontrak));
     const dipakai = urut.filter((d) => {
-      if (awalLama.has(d.awal_kontrak)) { galat.push(`NP ${np}: kontrak mulai ${d.awal_kontrak} sudah ada, dilewati`); dilewati++; return false; }
+      if (awalLama.has(d.awal_kontrak)) { galat.push(catatan("Perpanjangan", "dilewati", "Kontrak dengan Awal Kontrak ini sudah ada di riwayat (atau ganda di file)", { baris: d.baris, np, kolom: "Awal Kontrak", nilai: d.awal_kontrak })); dilewati++; return false; }
       awalLama.add(d.awal_kontrak);
       return true;
     });
@@ -117,7 +128,7 @@ export async function importPerpanjangan(formData: FormData) {
   const disentuh = new Set<number>();
   for (const bagian of potong(baru)) {
     const { error } = await supabase.from("kontrak").insert(bagian);
-    if (error) { galat.push(`Simpan kontrak: ${pesanGalat(error)}`); continue; }
+    if (error) { galat.push(catatan("Perpanjangan", "gagal", `Simpan kontrak: ${pesanGalat(error)}`)); continue; }
     masuk += bagian.length;
     bagian.forEach((b) => disentuh.add(b.karyawan_id));
   }
@@ -129,7 +140,8 @@ export async function importPerpanjangan(formData: FormData) {
   revalidatePath("/karyawan");
   revalidatePath("/dashboard");
 
-  const catatan = galat.length ? ` ${galat.length} catatan: ${galat.slice(0, 5).join("; ")}${galat.length > 5 ? "; ..." : ""}` : "";
-  if (masuk === 0) return kembali("error", `Tidak ada kontrak yang ditambahkan.${catatan}`);
-  return kembali("ok", `Import laporan perpanjangan selesai: ${masuk} kontrak ditambahkan untuk ${disentuh.size} karyawan${dilewati ? `, ${dilewati} baris dilewati` : ""}.${catatan}`);
+  const idCatatan = await simpanCatatan(galat);
+  const keterangan = galat.length ? ` Ada ${galat.length} catatan kesalahan: lihat tabel Rincian kesalahan import di bawah untuk baris dan kolomnya.` : "";
+  if (masuk === 0) return kembali("error", `Tidak ada kontrak yang ditambahkan.${keterangan}`, idCatatan);
+  return kembali("ok", `Import laporan perpanjangan selesai: ${masuk} kontrak ditambahkan untuk ${disentuh.size} karyawan${dilewati ? `, ${dilewati} baris dilewati` : ""}.${keterangan}`, idCatatan);
 }

@@ -2,6 +2,7 @@ import Link from "next/link";
 import ConfirmSubmit from "@/components/ConfirmSubmit";
 import FilterBar, { PilihanFilter } from "@/components/FilterBar";
 import Flash from "@/components/Flash";
+import LaporanImpor from "@/components/LaporanImpor";
 import PageHeader from "@/components/PageHeader";
 import { getProfile } from "@/lib/auth";
 import { filterPilihan, paramFilter, queryString, saringKaryawan } from "@/lib/filter";
@@ -57,6 +58,7 @@ export default async function KaryawanPage({ searchParams }: { searchParams: Pro
       </PageHeader>
 
       <Flash ok={p.ok} error={p.error} />
+      <div id="laporan-impor"><LaporanImpor id={p.impor} /></div>
 
       {/* key: isian ikut diperbarui saat berpindah kategori lewat sidebar (navigasi tanpa muat ulang) */}
       <FilterBar

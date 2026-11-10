@@ -1,4 +1,5 @@
 import * as XLSX from "xlsx";
+import { catatan, type Catatan, type HasilBaca } from "@/lib/catatan-impor";
 import { pilihanStandar, type KategoriConfig } from "@/lib/kategori-config";
 
 // Format file sama dengan versi Laravel: satu workbook dengan sheet
@@ -98,14 +99,24 @@ export type KaryawanImpor = {
 
 export type Hasil<T> = { data: T[]; galat: string[] };
 
+type Lapor = (kolom: string, nilai: Sel | undefined, pesan: string) => void;
+
 /** Pasangan kolom kontrak berurutan: awal_kontrak/akhir_kontrak, awal_kontrak2/akhir_kontrak2, ... (maksimal 10). */
-function bacaKontrakBerurutan(r: Baris): Kontrak[] {
+function bacaKontrakBerurutan(r: Baris, lapor?: Lapor): Kontrak[] {
   // Judul "awal_kontrak2" (format Laravel) maupun "Awal Kontrak 2" (-> awal_kontrak_2) diterima
   const ambil = (dasar: string, i: number) => (i === 1 ? r[dasar] : r[`${dasar}${i}`] ?? r[`${dasar}_${i}`]);
   const daftar: Kontrak[] = [];
   for (let i = 1; i <= 10; i++) {
-    const awal = parseTanggal(ambil("awal_kontrak", i));
-    const akhir = parseTanggal(ambil("akhir_kontrak", i));
+    const awalMentah = ambil("awal_kontrak", i);
+    const akhirMentah = ambil("akhir_kontrak", i);
+    const awal = parseTanggal(awalMentah);
+    const akhir = parseTanggal(akhirMentah);
+    const ada = (v: Sel | undefined) => v != null && String(v).trim() !== "";
+    const akhiran = i === 1 ? "" : ` ${i}`;
+    if (lapor && (ada(awalMentah) || ada(akhirMentah))) {
+      if (!awal) lapor(`Awal Kontrak${akhiran}`, awalMentah, ada(awalMentah) ? "Tanggal tidak bisa dibaca (pakai format YYYY-MM-DD), kontrak ini diabaikan" : "Kosong padahal Akhir Kontrak diisi, kontrak ini diabaikan");
+      else if (!akhir) lapor(`Akhir Kontrak${akhiran}`, akhirMentah, ada(akhirMentah) ? "Tanggal tidak bisa dibaca (pakai format YYYY-MM-DD), kontrak ini diabaikan" : "Kosong padahal Awal Kontrak diisi, kontrak ini diabaikan");
+    }
     if (awal && akhir) {
       daftar.push({
         kontrak_ke: `Kontrak ${teks(ambil("kontrak", i)) ?? daftar.length + 1}`,
@@ -119,10 +130,11 @@ function bacaKontrakBerurutan(r: Baris): Kontrak[] {
   return daftar;
 }
 
-export function bacaKaryawan(rows: Baris[], config: KategoriConfig | null, namaKategori: string | null = null): Hasil<KaryawanImpor> {
+export function bacaKaryawan(rows: Baris[], config: KategoriConfig | null, namaKategori: string | null = null): HasilBaca<KaryawanImpor> {
   const pilihan = pilihanStandar(namaKategori);
   const data: KaryawanImpor[] = [];
-  const galat: string[] = [];
+  const galat: Catatan[] = [];
+  const S = "Database";
   const dilihat = new Set<string>();
 
   rows.forEach((r, i) => {
@@ -130,27 +142,32 @@ export function bacaKaryawan(rows: Baris[], config: KategoriConfig | null, namaK
     const np = teks(r.np);
     if (!np) return; // baris kosong dilewati diam-diam, seperti di Laravel
     const nama = teks(r.nama);
-    if (!nama) return void galat.push(`Baris ${baris}: nama kosong`);
-    if (dilihat.has(np)) return void galat.push(`Baris ${baris}: NP ${np} muncul dua kali di file`);
+    if (!nama) return void galat.push(catatan(S, "dilewati", "Nama wajib diisi", { baris, np, kolom: "Nama" }));
+    if (dilihat.has(np)) return void galat.push(catatan(S, "dilewati", "NP muncul dua kali di file; baris ini diabaikan", { baris, np, kolom: "NP", nilai: np }));
     dilihat.add(np);
 
-    const kontrak = bacaKontrakBerurutan(r);
+    const kontrak = bacaKontrakBerurutan(r, (kolom, nilai, pesan) => galat.push(catatan(S, "peringatan", pesan, { baris, np, kolom, nilai })));
     for (const k of kontrak) {
-      if (k.akhir_kontrak <= k.awal_kontrak) return void galat.push(`Baris ${baris}: ${k.kontrak_ke} berakhir sebelum mulai`);
+      if (k.akhir_kontrak <= k.awal_kontrak) {
+        return void galat.push(catatan(S, "dilewati", `${k.kontrak_ke}: Akhir Kontrak harus setelah Awal Kontrak`, { baris, np, kolom: "Akhir Kontrak", nilai: `${k.awal_kontrak} s/d ${k.akhir_kontrak}` }));
+      }
     }
 
     const detail: Record<string, string | null> = {};
     for (const f of config?.fields ?? []) {
       const nilai = f.type === "date" ? parseTanggal(r[slug(f.label)] ?? r[f.name]) : teks(r[slug(f.label)] ?? r[f.name]);
       if (nilai && f.type === "select" && !f.options?.map((o) => o.toLowerCase()).includes(nilai.toLowerCase())) {
-        return void galat.push(`Baris ${baris}: ${f.label} "${nilai}" tidak valid (pilihan: ${f.options?.join(", ")})`);
+        return void galat.push(catatan(S, "dilewati", `Bukan pilihan yang tersedia (pilihan: ${f.options?.join(", ")})`, { baris, np, kolom: f.label, nilai }));
       }
-      if (f.required && !nilai) return void galat.push(`Baris ${baris}: ${f.label} wajib diisi`);
+      if (f.required && !nilai) {
+        const mentah = r[slug(f.label)] ?? r[f.name];
+        return void galat.push(catatan(S, "dilewati", f.type === "date" && mentah != null && mentah !== "" ? "Tanggal tidak bisa dibaca (pakai format YYYY-MM-DD)" : "Wajib diisi", { baris, np, kolom: f.label, nilai: mentah }));
+      }
       // seragamkan huruf besar-kecil ke pilihan resmi
       detail[f.name] = nilai && f.type === "select" ? (f.options?.find((o) => o.toLowerCase() === nilai.toLowerCase()) ?? nilai) : nilai;
     }
     if (detail.awal_pendidikan && detail.akhir_pendidikan && detail.akhir_pendidikan < detail.awal_pendidikan) {
-      return void galat.push(`Baris ${baris}: akhir pendidikan sebelum awal pendidikan`);
+      return void galat.push(catatan(S, "dilewati", "Akhir pendidikan sebelum awal pendidikan", { baris, np, kolom: "Akhir Pendidikan", nilai: detail.akhir_pendidikan }));
     }
 
     // Kolom standar berpilihan (mis. Level di IDH): wajib salah satu pilihan, huruf besar-kecil diseragamkan
@@ -158,7 +175,7 @@ export function bacaKaryawan(rows: Baris[], config: KategoriConfig | null, namaK
     const opsiLevel = pilihan.level;
     if (opsiLevel) {
       const cocok = opsiLevel.find((o) => o.toLowerCase() === level?.toLowerCase());
-      if (!cocok) return void galat.push(`Baris ${baris}: Level ${level ? `"${level}" tidak valid` : "wajib diisi"} (pilihan: ${opsiLevel.join(", ")})`);
+      if (!cocok) return void galat.push(catatan(S, "dilewati", `${level ? "Bukan pilihan yang tersedia" : "Wajib diisi"} (pilihan: ${opsiLevel.join(", ")})`, { baris, np, kolom: "Level", nilai: level }));
       level = cocok;
     }
 
@@ -188,14 +205,17 @@ export function bacaKaryawan(rows: Baris[], config: KategoriConfig | null, namaK
 
 export type TerminateImpor = { baris: number; np: string; nama: string | null; awal_kontrak: string | null; akhir_kontrak: string | null; kode_bagan: string | null; unit_kerja: string | null; jabatan: string | null; level: string | null; role: string | null; tanggal_keluar: string | null; alasan_keluar: string | null };
 
-export function bacaTerminate(rows: Baris[]): Hasil<TerminateImpor> {
+export function bacaTerminate(rows: Baris[]): HasilBaca<TerminateImpor> {
   const data: TerminateImpor[] = [];
-  const galat: string[] = [];
+  const galat: Catatan[] = [];
   rows.forEach((r, i) => {
     const np = teks(r.np);
     if (!np) return;
     const tanggal = parseTanggal(r.tanggal_keluar);
-    if (!tanggal) return void galat.push(`Terminate baris ${i + 2}: tanggal keluar kosong atau tidak valid`);
+    if (!tanggal) {
+      const ada = r.tanggal_keluar != null && r.tanggal_keluar !== "";
+      return void galat.push(catatan("Terminate", "dilewati", ada ? "Tanggal tidak bisa dibaca (pakai format YYYY-MM-DD)" : "Wajib diisi", { baris: i + 2, np, kolom: "Tanggal Keluar", nilai: r.tanggal_keluar }));
+    }
     data.push({
       baris: i + 2, np, nama: teks(r.nama), awal_kontrak: parseTanggal(r.awal_kontrak), akhir_kontrak: parseTanggal(r.akhir_kontrak),
       kode_bagan: teks(r.kode_bagan), unit_kerja: teks(r.unit_kerja), jabatan: teks(r.jabatan), level: teks(r.level), role: teks(r.role),
@@ -205,19 +225,19 @@ export function bacaTerminate(rows: Baris[]): Hasil<TerminateImpor> {
   return { data, galat };
 }
 
-export type KontrakImpor = { np: string; kontrak: Kontrak[] };
+export type KontrakImpor = { baris: number; np: string; kontrak: Kontrak[] };
 
 /** Sheet "Kontrak": kolom kontrak, awal_kontrak, akhir_kontrak, penilaian, folder (+ akhiran 2..10). */
-export function bacaSheetKontrak(rows: Baris[]): KontrakImpor[] {
-  return rows.flatMap((r) => {
+export function bacaSheetKontrak(rows: Baris[], galat?: Catatan[]): KontrakImpor[] {
+  return rows.flatMap((r, i) => {
     const np = teks(r.np);
     if (!np) return [];
-    const kontrak = bacaKontrakBerurutan(r);
-    return [{ np, kontrak }];
+    const kontrak = bacaKontrakBerurutan(r, galat && ((kolom, nilai, pesan) => galat.push(catatan("Kontrak", "peringatan", pesan, { baris: i + 2, np, kolom, nilai }))));
+    return [{ baris: i + 2, np, kontrak }];
   });
 }
 
-export type DataDiriImpor = { np: string; ktp: string | null; peringatan: string | null; nilai: Record<string, string | null> };
+export type DataDiriImpor = { baris: number; np: string; ktp: string | null; peringatan: Catatan | null; nilai: Record<string, string | null> };
 
 export function bacaDataDiri(rows: Baris[]): DataDiriImpor[] {
   return rows.flatMap((r, i) => {
@@ -226,9 +246,10 @@ export function bacaDataDiri(rows: Baris[]): DataDiriImpor[] {
     const digit = teks(r.no_ktp)?.replace(/\D/g, "") ?? null;
     const ktpValid = digit && digit.length === 16 ? digit : null;
     return [{
+      baris: i + 2,
       np,
       ktp: ktpValid,
-      peringatan: digit && !ktpValid ? `Data diri baris ${i + 2}: No KTP ${np} tidak 16 digit, dikosongkan` : null,
+      peringatan: digit && !ktpValid ? catatan("Mail Merge", "peringatan", `No KTP harus 16 digit (terbaca ${digit.length} digit), dikosongkan`, { baris: i + 2, np, kolom: "No KTP", nilai: r.no_ktp }) : null,
       nilai: {
         tempat_lahir: teks(r.tempat),
         tanggal_lahir: parseTanggal(r.tanggal_lahir),
@@ -264,28 +285,29 @@ export type PerpanjanganImpor = {
  * Laporan perpanjangan: satu baris = satu kontrak baru untuk satu NP.
  * Kolom: NP, Nama (opsional), Kontrak Ke (opsional), Awal Kontrak, Akhir Kontrak, Penilaian, Folder.
  */
-export function bacaPerpanjangan(rows: Baris[]): Hasil<PerpanjanganImpor> {
+export function bacaPerpanjangan(rows: Baris[]): HasilBaca<PerpanjanganImpor> {
   const data: PerpanjanganImpor[] = [];
-  const galat: string[] = [];
+  const galat: Catatan[] = [];
+  const S = "Perpanjangan";
   rows.forEach((r, i) => {
     const baris = i + 2;
     const np = teks(r.np);
     if (!np) {
-      if (Object.values(r).some((v) => v != null && v !== "")) galat.push(`Baris ${baris}: NP kosong`);
+      if (Object.values(r).some((v) => v != null && v !== "")) galat.push(catatan(S, "dilewati", "NP wajib diisi", { baris, kolom: "NP" }));
       return;
     }
     const awalMentah = r.awal_kontrak ?? r.awal_kontrak_baru ?? r.awal ?? null;
     const akhirMentah = r.akhir_kontrak ?? r.akhir_kontrak_baru ?? r.akhir ?? null;
     const awal = parseTanggal(awalMentah);
     const akhir = parseTanggal(akhirMentah);
-    const tampil = (v: Sel) => (v == null || v === "" ? "kosong" : `"${v}"`);
-    if (!awal) return void galat.push(`Baris ${baris} (NP ${np}): Awal Kontrak ${tampil(awalMentah)} tidak bisa dibaca sebagai tanggal`);
-    if (!akhir) return void galat.push(`Baris ${baris} (NP ${np}): Akhir Kontrak ${tampil(akhirMentah)} tidak bisa dibaca sebagai tanggal`);
-    if (akhir <= awal) return void galat.push(`Baris ${baris} (NP ${np}): akhir kontrak harus setelah awal kontrak`);
+    const sebab = (v: Sel) => (v == null || v === "" ? "Wajib diisi" : "Tanggal tidak bisa dibaca (pakai format YYYY-MM-DD)");
+    if (!awal) return void galat.push(catatan(S, "dilewati", sebab(awalMentah), { baris, np, kolom: "Awal Kontrak", nilai: awalMentah }));
+    if (!akhir) return void galat.push(catatan(S, "dilewati", sebab(akhirMentah), { baris, np, kolom: "Akhir Kontrak", nilai: akhirMentah }));
+    if (akhir <= awal) return void galat.push(catatan(S, "dilewati", `Akhir Kontrak harus setelah Awal Kontrak (${awal})`, { baris, np, kolom: "Akhir Kontrak", nilai: akhirMentah }));
     // Link tanpa "https://" (mis. drive.google.com/...) dilengkapi otomatis
     const folderMentah = teks(r.folder ?? r.folder_link ?? r.link_folder);
     const folder = folderMentah && !/^https?:\/\//i.test(folderMentah) && /^[\w-]+(\.[\w-]+)+\/?\S*$/.test(folderMentah) ? `https://${folderMentah}` : folderMentah;
-    if (folder && !/^https?:\/\/\S+$/.test(folder)) galat.push(`Baris ${baris} (NP ${np}): Folder "${folderMentah}" bukan link, dikosongkan`);
+    if (folder && !/^https?:\/\/\S+$/.test(folder)) galat.push(catatan(S, "peringatan", "Bukan link (harus diawali https://), Folder dikosongkan", { baris, np, kolom: "Folder", nilai: folderMentah }));
     const ke = teks(r.kontrak_ke ?? r.kontrak);
     data.push({
       baris,
