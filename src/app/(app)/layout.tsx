@@ -15,13 +15,14 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   let menuKategori: { nama: string; jumlah: number }[] | undefined;
   if (isSuperAdmin) {
     const supabase = await createClient();
-    const [{ data: daftar }, { data: aktif }] = await Promise.all([
-      supabase.from("kategori").select("id, nama").order("id"),
-      supabase.from("karyawan").select("kategori_id").eq("status", "aktif"),
-    ]);
-    const jumlah = new Map<number, number>();
-    for (const r of aktif ?? []) jumlah.set(r.kategori_id, (jumlah.get(r.kategori_id) ?? 0) + 1);
-    menuKategori = (daftar ?? []).map((k) => ({ nama: k.nama, jumlah: jumlah.get(k.id) ?? 0 }));
+    const { data: daftar } = await supabase.from("kategori").select("id, nama").order("id");
+    // Hitung per kategori di database (tanpa menarik semua baris karyawan; batas bawaan 1000 baris juga membuat hitungan salah)
+    menuKategori = await Promise.all(
+      (daftar ?? []).map(async (k) => {
+        const { count } = await supabase.from("karyawan").select("id", { count: "exact", head: true }).eq("kategori_id", k.id).eq("status", "aktif");
+        return { nama: k.nama, jumlah: count ?? 0 };
+      }),
+    );
   }
 
   return (

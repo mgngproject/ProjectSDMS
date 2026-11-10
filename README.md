@@ -68,6 +68,9 @@ Form Tambah dan Ubah karyawan berada di tengah halaman dengan judul sejajar, isi
 ### Filter
 Karyawan, Kontrak, Data Diri, Monitoring, dan Terminate memakai baris filter yang sama (`src/components/FilterBar.tsx`): kategori (Super Admin), cari nama/NP, periode (kontrak masuk, kontrak habis, atau tanggal keluar per bulan dan tahun), filter khusus halaman, tombol **Cari** dan **Reset**. Filter khusus: Karyawan (kolom khusus kategori seperti penempatan, status, level), Data Diri (jenjang, kelengkapan), Monitoring (status, berkas yang belum ada), Terminate (alasan keluar). Pilihan filter tersimpan di alamat halaman, dan Export Excel dan PDF mengikuti filter yang sedang dipakai.
 
+### Kecepatan pindah halaman
+Setiap halaman membaca data dari Supabase, jadi kecepatannya dipengaruhi jarak antara server Vercel dan database Supabase. Atur **Function Region** di Vercel (Project Settings, Functions) ke wilayah yang sama atau terdekat dengan wilayah proyek Supabase. Di aplikasi: halaman memakai `loading.tsx` agar kerangka tampil seketika saat pindah menu; `getProfile()` dibungkus `cache` agar layout dan halaman hanya sekali bertanya; pemeriksaan login di middleware dan `getProfile()` memakai `getClaims()` (tanpa bertanya ke Supabase bila proyek memakai kunci asimetris, selain itu kembali ke `getUser()`); jumlah karyawan di sidebar dihitung per kategori di database.
+
 ### Ikon tab
 Ikon tab browser memakai bunga logo Peruri (`src/app/icon.png`, `apple-icon.png`, dan `favicon.ico`) di atas latar putih bersudut membulat agar terlihat di tab terang maupun gelap.
 

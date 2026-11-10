@@ -23,7 +23,21 @@ export async function middleware(request: NextRequest) {
     },
   );
 
-  const { data: { user } } = await supabase.auth.getUser();
+  // Cukup memeriksa token (tanpa bertanya ke Supabase bila memungkinkan); data tetap dijaga RLS dan getProfile() di tiap halaman
+  const auth = supabase.auth as typeof supabase.auth & { getClaims?: () => Promise<{ data: { claims?: { sub?: string } } | null }> };
+  let user: { id: string } | null = null;
+  if (typeof auth.getClaims === "function") {
+    try {
+      const { data } = await auth.getClaims();
+      if (data?.claims?.sub) user = { id: data.claims.sub };
+    } catch {
+      // lanjut ke pemeriksaan lewat server Supabase
+    }
+  }
+  if (!user) {
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+  }
   const isPublic = PUBLIC_PATHS.some((p) => request.nextUrl.pathname.startsWith(p));
 
   if (!user && !isPublic) {
