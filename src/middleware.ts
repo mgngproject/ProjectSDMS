@@ -32,7 +32,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
   // Halaman ganti password tetap bisa dibuka walau sedang masuk
-  const bebas = request.nextUrl.pathname.startsWith("/login/ganti-password") || request.nextUrl.searchParams.has("error") || request.nextUrl.searchParams.has("ok");
+  const bebas = request.nextUrl.pathname.startsWith("/login/ganti-password") || request.nextUrl.pathname.startsWith("/login/lupa-password") || request.nextUrl.searchParams.has("error") || request.nextUrl.searchParams.has("ok");
   if (user && isPublic && !bebas) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";

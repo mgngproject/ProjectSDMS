@@ -161,7 +161,13 @@ Menu **Akun** (hanya Super Admin) membuat dan mengelola akun dari aplikasi, dan 
 
 Password tidak diganti dari menu Akun. Setiap pengguna (PIC kategori maupun Super Admin) menggantinya sendiri lewat tautan **Ganti password** di halaman masuk (`/login/ganti-password`): isi email, password lama, dan password baru (minimal 8 karakter, diulang dua kali). Password lama diverifikasi lebih dulu, lalu semua sesi akun itu diakhiri sehingga pengguna masuk ulang dengan password baru. Fitur ini tidak butuh `SUPABASE_SERVICE_ROLE_KEY`.
 
-Bila PIC lupa password, tautan **Lupa password?** di halaman masuk (`/login/lupa-password`) mengarahkannya ke Super Admin. Super Admin mengisi password sementara di kolom **Reset password** menu Akun (tombol acak membuatkannya, tombol salin menyalinnya), klik **Reset**, menyampaikannya ke PIC, lalu PIC menggantinya sendiri lewat **Ganti password**.
+Bila PIC lupa password, tautan **Lupa password?** di halaman masuk (`/login/lupa-password`) meminta email akun, lalu Supabase mengirim **kode verifikasi** ke email itu. PIC memasukkan kode dan password baru di halaman yang sama. Pesan setelah meminta kode selalu sama agar tidak membocorkan email mana yang terdaftar. Syaratnya:
+
+1. Email akun harus kotak masuk yang benar-benar bisa dibuka PIC (ubah lewat Supabase → Authentication → Users bila perlu).
+2. **Custom SMTP** di Supabase (Authentication → Emails → SMTP Settings), misalnya Gmail dengan App Password, Brevo, atau Resend. Layanan email bawaan Supabase hanya mengirim ke anggota tim project dan dibatasi beberapa email per jam.
+3. Template **Reset Password** (Authentication → Emails → Templates) memuat kode `{{ .Token }}`, contoh: `<h2>Atur ulang password SDMS</h2><p>Kode verifikasi Anda: <b>{{ .Token }}</b></p><p>Kode berlaku sementara. Abaikan email ini bila Anda tidak memintanya.</p>`
+
+Bila PIC tidak bisa membuka email akunnya, Super Admin tetap bisa me-reset: isi password sementara di kolom **Reset password** menu Akun (tombol acak membuatkannya, tombol salin menyalinnya), klik **Reset**, menyampaikannya ke PIC, lalu PIC menggantinya sendiri lewat **Ganti password**.
 
 ## 7. Perintah
 
