@@ -245,3 +245,47 @@ export function bacaDataDiri(rows: Baris[]): DataDiriImpor[] {
     }];
   });
 }
+
+export type PerpanjanganImpor = {
+  baris: number;
+  np: string;
+  kontrak_ke: string | null;
+  awal_kontrak: string;
+  akhir_kontrak: string;
+  penilaian: string | null;
+  folder_link: string | null;
+};
+
+/**
+ * Laporan perpanjangan: satu baris = satu kontrak baru untuk satu NP.
+ * Kolom: NP, Nama (opsional), Kontrak Ke (opsional), Awal Kontrak, Akhir Kontrak, Penilaian, Folder.
+ */
+export function bacaPerpanjangan(rows: Baris[]): Hasil<PerpanjanganImpor> {
+  const data: PerpanjanganImpor[] = [];
+  const galat: string[] = [];
+  rows.forEach((r, i) => {
+    const baris = i + 2;
+    const np = teks(r.np);
+    if (!np) {
+      if (Object.values(r).some((v) => v != null && v !== "")) galat.push(`Baris ${baris}: NP kosong`);
+      return;
+    }
+    const awal = parseTanggal(r.awal_kontrak ?? r.awal_kontrak_baru ?? r.awal);
+    const akhir = parseTanggal(r.akhir_kontrak ?? r.akhir_kontrak_baru ?? r.akhir);
+    if (!awal || !akhir) return void galat.push(`Baris ${baris} (NP ${np}): awal/akhir kontrak kosong atau tidak valid`);
+    if (akhir <= awal) return void galat.push(`Baris ${baris} (NP ${np}): akhir kontrak harus setelah awal kontrak`);
+    const folder = teks(r.folder ?? r.folder_link ?? r.link_folder);
+    if (folder && !/^https?:\/\/\S+$/.test(folder)) galat.push(`Baris ${baris} (NP ${np}): link folder tidak valid, dikosongkan`);
+    const ke = teks(r.kontrak_ke ?? r.kontrak);
+    data.push({
+      baris,
+      np,
+      kontrak_ke: ke ? (/^\d+$/.test(ke) ? `Kontrak ${ke}` : ke) : null,
+      awal_kontrak: awal,
+      akhir_kontrak: akhir,
+      penilaian: teks(r.penilaian),
+      folder_link: folder && /^https?:\/\/\S+$/.test(folder) ? folder : null,
+    });
+  });
+  return { data, galat };
+}
