@@ -53,6 +53,11 @@ export async function importPerpanjangan(formData: FormData) {
     const { data } = await supabase.from("karyawan").select("id, np, status").in("np", bagian);
     for (const k of data ?? []) karyawan.set(k.np, { id: k.id, status: k.status });
   }
+  // NP yang belum cocok dicari lagi tanpa membedakan huruf besar-kecil dan spasi di ujung
+  for (const np of daftarNp.filter((n) => !karyawan.has(n)).slice(0, 100)) {
+    const { data } = await supabase.from("karyawan").select("id, np, status").ilike("np", np.replace(/[%_\\]/g, "\\$&")).limit(1);
+    if (data?.[0]) karyawan.set(np, { id: data[0].id, status: data[0].status });
+  }
   const riwayat = new Map<number, KontrakLama[]>();
   for (const bagian of potong([...karyawan.values()].map((k) => k.id))) {
     const { data } = await supabase.from("kontrak").select("karyawan_id, awal_kontrak, status").in("karyawan_id", bagian);
@@ -70,7 +75,7 @@ export async function importPerpanjangan(formData: FormData) {
 
   for (const [np, daftar] of perNp) {
     const k = karyawan.get(np);
-    if (!k) { galat.push(`NP ${np} tidak ditemukan`); dilewati += daftar.length; continue; }
+    if (!k) { galat.push(`NP ${np} tidak ditemukan di data karyawan`); dilewati += daftar.length; continue; }
     if (k.status !== "aktif") { galat.push(`NP ${np} sudah terminate, dilewati`); dilewati += daftar.length; continue; }
 
     const lama = riwayat.get(k.id) ?? [];
