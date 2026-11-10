@@ -1,5 +1,6 @@
 import { Mail } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import AsciiBackground from "@/components/AsciiBackground";
 import PasswordInput from "@/components/PasswordInput";
 import { login } from "./actions";
@@ -9,8 +10,8 @@ const PESAN: Record<string, string> = {
   profil: "Akun belum memiliki profil. Hubungi Super Admin.",
 };
 
-export default async function LoginPage({ searchParams }: { searchParams: Promise<{ error?: string; detail?: string }> }) {
-  const { error, detail } = await searchParams;
+export default async function LoginPage({ searchParams }: { searchParams: Promise<{ error?: string; detail?: string; ok?: string }> }) {
+  const { error, detail, ok } = await searchParams;
 
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-center gap-8 overflow-hidden p-4">
@@ -27,6 +28,8 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
           <h1 className="text-2xl font-bold tracking-tight">SDMS</h1>
           <p className="text-sm text-muted">Masuk dengan akun kategori Anda.</p>
         </div>
+
+        {ok && !error && <p className="rounded-xl bg-success-soft p-3 text-sm text-success">{ok}</p>}
 
         {error && (
           <p className="rounded-xl bg-danger-soft p-3 text-sm text-danger">
@@ -45,6 +48,9 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         <div>
           <label className="label" htmlFor="password">Password</label>
           <PasswordInput id="password" name="password" />
+          <div className="mt-1.5 text-right">
+            <Link href="/login/ganti-password" className="text-xs text-primary hover:underline">Ganti password</Link>
+          </div>
         </div>
         <button className="btn w-full py-2.5" type="submit">Masuk</button>
       </form>
