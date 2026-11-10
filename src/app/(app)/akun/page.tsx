@@ -69,7 +69,7 @@ export default async function AkunPage({ searchParams }: { searchParams: Promise
       ) : (
         <>
           <p className="text-sm text-muted">
-            Buat, ubah akses, dan nonaktifkan akun pengguna. Akun yang dinonaktifkan tidak bisa masuk, datanya tetap tersimpan. Password diganti sendiri oleh pemilik akun lewat tautan <b>Ganti password</b> di halaman masuk.
+            Buat, ubah email dan akses, serta nonaktifkan akun pengguna. Akun yang dinonaktifkan tidak bisa masuk, datanya tetap tersimpan. Pastikan email tiap akun adalah kotak masuk yang aktif: PIC yang lupa password memulihkannya sendiri lewat tautan <b>Lupa password?</b> di halaman masuk, dan kodenya dikirim ke email itu.
           </p>
 
           <form action={tambahAkun} className="card grid gap-3 p-4 sm:grid-cols-2 xl:grid-cols-5">
@@ -82,7 +82,7 @@ export default async function AkunPage({ searchParams }: { searchParams: Promise
 
           <div className="card overflow-x-auto">
             <table className="min-w-full divide-y divide-line">
-              <thead><tr><th className="th">Email</th><th className="th">Nama dan akses</th><th className="th">Status</th><th className="th" /></tr></thead>
+              <thead><tr><th className="th">Email</th><th className="th">Email, nama, dan akses</th><th className="th">Status</th><th className="th" /></tr></thead>
               <tbody className="divide-y divide-line">
                 {baris.map((r) => (
                   <tr key={r.id}>
@@ -95,6 +95,7 @@ export default async function AkunPage({ searchParams }: { searchParams: Promise
                     </td>
                     <td className="td">
                       <form action={ubahAkun.bind(null, r.id)} className="flex flex-wrap items-center gap-2">
+                        <input className="input min-w-52 flex-1" name="email" type="email" defaultValue={r.email === "-" ? "" : r.email} aria-label={`Email ${r.email}`} required />
                         <input className="input min-w-40 flex-1" name="nama" defaultValue={r.nama} aria-label={`Nama ${r.email}`} required />
                         <select className="input !w-auto" name="akses" defaultValue={r.adaProfil ? aksesNilai(r) : ""} aria-label={`Akses ${r.email}`} required>{opsiAkses}</select>
                         <button className="btn-secondary !px-3 !py-1.5" type="submit">Simpan</button>

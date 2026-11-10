@@ -162,7 +162,13 @@ Akun yang passwordnya tidak diisi akan dilewati. Email akun ada di `scripts/crea
 
 Menu **Akun** (hanya Super Admin) membuat dan mengelola akun dari aplikasi, dan butuh `SUPABASE_SERVICE_ROLE_KEY` di Vercel (Settings → Environment Variables, pilih Production dan Preview, tanpa awalan `NEXT_PUBLIC_`). Kunci itu melewati RLS: hanya dibaca server action yang lebih dulu memastikan penggunanya Super Admin, dan tidak pernah dikirim ke browser. Tanpa kunci ini menu Akun menampilkan petunjuk dan fitur lain tetap berjalan.
 
-Password tidak diganti dari menu Akun. Setiap pengguna (PIC kategori maupun Super Admin) menggantinya sendiri lewat tautan **Ganti password** di halaman masuk (`/login/ganti-password`): isi email, password lama, dan password baru (minimal 8 karakter, diulang dua kali). Password lama diverifikasi lebih dulu, lalu semua sesi akun itu diakhiri sehingga pengguna masuk ulang dengan password baru. Fitur ini tidak butuh `SUPABASE_SERVICE_ROLE_KEY`.
+Bila PIC lupa password, tautan **Lupa password?** di halaman masuk (`/login/lupa-password`) meminta email akun, lalu Supabase mengirim **kode verifikasi** ke email itu. PIC memasukkan kode dan password baru di halaman yang sama. Pesan setelah meminta kode selalu sama agar tidak membocorkan email mana yang terdaftar. Syaratnya:
+
+1. Email akun harus kotak masuk yang benar-benar bisa dibuka PIC. Super Admin mengubahnya di menu **Akun** (kolom Email, lalu Simpan); email baru langsung berlaku untuk masuk.
+2. **Custom SMTP** di Supabase (Authentication → Emails → SMTP Settings), misalnya Gmail dengan App Password, Brevo, atau Resend. Layanan email bawaan Supabase hanya mengirim ke anggota tim project dan dibatasi beberapa email per jam.
+3. Template **Reset Password** (Authentication → Emails → Templates) memuat kode `{{ .Token }}`, contoh: `<h2>Atur ulang password SDMS</h2><p>Kode verifikasi Anda: <b>{{ .Token }}</b></p><p>Kode berlaku sementara. Abaikan email ini bila Anda tidak memintanya.</p>`
+
+Tidak ada reset password oleh Super Admin dan tidak ada halaman ganti password terpisah: satu-satunya cara mengganti password adalah **Lupa password?**.
 
 ## 7. Perintah
 

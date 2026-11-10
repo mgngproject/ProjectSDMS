@@ -66,8 +66,10 @@ export async function tambahAkun(formData: FormData) {
 // Id disematkan lewat bind(): nama dan nilai tombol tidak ikut terkirim bersama aksi server
 export async function ubahAkun(id: string, formData: FormData) {
   const saya = await pastikanSuperAdmin();
+  const email = text(formData, "email")?.toLowerCase() ?? "";
   const nama = text(formData, "nama");
   const akses = bacaAkses(formData);
+  if (!EMAIL.test(email)) selesai("error", "Email tidak valid.");
   if (!nama) selesai("error", "Nama wajib diisi.");
   if (akses.error) selesai("error", akses.error);
   if (id === saya.id && akses.role !== "superadmin") selesai("error", "Anda tidak dapat mencabut peran Super Admin dari akun Anda sendiri.");
@@ -78,7 +80,16 @@ export async function ubahAkun(id: string, formData: FormData) {
     { onConflict: "id", ignoreDuplicates: false },
   );
   if (error) selesai("error", pesanGalat(error));
-  selesai("ok", "Akun disimpan. Perubahan akses berlaku saat pengguna memuat ulang halaman.");
+
+  // Email dipakai untuk masuk dan menerima kode Lupa password; langsung aktif tanpa konfirmasi
+  const admin = createAdminClient();
+  const { data: lama } = await admin.auth.admin.getUserById(id);
+  const emailBerubah = !!lama?.user && (lama.user.email ?? "").toLowerCase() !== email;
+  if (emailBerubah) {
+    const { error: galatEmail } = await admin.auth.admin.updateUserById(id, { email, email_confirm: true });
+    if (galatEmail) selesai("error", /already|exists|registered/i.test(galatEmail.message) ? `Email ${email} sudah dipakai akun lain.` : `Gagal mengubah email: ${galatEmail.message}`);
+  }
+  selesai("ok", emailBerubah ? `Akun disimpan. Pengguna kini masuk dengan email ${email}.` : "Akun disimpan. Perubahan akses berlaku saat pengguna memuat ulang halaman.");
 }
 
 export async function ubahStatusAkun(id: string, aktif: boolean, _formData: FormData) {
