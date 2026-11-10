@@ -85,7 +85,7 @@ export default async function LupaPasswordPage({ searchParams }: { searchParams:
           </>
         )}
 
-        <p className="text-center text-xs text-muted">Tidak bisa membuka email akun? Hubungi Super Admin untuk reset password.</p>
+        <p className="text-center text-xs text-muted">Email akun tidak aktif atau tidak menerima kode? Hubungi Super Admin untuk memperbarui email akun Anda.</p>
         <Link href="/login" className="flex items-center justify-center gap-1 text-sm text-muted hover:text-ink">
           <ArrowLeft size={14} /> Kembali ke halaman masuk
         </Link>

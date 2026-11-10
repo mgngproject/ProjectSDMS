@@ -161,11 +161,11 @@ Menu **Akun** (hanya Super Admin) membuat dan mengelola akun dari aplikasi, dan 
 
 Bila PIC lupa password, tautan **Lupa password?** di halaman masuk (`/login/lupa-password`) meminta email akun, lalu Supabase mengirim **kode verifikasi** ke email itu. PIC memasukkan kode dan password baru di halaman yang sama. Pesan setelah meminta kode selalu sama agar tidak membocorkan email mana yang terdaftar. Syaratnya:
 
-1. Email akun harus kotak masuk yang benar-benar bisa dibuka PIC (ubah lewat Supabase → Authentication → Users bila perlu).
+1. Email akun harus kotak masuk yang benar-benar bisa dibuka PIC. Super Admin mengubahnya di menu **Akun** (kolom Email, lalu Simpan); email baru langsung berlaku untuk masuk.
 2. **Custom SMTP** di Supabase (Authentication → Emails → SMTP Settings), misalnya Gmail dengan App Password, Brevo, atau Resend. Layanan email bawaan Supabase hanya mengirim ke anggota tim project dan dibatasi beberapa email per jam.
 3. Template **Reset Password** (Authentication → Emails → Templates) memuat kode `{{ .Token }}`, contoh: `<h2>Atur ulang password SDMS</h2><p>Kode verifikasi Anda: <b>{{ .Token }}</b></p><p>Kode berlaku sementara. Abaikan email ini bila Anda tidak memintanya.</p>`
 
-Bila PIC tidak bisa membuka email akunnya, Super Admin tetap bisa me-reset: isi password sementara di kolom **Reset password** menu Akun (tombol acak membuatkannya, tombol salin menyalinnya), klik **Reset**, lalu menyampaikannya ke PIC. Pengguna tidak lagi mengganti password dari halaman khusus; penggantian password hanya lewat **Lupa password?**.
+Tidak ada reset password oleh Super Admin dan tidak ada halaman ganti password terpisah: satu-satunya cara mengganti password adalah **Lupa password?**.
 
 ## 7. Perintah
 
