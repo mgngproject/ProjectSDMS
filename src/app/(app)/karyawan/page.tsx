@@ -98,6 +98,7 @@ export default async function KaryawanPage({ searchParams }: { searchParams: Pro
                     <div className="flex items-center gap-3">
                       <Link className="link" href={`/karyawan/${r.id}/edit`}>Ubah</Link>
                       <Link className="link" href={`/karyawan/${r.id}/kontrak`}>Kontrak</Link>
+                      <Link className="link" href={`/karyawan/${r.id}/mutasi`}>Mutasi</Link>
                       <Link className="link" href={`/karyawan/${r.id}/datadiri`}>Data Diri</Link>
                       <Link className="link" href={`/karyawan/${r.id}/terminate`}>Terminate</Link>
                       <ConfirmSubmit label="Hapus" message={`Hapus ${r.nama}?`} formAction={deleteKaryawan.bind(null, r.id)} />

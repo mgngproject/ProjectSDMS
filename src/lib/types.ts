@@ -80,3 +80,15 @@ export type KaryawanMagang = {
 
 /** Baris detail kategori; bentuknya bergantung pada konfigurasi kategori. */
 export type Detail = Record<string, string | null>;
+
+export type Mutasi = {
+  id: number;
+  karyawan_id: number;
+  tanggal: string;
+  kode_bagan_lama: string | null;
+  unit_kerja_lama: string | null;
+  kode_bagan_baru: string | null;
+  unit_kerja_baru: string | null;
+  keterangan: string | null;
+  created_at: string;
+};
