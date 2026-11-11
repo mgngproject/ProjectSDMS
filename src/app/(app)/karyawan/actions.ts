@@ -56,16 +56,16 @@ async function namaKategori(supabase: Awaited<ReturnType<typeof createClient>>, 
   return data?.nama ?? null;
 }
 
-/** Peringatan (bukan penolakan) bila penempatan peserta Magang melebihi kuota unit kerjanya. */
+/** Peringatan (bukan penolakan) bila peserta Magang membuat kuota divisinya penuh. */
 async function peringatanMagang(
   supabase: Awaited<ReturnType<typeof createClient>>,
   namaKat: string | null,
-  baru: { unit_kerja: string | null; penempatan: string | null; awal: string; akhir: string },
+  baru: { kode: string | null; awal: string; akhir: string },
   kecuali?: number,
 ): Promise<string> {
   if (namaKat !== "Magang") return "";
-  const [kuota, peserta] = await Promise.all([ambilKuota(supabase), ambilPesertaMagang(supabase, kecuali)]);
-  const pesan = peringatanKuota(kuota, peserta, baru);
+  const [kuota, peserta, bagan] = await Promise.all([ambilKuota(supabase), ambilPesertaMagang(supabase, kecuali), ambilBagan(supabase, true)]);
+  const pesan = peringatanKuota(kuota, peserta, bagan, baru);
   return pesan ? ` Peringatan kuota: ${pesan}` : "";
 }
 
@@ -126,7 +126,7 @@ export async function createKaryawan(formData: FormData) {
   });
   if (kontrakError) redirect(dengan("/karyawan", "error", `Karyawan tersimpan, tetapi kontrak gagal dibuat: ${pesanGalat(kontrakError)}`));
 
-  const peringatan = await peringatanMagang(supabase, namaKat, { unit_kerja: umum.unit_kerja, penempatan: detail?.values.penempatan ?? null, awal, akhir }, karyawan.id);
+  const peringatan = await peringatanMagang(supabase, namaKat, { kode: umum.kode_bagan, awal, akhir }, karyawan.id);
   revalidatePath("/karyawan");
   redirect(dengan("/karyawan", "ok", `Data karyawan berhasil ditambahkan.${peringatan}`));
 }
