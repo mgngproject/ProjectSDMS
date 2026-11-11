@@ -213,7 +213,10 @@ export function kelengkapan(aktif: Orang[], hari: string, kategori: string[]) {
 // ---------- direktorat dan divisi ----------
 export const TANPA_BAGAN = "Belum dipetakan";
 
-/** Menentukan direktorat dan divisi dari kode bagan. Direktorat = atasan tertinggi di daftar; bila daftar tidak punya atasan, dua karakter depan kode. */
+/**
+ * Menentukan direktorat dan divisi dari kode bagan: satu angka depan = direktorat (50000), dua angka depan = divisi (52000).
+ * Bila kode resmi direktorat atau divisinya tidak ada di daftar, dipakai atasan di daftar (induk_kode), lalu unit itu sendiri.
+ */
 export function peta(bagan: BaganRow[]) {
   const byKode = new Map(bagan.map((b) => [normKode(b.kode), b]));
   const akar = (kode: string): string => {
@@ -225,15 +228,19 @@ export function peta(bagan: BaganRow[]) {
     }
     return k;
   };
+  const cari = (pola: RegExp, awalan: string) => bagan.find((x) => pola.test(normKode(x.kode)) && normKode(x.kode).startsWith(awalan));
   return (kodeAsli: string | null, unit: string | null): { direktorat: string; divisi: string } => {
     const kode = normKode(kodeAsli);
     const b = kode ? byKode.get(kode) : undefined;
     if (!b) return { direktorat: TANPA_BAGAN, divisi: unit?.trim() || (kode ? kode : "Tanpa unit kerja") };
+    const dir = cari(/^\d0+$/, kode.slice(0, 1));
+    const div = cari(/^\d[1-9]0+$/, kode.slice(0, 2));
+    if (dir || div) {
+      const direktorat = (dir ?? byKode.get(akar(kode)) ?? b).nama_unit;
+      return { direktorat, divisi: (div ?? b).nama_unit };
+    }
     const root = akar(kode);
     if (root !== kode) return { direktorat: byKode.get(root)!.nama_unit, divisi: b.nama_unit };
-    const awalan = kode.slice(0, 2);
-    const pucuk = bagan.find((x) => /^\d{2}0+$/.test(normKode(x.kode)) && normKode(x.kode).startsWith(awalan));
-    if (pucuk && normKode(pucuk.kode) !== kode) return { direktorat: pucuk.nama_unit, divisi: b.nama_unit };
     return { direktorat: b.nama_unit, divisi: b.nama_unit };
   };
 }

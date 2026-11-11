@@ -18,13 +18,15 @@ export type ItemDivisi = {
   yatim: boolean;
 };
 
+export type ItemDirektorat = { awalan: string; kode: string | null; nama: string; divisi: ItemDivisi[] };
+
 const PILL = { success: "pill-success", warning: "pill-warning", danger: "pill-danger" } as const;
 const BAR = { success: "bg-success", warning: "bg-warning", danger: "bg-danger" } as const;
 
 /** Daftar divisi memanjang; klik satu divisi membuka unit kerjanya di bawahnya. Kuota diubah langsung di barisnya. */
-export default function KuotaDaftar({ items }: { items: ItemDivisi[] }) {
-  const [kuota, setKuota] = useState<Record<string, number | null>>(() => Object.fromEntries(items.map((d) => [d.awalan, d.kuota])));
-  const [terbuka, setTerbuka] = useState<Set<string>>(new Set());
+export default function KuotaDaftar({ grup }: { grup: ItemDirektorat[] }) {
+  const [kuota, setKuota] = useState<Record<string, number | null>>(() => Object.fromEntries(grup.flatMap((g) => g.divisi).map((d) => [d.awalan, d.kuota])));
+  const [terbuka, setTerbuka] = useState<Set<string>>(() => new Set(grup.map((g) => `d${g.awalan}`)));
   const [galat, setGalat] = useState<string | null>(null);
   const [, mulai] = useTransition();
 
@@ -57,17 +59,39 @@ export default function KuotaDaftar({ items }: { items: ItemDivisi[] }) {
     <div className="card overflow-hidden">
       {galat && <p className="border-b border-line bg-danger-soft p-3 text-sm text-danger" role="alert">{galat}</p>}
       <div className="hidden grid-cols-[minmax(0,1fr)_120px_180px_150px] gap-3 border-b border-line px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted md:grid">
-        <span>Divisi</span><span>Terisi / kuota</span><span>Penggunaan</span><span>Kuota</span>
+        <span>Direktorat dan divisi</span><span>Terisi / kuota</span><span>Penggunaan</span><span>Kuota</span>
       </div>
-      {items.length === 0 && <p className="p-6 text-center text-sm text-muted">Daftar Kode Bagan masih kosong. Minta Super Admin mengisinya di menu Kode Bagan.</p>}
-      {items.map((d) => {
+      {grup.length === 0 && <p className="p-6 text-center text-sm text-muted">Daftar Kode Bagan masih kosong. Minta Super Admin mengisinya di menu Kode Bagan.</p>}
+      {grup.map((g) => {
+        const idG = `d${g.awalan}`;
+        const bukaG = terbuka.has(idG);
+        const totT = g.divisi.reduce((n, v) => n + v.terisi, 0);
+        const diatur = g.divisi.filter((v) => (kuota[v.awalan] ?? null) !== null);
+        const totK = diatur.reduce((n, v) => n + (kuota[v.awalan] ?? 0), 0);
+        return (
+          <div key={g.awalan}>
+            <div className="grid items-center gap-3 border-b border-line bg-soft px-4 py-3 md:grid-cols-[minmax(0,1fr)_120px_180px_150px]">
+              <button type="button" aria-expanded={bukaG} aria-controls={`isi-${idG}`} onClick={() => geser(idG)} className="group flex min-w-0 items-center gap-2.5 text-left">
+                <ChevronDown size={18} className={`shrink-0 text-muted transition ${bukaG ? "rotate-180" : ""}`} aria-hidden="true" />
+                <span className="min-w-0">
+                  <b className="font-bold group-hover:text-primary">{g.nama}</b>
+                  {g.kode && <span className="ml-1.5 text-xs tabular-nums text-muted">{g.kode}</span>}
+                  <small className="block text-xs text-muted">{g.divisi.length} divisi</small>
+                </span>
+              </button>
+              <div className="text-xs tabular-nums text-muted">{totT} / {diatur.length ? totK : "-"}</div>
+              <div />
+              <div />
+            </div>
+            <div id={`isi-${idG}`}>
+            {bukaG && g.divisi.map((d) => {
         const k = kuota[d.awalan] ?? null;
         const st = k === null ? null : statusKuota(k, d.terisi);
         const pct = k ? Math.min(100, (d.terisi / k) * 100) : d.terisi ? 100 : 0;
         const buka = terbuka.has(d.awalan);
         return (
           <div key={d.awalan} className="border-b border-line last:border-b-0">
-            <div className="grid items-center gap-3 px-4 py-3 md:grid-cols-[minmax(0,1fr)_120px_180px_150px]">
+            <div className="grid items-center gap-3 px-4 py-3 md:grid-cols-[minmax(0,1fr)_120px_180px_150px] md:pl-11">
               <button
                 type="button" aria-expanded={buka} aria-controls={`unit-${d.awalan}`} onClick={() => geser(d.awalan)}
                 className="group flex min-w-0 items-center gap-2.5 text-left"
@@ -112,6 +136,10 @@ export default function KuotaDaftar({ items }: { items: ItemDivisi[] }) {
                 )}
               </div>
             )}
+          </div>
+        );
+            })}
+            </div>
           </div>
         );
       })}

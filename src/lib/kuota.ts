@@ -1,5 +1,5 @@
-// Perhitungan kuota Magang per divisi. Divisi diambil dari Kode Bagan: kode berpola dua angka lalu nol semua
-// (mis. 10000) adalah divisi, dan unit kerja yang dua karakter depan kodenya sama masuk ke divisi itu.
+// Perhitungan kuota Magang per divisi. Struktur diambil dari Kode Bagan: satu angka depan = direktorat (mis. 50000),
+// dua angka depan = divisi (mis. 52000), dan unit kerja (mis. 52A00) ikut divisi lewat dua karakter depannya.
 // Satu peserta memakai satu slot selama seluruh masa kontraknya.
 import { normKode } from "@/lib/bagan";
 
@@ -22,30 +22,53 @@ export const bulanValid = (ym: string | undefined): ym is string => !!ym && /^\d
 
 /** Dua karakter depan kode, yang menentukan divisinya. */
 export const awalanKode = (kode: string | null | undefined) => normKode(kode).slice(0, 2);
-/** Kode divisi: dua angka lalu nol semua, mis. 10000 dan 20000. */
-export const kodeDivisi = (kode: string | null | undefined) => /^\d{2}0+$/.test(normKode(kode));
+/** Satu karakter depan kode, yang menentukan direktoratnya. */
+export const awalanDirektorat = (kode: string | null | undefined) => normKode(kode).slice(0, 1);
+/** Kode direktorat: satu angka lalu nol semua, mis. 50000. */
+export const kodeDirektorat = (kode: string | null | undefined) => /^\d0+$/.test(normKode(kode));
+/** Kode divisi: dua angka (angka kedua bukan nol) lalu nol semua, mis. 52000. */
+export const kodeDivisi = (kode: string | null | undefined) => /^\d[1-9]0+$/.test(normKode(kode));
+
+export type Direktorat = { awalan: string; kode: string | null; nama: string; divisi: Divisi[] };
 
 /**
- * Menyusun divisi dari daftar bagan. Awalan yang punya unit tetapi tidak punya kode divisi di daftar tetap muncul,
- * dengan nama "Divisi <awalan>". Urut menurut awalan.
+ * Menyusun direktorat > divisi > unit kerja dari daftar bagan. Satu angka depan menentukan direktorat, dua angka depan
+ * menentukan divisi. Unit yang angka keduanya nol (mis. 50A00) tidak punya divisi sendiri, jadi ditaruh di divisi
+ * "Langsung di bawah direktorat" milik direktoratnya. Awalan tanpa kode resmi tetap muncul dengan nama bawaan.
  */
-export function susunDivisi(bagan: BaganKuota[]): Divisi[] {
-  const peta = new Map<string, Divisi>();
+export function susunDirektorat(bagan: BaganKuota[]): Direktorat[] {
+  const dirs = new Map<string, Direktorat>();
   for (const b of bagan) {
     const kode = normKode(b.kode);
     if (!kode) continue;
+    const da = awalanDirektorat(kode);
+    const dir = dirs.get(da) ?? { awalan: da, kode: null, nama: `Direktorat ${da}`, divisi: [] };
+    dirs.set(da, dir);
+    if (kodeDirektorat(kode)) {
+      dir.kode = kode;
+      dir.nama = b.nama_unit;
+      continue;
+    }
     const a = awalanKode(kode);
-    const d = peta.get(a) ?? { awalan: a, kode: null, nama: `Divisi ${a}`, units: [] };
+    let d = dir.divisi.find((x) => x.awalan === a);
+    if (!d) {
+      d = { awalan: a, kode: null, nama: a[1] === "0" ? "Langsung di bawah direktorat" : `Divisi ${a}`, units: [] };
+      dir.divisi.push(d);
+    }
     if (kodeDivisi(kode)) {
       d.kode = kode;
       d.nama = b.nama_unit;
     } else {
       d.units.push({ kode, nama: b.nama_unit });
     }
-    peta.set(a, d);
   }
-  return [...peta.values()].sort((x, y) => x.awalan.localeCompare(y.awalan));
+  const urut = [...dirs.values()].sort((x, y) => x.awalan.localeCompare(y.awalan));
+  for (const d of urut) d.divisi.sort((x, y) => x.awalan.localeCompare(y.awalan));
+  return urut;
 }
+
+/** Daftar divisi saja (tanpa direktorat), urut menurut awalan. */
+export const susunDivisi = (bagan: BaganKuota[]): Divisi[] => susunDirektorat(bagan).flatMap((d) => d.divisi).sort((x, y) => x.awalan.localeCompare(y.awalan));
 
 /** Peserta di divisi itu yang kontraknya mencakup bulan tersebut (sebagian bulan pun dihitung). */
 export function pesertaDiBulan(peserta: PesertaKuota[], awalan: string, ym: string): PesertaKuota[] {
