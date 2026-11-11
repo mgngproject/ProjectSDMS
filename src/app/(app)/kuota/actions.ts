@@ -1,56 +1,42 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { getProfile } from "@/lib/auth";
-import { TEMPAT } from "@/lib/kuota";
-import { dengan, pesanGalat, text } from "@/lib/params";
+import { normKode } from "@/lib/bagan";
+import { pesanGalat } from "@/lib/params";
 import { createClient } from "@/lib/supabase/server";
 
+type Hasil = { error?: string };
+
 /** Kuota hanya untuk PIC Magang; Super Admin tidak punya akses. */
-async function pastikanPicMagang() {
+async function picMagang(): Promise<boolean> {
   const profile = await getProfile();
-  if (profile.role === "superadmin" || profile.kategori?.nama !== "Magang") redirect(dengan("/kuota", "error", "Kuota hanya bisa diubah oleh PIC Magang."));
+  return profile.role !== "superadmin" && profile.kategori?.nama === "Magang";
 }
 
-function bacaKuota(f: FormData): number | null {
-  const n = Number(text(f, "kuota"));
-  return Number.isInteger(n) && n >= 0 ? n : null;
-}
+const AWALAN = /^[A-Z0-9]{2}$/;
 
-export async function tambahKuota(formData: FormData) {
-  await pastikanPicMagang();
-  const unit = text(formData, "unit_kerja");
-  const tempat = text(formData, "penempatan");
-  const kuota = bacaKuota(formData);
-  if (!unit) redirect(dengan("/kuota", "error", "Unit kerja wajib diisi."));
-  if (!tempat || !(TEMPAT as readonly string[]).includes(tempat)) redirect(dengan("/kuota", "error", "Penempatan tidak valid."));
-  if (kuota === null) redirect(dengan("/kuota", "error", "Kuota harus berupa bilangan bulat 0 atau lebih."));
-
+/** Menyimpan kuota satu divisi (dua karakter depan kode bagan). Dipanggil langsung dari halaman, tanpa pindah halaman. */
+export async function simpanKuota(awalan: string, kuota: number): Promise<Hasil> {
+  if (!(await picMagang())) return { error: "Kuota hanya bisa diubah oleh PIC Magang." };
+  const a = normKode(awalan);
+  if (!AWALAN.test(a)) return { error: "Divisi tidak valid." };
+  if (!Number.isInteger(kuota) || kuota < 0 || kuota > 9999) return { error: "Kuota harus berupa bilangan bulat 0 sampai 9999." };
   const supabase = await createClient();
-  const { error } = await supabase.from("kuota_magang").insert({ unit_kerja: unit, penempatan: tempat, kuota });
-  if (error) redirect(dengan("/kuota", "error", error.code === "23505" ? `${unit} sudah punya kuota di ${tempat}.` : pesanGalat(error)));
+  const { error } = await supabase.from("kuota_divisi").upsert({ awalan: a, kuota, updated_at: new Date().toISOString() }, { onConflict: "awalan" });
+  if (error) return { error: error.code === "42P01" ? "Tabel kuota belum ada di database. Jalankan migrasi 0024_kuota_divisi.sql di Supabase SQL Editor." : pesanGalat(error) };
   revalidatePath("/kuota");
-  redirect(dengan("/kuota", "ok", "Kuota ditambahkan"));
+  return {};
 }
 
-// Nomor disematkan lewat bind(): nama dan nilai tombol tidak ikut terkirim bersama aksi server
-export async function ubahKuota(id: number, formData: FormData) {
-  await pastikanPicMagang();
-  const kuota = bacaKuota(formData);
-  if (kuota === null) redirect(dengan("/kuota", "error", "Kuota harus berupa bilangan bulat 0 atau lebih."));
+/** Menghapus kuota satu divisi (mis. divisi yang sudah tidak ada di daftar bagan). */
+export async function hapusKuota(awalan: string): Promise<Hasil> {
+  if (!(await picMagang())) return { error: "Kuota hanya bisa diubah oleh PIC Magang." };
+  const a = normKode(awalan);
+  if (!AWALAN.test(a)) return { error: "Divisi tidak valid." };
   const supabase = await createClient();
-  const { error } = await supabase.from("kuota_magang").update({ kuota }).eq("id", id);
-  if (error) redirect(dengan("/kuota", "error", pesanGalat(error)));
+  const { error } = await supabase.from("kuota_divisi").delete().eq("awalan", a);
+  if (error) return { error: pesanGalat(error) };
   revalidatePath("/kuota");
-  redirect(dengan("/kuota", "ok", "Kuota disimpan"));
-}
-
-export async function hapusKuota(id: number, _formData: FormData) {
-  await pastikanPicMagang();
-  const supabase = await createClient();
-  const { error } = await supabase.from("kuota_magang").delete().eq("id", id);
-  if (error) redirect(dengan("/kuota", "error", pesanGalat(error)));
-  revalidatePath("/kuota");
-  redirect(dengan("/kuota", "ok", "Kuota dihapus"));
+  return {};
 }
