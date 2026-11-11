@@ -1,13 +1,13 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import KuotaDaftar, { type ItemDivisi } from "@/components/KuotaDaftar";
+import KuotaDaftar, { type ItemDirektorat, type ItemDivisi } from "@/components/KuotaDaftar";
 import PageHeader from "@/components/PageHeader";
 import { getProfile } from "@/lib/auth";
 import { normKode } from "@/lib/bagan";
 import { ambilBagan } from "@/lib/bagan-data";
 import { hariIni } from "@/lib/format";
-import { awalanKode, bulanDari, bulanValid, geserBulan, namaBulan, pesertaDiBulan, susunDivisi } from "@/lib/kuota";
+import { awalanKode, bulanDari, bulanValid, geserBulan, namaBulan, pesertaDiBulan, susunDirektorat } from "@/lib/kuota";
 import { ambilKuota, ambilPesertaMagang } from "@/lib/kuota-data";
 import { createClient } from "@/lib/supabase/server";
 
@@ -21,7 +21,8 @@ export default async function KuotaPage({ searchParams }: { searchParams: Promis
   const [bagan, kuota, peserta] = await Promise.all([ambilBagan(supabase, true), ambilKuota(supabase), ambilPesertaMagang(supabase)]);
   const bulan = bulanValid(sp.bulan) ? sp.bulan : bulanDari(hariIni());
 
-  const divisi = susunDivisi(bagan);
+  const direktorat = susunDirektorat(bagan);
+  const divisi = direktorat.flatMap((d) => d.divisi);
   const kuotaPer = new Map(kuota.map((k) => [k.awalan, k.kuota]));
   const awalanDikenal = new Set(divisi.map((d) => d.awalan));
   const aktifBulanIni = peserta.filter((p) => p.awal && p.akhir && bulanDari(p.awal) <= bulan && bulanDari(p.akhir) >= bulan);
@@ -35,11 +36,11 @@ export default async function KuotaPage({ searchParams }: { searchParams: Promis
     units: d.units.map((u) => ({ ...u, jumlah: aktifBulanIni.filter((p) => normKode(p.kode) === u.kode).length })),
     yatim,
   });
-  const items: ItemDivisi[] = [
-    ...divisi.map((d) => item(d, false)),
-    // Kuota tersimpan untuk awalan yang tidak ada lagi di daftar bagan (mis. setelah restrukturisasi)
-    ...kuota.filter((k) => !awalanDikenal.has(k.awalan)).map((k) => item({ awalan: k.awalan, kode: null, nama: `Divisi ${k.awalan}`, units: [] }, true)),
-  ];
+  const grup: ItemDirektorat[] = direktorat.map((d) => ({ awalan: d.awalan, kode: d.kode, nama: d.nama, divisi: d.divisi.map((v) => item(v, false)) }));
+  // Kuota tersimpan untuk awalan yang tidak ada lagi di daftar bagan (mis. setelah restrukturisasi)
+  const yatim = kuota.filter((k) => !awalanDikenal.has(k.awalan)).map((k) => item({ awalan: k.awalan, kode: null, nama: `Divisi ${k.awalan}`, units: [] }, true));
+  if (yatim.length) grup.push({ awalan: "?", kode: null, nama: "Tidak ada di daftar Kode Bagan", divisi: yatim });
+  const items: ItemDivisi[] = grup.flatMap((g) => g.divisi);
 
   const totalKuota = items.reduce((n, d) => n + (d.kuota ?? 0), 0);
   const totalTerisi = items.reduce((n, d) => n + (d.kuota === null ? 0 : d.terisi), 0);
@@ -58,8 +59,8 @@ export default async function KuotaPage({ searchParams }: { searchParams: Promis
       </PageHeader>
 
       <p className="text-sm text-muted">
-        Kuota diatur per divisi. Divisi diambil dari Kode Bagan: kode seperti 10000 dan 20000 adalah divisi, dan unit kerja yang dua angka depan kodenya sama masuk ke divisi itu.
-        Peserta dihitung lewat Kode Bagan-nya dan memakai satu slot selama seluruh masa kontraknya. Klik satu divisi untuk melihat unit kerjanya.
+        Kuota diatur per divisi. Strukturnya dari Kode Bagan: satu angka depan menentukan direktorat, dua angka depan menentukan divisi, dan unit kerja ikut divisinya.
+        Peserta dihitung lewat Kode Bagan-nya dan memakai satu slot selama seluruh masa kontraknya. Klik direktorat atau divisi untuk membukanya.
       </p>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -76,7 +77,7 @@ export default async function KuotaPage({ searchParams }: { searchParams: Promis
         </p>
       )}
 
-      <KuotaDaftar key={bulan} items={items} />
+      <KuotaDaftar key={bulan} grup={grup} />
 
       <p className="text-xs text-muted">Unit kerja dan divisi dikelola Super Admin di menu Kode Bagan. Halaman ini hanya membaca daftar itu.</p>
     </div>
