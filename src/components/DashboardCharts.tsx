@@ -48,14 +48,6 @@ export function GrafikKategori({ data }: { data: { nama: string; total: number }
   );
 }
 
-export function GrafikKampus({ data }: { data: { nama: string; S1: number; S2: number }[] }) {
-  return (
-    <div className="h-72 w-full">
-      {data.every((d) => d.S1 + d.S2 === 0) ? <Kosong /> : <Kolom data={data} kunci={["S1", "S2"]} warna={[WARNA[0], WARNA[1]]} />}
-    </div>
-  );
-}
-
 export function GrafikPendidikan({ data }: { data: { nama: string; total: number }[] }) {
   return (
     <div className="h-64 w-full">

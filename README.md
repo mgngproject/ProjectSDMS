@@ -30,7 +30,7 @@ Versi ini dibangun dengan **Next.js + Supabase** dan di-deploy ke **Vercel**. Ve
 Logikanya mengikuti versi Laravel.
 
 * **Login & hak akses** — admin hanya melihat dan mengelola data kategorinya; Super Admin melihat semua.
-* **Dashboard** — penunjuk bulan; karyawan aktif, masuk, kontrak habis, dan berkas belum lengkap; grafik masuk dan habis per bulan, pendidikan, 10 kampus teratas, dan per kategori; daftar kontrak habis ≤ 60 hari; filter kategori untuk Super Admin.
+* **Dashboard** — penunjuk bulan; karyawan aktif, masuk, kontrak habis, dan berkas belum lengkap; grafik masuk dan habis per bulan, pendidikan, dan per kategori; daftar kontrak habis ≤ 60 hari; filter kategori untuk Super Admin.
 * **Dashboard Super Admin** — dua tab. **Ringkasan**: kartu karyawan aktif, masuk bulan ini, kontrak berakhir bulan ini, dan turnover 12 bulan (dengan perbandingan dan garis tren kecil); tren karyawan aktif dengan batang masuk dan keluar; Perlu tindak lanjut; Kontrak habis dalam 60 hari (jendela mengikuti kategori); Risiko perpanjangan (habis ≤ 30 hari menurut kelengkapan berkas); Corong perpanjangan; Alasan keluar. **Profil**: karyawan aktif per direktorat dan divisi (treemap dari daftar Kode Bagan), sebaran usia, pendidikan menurut kelompok usia, masa kerja, dan kelengkapan data. Filter kategori berlaku untuk semuanya, klik batang atau kotak membuka daftar orangnya, dan tiap grafik punya tampilan tabel. Dashboard PIC tidak berubah. Logika ada di `src/lib/dashboard-sa.ts`.
 * **Data Karyawan** — Super Admin memilih kategori lewat submenu di sidebar (dengan jumlah karyawan aktif per kategori); tiap kategori menampilkan kolomnya sendiri, tambah (otomatis membuat Kontrak 1, data diri, dan monitoring), ubah, hapus, hapus massal, cari, filter masuk/habis per bulan dan tahun, masa kerja dan masa kontrak, export Excel.
 * **Mutasi** — riwayat perpindahan unit kerja. Tercatat otomatis setiap kali kode bagan karyawan berubah (Ubah data atau Import Excel); bisa juga dicatat manual di **Karyawan → Mutasi** dengan tanggal efektif dan keterangan (mis. No. SK), yang sekaligus memindahkan unit kerjanya. Tanggal dan keterangan bisa diubah, baris yang salah catat bisa dihapus. Menu **Mutasi** menampilkan semua riwayat (cari, filter kategori dan tanggal, Export Excel). Mengganti kode atau nama unit di menu Kode Bagan tidak dihitung sebagai mutasi.
@@ -63,7 +63,7 @@ Menu **Kode Bagan** (hanya Super Admin) memegang daftar bagan, tabel `bagan`: ko
 Kolom khusus kategori lain didaftarkan di `src/lib/kategori-config.ts`.
 
 ### Dashboard "akan selesai"
-Dashboard menampilkan daftar karyawan yang kontraknya akan berakhir dalam jendela waktu per kategori: Magang 30 hari, TPBW/TPP, PKWT, BGN, dan Inagov 2 bulan serta IDE, IDH, dan TAD 1 bulan (bulan kalender), kategori lain 60 hari. Jendela diatur di `JENDELA_KHUSUS` pada `src/lib/kategori-config.ts`.
+Dashboard menampilkan daftar karyawan yang kontraknya akan berakhir dalam jendela waktu per kategori: Magang 30 hari, TPBW/TPP, PKWT, BGN, Inagov, IDE, dan IDH 2 bulan serta TAD 1 bulan (bulan kalender), kategori lain 60 hari. Jendela diatur di `JENDELA_KHUSUS` pada `src/lib/kategori-config.ts`.
 
 ### Form karyawan
 Form Tambah dan Ubah karyawan berada di tengah halaman dengan judul sejajar, isiannya dikelompokkan (Identitas, Data kategori, Kontrak, Penempatan, Kompensasi, Lainnya; bagian yang kosong untuk suatu kategori tidak tampil), dan tombol Simpan menempel di bawah layar saat form digulir.

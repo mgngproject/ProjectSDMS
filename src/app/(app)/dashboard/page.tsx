@@ -1,6 +1,6 @@
 import { CalendarClock, ChevronLeft, ChevronRight, ClipboardList, FolderOpen, Info, UserMinus, UserPlus, Users } from "lucide-react";
 import Link from "next/link";
-import { GrafikBulanan, GrafikKampus, GrafikKategori, GrafikPendidikan, GrafikSebaran } from "@/components/DashboardCharts";
+import { GrafikBulanan, GrafikKategori, GrafikPendidikan, GrafikSebaran } from "@/components/DashboardCharts";
 import DashboardSuperAdmin from "@/components/DashboardSuperAdmin";
 import PageHeader from "@/components/PageHeader";
 import StatCard from "@/components/StatCard";
@@ -48,7 +48,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const [{ data: kategori }, { data: karyawanData }, { data: dataDiri }, { data: monitoring }, { data: detailData }] = await Promise.all([
     supabase.from("kategori").select("id, nama").order("id"),
     supabase.from("karyawan").select("id, np, nama, unit_kerja, jabatan, level, status, tanggal_keluar, awal_kontrak, akhir_kontrak, kategori:kategori_id(nama)"),
-    supabase.from("data_diri").select("karyawan_id, jenjang_1, jenjang_2, kampus_1, kampus_2"),
+    supabase.from("data_diri").select("karyawan_id, jenjang_1, jenjang_2"),
     supabase.from("monitoring").select("karyawan_id, status"),
     config ? supabase.from(config.tabel).select("*") : Promise.resolve({ data: [] as Record<string, string | null>[] }),
   ]);
@@ -177,11 +177,6 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         <section className="card p-5">
           <h2 className="mb-3 font-semibold">Pendidikan terakhir</h2>
           <GrafikPendidikan data={d.pendidikan} />
-        </section>
-
-        <section className="card p-5">
-          <h2 className="mb-3 font-semibold">10 kampus teratas</h2>
-          <GrafikKampus data={d.kampus} />
         </section>
 
         {!config && (

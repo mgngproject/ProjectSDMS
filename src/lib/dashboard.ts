@@ -1,27 +1,10 @@
 import { hariIni, selisihHari, tambahHari } from "@/lib/format";
 import type { DataDiri, Karyawan } from "@/lib/types";
 
-// Alias nama kampus untuk grafik 10 kampus teratas (sama dengan Laravel)
-const ALIAS_KAMPUS: Record<string, string[]> = {
-  UGM: ["UGM", "Universitas Gadjah Mada", "Univ Gadjah Mada", "Univ. Gadjah Mada"],
-  UI: ["UI", "Universitas Indonesia"],
-  UNAIR: ["UNAIR", "Universitas Airlangga"],
-  ITB: ["ITB", "Institut Teknologi Bandung"],
-  UNS: ["UNS", "Universitas Sebelas Maret"],
-  IPB: ["IPB", "Institut Pertanian Bogor", "IPB University"],
-  ITS: ["ITS", "Institut Teknologi Sepuluh Nopember"],
-  UNDIP: ["UNDIP", "Universitas Diponegoro"],
-  UNPAD: ["UNPAD", "Universitas Padjadjaran", "Universitas Padjajaran"],
-  UPI: ["UPI", "Universitas Pendidikan Indonesia"],
-};
-
-const normal = (s: string) => s.trim().toLowerCase().replace(/\s+/g, " ");
-const LOOKUP = new Map(Object.entries(ALIAS_KAMPUS).flatMap(([key, list]) => list.map((a) => [normal(a), key] as const)));
-
 type KaryawanRow = Pick<Karyawan, "id" | "np" | "nama" | "unit_kerja" | "jabatan" | "level" | "status" | "tanggal_keluar" | "awal_kontrak" | "akhir_kontrak"> & {
   kategori: { nama: string } | null;
 };
-type PendidikanRow = Pick<DataDiri, "karyawan_id" | "jenjang_1" | "jenjang_2" | "kampus_1" | "kampus_2">;
+type PendidikanRow = Pick<DataDiri, "karyawan_id" | "jenjang_1" | "jenjang_2">;
 type MonitoringRow = { karyawan_id: number; status: string | null };
 
 const ym = (tgl: string | null) => (tgl ? tgl.slice(0, 7) : "");
@@ -80,7 +63,7 @@ export function hitungDashboard(opts: {
     .filter((k) => k.status === "aktif" && k.akhir_kontrak && k.akhir_kontrak >= hari && k.akhir_kontrak <= batasJendela)
     .sort((a, b) => (a.akhir_kontrak ?? "").localeCompare(b.akhir_kontrak ?? ""));
 
-  // Pendidikan dan kampus: karyawan yang belum keluar
+  // Pendidikan: karyawan yang belum keluar
   const belumKeluar = new Set(karyawan.filter((k) => !k.tanggal_keluar).map((k) => k.id));
   const pendidikan = opts.dataDiri.filter((d) => ids.has(d.karyawan_id) && belumKeluar.has(d.karyawan_id));
 
@@ -91,16 +74,6 @@ export function hitungDashboard(opts: {
     const j = terakhir(d);
     return !!j && j !== "S1" && j !== "S2";
   }).length;
-
-  const kampus = Object.fromEntries(Object.keys(ALIAS_KAMPUS).map((k) => [k, { s1: 0, s2: 0 }]));
-  for (const d of pendidikan) {
-    for (const [nama, jenjang] of [[d.kampus_1, d.jenjang_1], [d.kampus_2, d.jenjang_2]] as const) {
-      if (!nama || !jenjang) continue;
-      const key = LOOKUP.get(normal(nama));
-      const j = jenjang.trim().toUpperCase();
-      if (key && (j === "S1" || j === "S2")) kampus[key][j === "S1" ? "s1" : "s2"]++;
-    }
-  }
 
   const perKategori = Object.entries(
     aktif.reduce<Record<string, number>>((acc, k) => {
@@ -129,7 +102,6 @@ export function hitungDashboard(opts: {
       { nama: "S1", total: s1 },
       { nama: "Lainnya", total: lainnya },
     ],
-    kampus: Object.entries(kampus).map(([nama, v]) => ({ nama, S1: v.s1, S2: v.s2 })),
     perKategori,
   };
 }
