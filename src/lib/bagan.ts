@@ -4,6 +4,9 @@ import type { Baris, Hasil } from "@/lib/impor";
 export type Bagan = { id: number; kode: string; nama_unit: string; induk_kode: string | null; aktif: boolean };
 
 /** Kode diseragamkan: spasi tepi dibuang dan huruf menjadi besar. */
+/** Kode yang berdiri sebagai direktorat sendiri walau tidak berpola satu angka lalu nol (mis. 99997 Dewan Pengawas). */
+export const DIREKTORAT_KHUSUS = ["99997"];
+
 export const normKode = (s: string | null | undefined): string => (s ?? "").trim().toUpperCase();
 
 export function cariBagan<T extends { kode: string }>(daftar: T[], kode: string | null | undefined): T | undefined {

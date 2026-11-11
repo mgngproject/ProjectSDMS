@@ -1,11 +1,11 @@
 // Perhitungan kuota Magang per divisi. Struktur diambil dari Kode Bagan: satu angka depan = direktorat (mis. 50000),
 // dua angka depan = divisi (mis. 52000), dan unit kerja (mis. 52A00) ikut divisi lewat dua karakter depannya.
 // Satu peserta memakai satu slot selama seluruh masa kontraknya.
-import { normKode } from "@/lib/bagan";
+import { DIREKTORAT_KHUSUS, normKode } from "@/lib/bagan";
 
 export type KuotaRow = { awalan: string; kuota: number };
 export type PesertaKuota = { id: number; kode: string | null; awal: string | null; akhir: string | null };
-export type BaganKuota = { kode: string; nama_unit: string };
+export type BaganKuota = { kode: string; nama_unit: string; induk_kode?: string | null };
 export type Divisi = { awalan: string; kode: string | null; nama: string; units: { kode: string; nama: string }[] };
 
 const NAMA_BULAN = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
@@ -29,6 +29,12 @@ export const kodeDirektorat = (kode: string | null | undefined) => /^\d0+$/.test
 /** Kode divisi: dua angka (angka kedua bukan nol) lalu nol semua, mis. 52000. */
 export const kodeDivisi = (kode: string | null | undefined) => /^\d[1-9]0+$/.test(normKode(kode));
 
+/** Kode direktorat khusus untuk satu kode bagan: kodenya sendiri, atau atasan langsungnya bila atasan itu direktorat khusus. */
+export const khususDari = (kode: string | null | undefined, induk?: string | null) => {
+  const k = normKode(kode), i = normKode(induk);
+  return DIREKTORAT_KHUSUS.includes(k) ? k : DIREKTORAT_KHUSUS.includes(i) ? i : null;
+};
+
 export type Direktorat = { awalan: string; kode: string | null; nama: string; divisi: Divisi[] };
 
 /**
@@ -41,10 +47,11 @@ export function susunDirektorat(bagan: BaganKuota[]): Direktorat[] {
   for (const b of bagan) {
     const kode = normKode(b.kode);
     if (!kode) continue;
-    const da = awalanDirektorat(kode);
+    const khusus = khususDari(kode, b.induk_kode);
+    const da = khusus ?? awalanDirektorat(kode);
     const dir = dirs.get(da) ?? { awalan: da, kode: null, nama: `Direktorat ${da}`, divisi: [] };
     dirs.set(da, dir);
-    if (kodeDirektorat(kode)) {
+    if (kode === khusus || (!khusus && kodeDirektorat(kode))) {
       dir.kode = kode;
       dir.nama = b.nama_unit;
       continue;
@@ -52,7 +59,7 @@ export function susunDirektorat(bagan: BaganKuota[]): Direktorat[] {
     const a = awalanKode(kode);
     let d = dir.divisi.find((x) => x.awalan === a);
     if (!d) {
-      d = { awalan: a, kode: null, nama: a[1] === "0" ? "Langsung di bawah direktorat" : `Divisi ${a}`, units: [] };
+      d = { awalan: a, kode: null, nama: khusus || a[1] === "0" ? "Langsung di bawah direktorat" : `Divisi ${a}`, units: [] };
       dir.divisi.push(d);
     }
     if (kodeDivisi(kode)) {
@@ -62,6 +69,8 @@ export function susunDirektorat(bagan: BaganKuota[]): Direktorat[] {
       d.units.push({ kode, nama: b.nama_unit });
     }
   }
+  // Direktorat khusus yang hanya punya kode sendiri tetap perlu satu baris divisi agar pesertanya terhitung
+  for (const d of dirs.values()) if (DIREKTORAT_KHUSUS.includes(d.awalan) && d.divisi.length === 0) d.divisi.push({ awalan: awalanKode(d.awalan), kode: null, nama: "Langsung di bawah direktorat", units: [] });
   const urut = [...dirs.values()].sort((x, y) => x.awalan.localeCompare(y.awalan));
   for (const d of urut) d.divisi.sort((x, y) => x.awalan.localeCompare(y.awalan));
   return urut;
