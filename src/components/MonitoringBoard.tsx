@@ -91,7 +91,7 @@ export default function MonitoringBoard({ rows: awal }: { rows: BarisMonitoring[
       </div>
 
       {dipilih && (
-        <aside className="card fixed inset-x-0 bottom-0 z-30 max-h-[78vh] space-y-3 overflow-y-auto rounded-b-none p-4 shadow-2xl lg:sticky lg:inset-auto lg:top-4 lg:z-auto lg:max-h-[calc(100vh-2rem)] lg:rounded-b-xl lg:shadow-none">
+        <aside className="card fixed inset-x-0 bottom-0 z-30 max-h-[calc(78vh/var(--zoom))] space-y-3 overflow-y-auto rounded-b-none p-4 shadow-2xl lg:sticky lg:inset-auto lg:top-4 lg:z-auto lg:max-h-[calc(100vh-2rem)] lg:rounded-b-xl lg:shadow-none">
           <div className="flex items-start justify-between gap-3">
             <div>
               <h2 className="font-semibold">{dipilih.nama}</h2>

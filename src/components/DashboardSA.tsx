@@ -656,6 +656,8 @@ export default function DashboardSA({ orang, hari, kategori, jendela, baganTeris
   const [tab, setTab] = useState<"ringkasan" | "profil">("ringkasan");
   const [daftar, setDaftar] = useState<{ judul: string; orang: Orang[]; link?: { href: string; label: string } } | null>(null);
   const [tip, setTip] = useState<Tip>(null);
+  // Halaman diperkecil lewat CSS zoom (globals.css); posisi kursor dalam piksel layar harus dibagi zoom agar tooltip tepat di dekat kursor
+  const zoom = tip && typeof window !== "undefined" ? parseFloat(getComputedStyle(document.documentElement).zoom) || 1 : 1;
   const daftarRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { if (!magang && window.location.hash === "#profil") setTab("profil"); }, [magang]);
@@ -809,7 +811,7 @@ export default function DashboardSA({ orang, hari, kategori, jendela, baganTeris
       {tip && (
         <div
           role="tooltip" className="pointer-events-none fixed z-50 max-w-[240px] rounded-xl border border-line bg-card px-2.5 py-2 text-xs shadow-xl"
-          style={{ left: Math.min(tip.x + 14, (typeof window !== "undefined" ? window.innerWidth : 1200) - 250), top: tip.y + 14 }}
+          style={{ left: Math.min(tip.x / zoom + 14, (typeof window !== "undefined" ? window.innerWidth : 1200) / zoom - 250), top: tip.y / zoom + 14 }}
         >
           <div className="mb-1 text-muted">{tip.judul}</div>
           {tip.baris.map((b, i) => (

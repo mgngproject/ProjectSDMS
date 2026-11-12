@@ -9,7 +9,7 @@ export default async function GantiPasswordPage({ searchParams }: { searchParams
   const { error } = await searchParams;
 
   return (
-    <main className="relative flex min-h-screen flex-col items-center justify-center gap-8 overflow-hidden p-4">
+    <main className="relative flex min-h-[calc(100vh/var(--zoom))] flex-col items-center justify-center gap-8 overflow-hidden p-4">
       <AsciiBackground avoidId="logo-login" />
 
       <div id="logo-login" className="relative z-10 flex flex-col items-center gap-2">
