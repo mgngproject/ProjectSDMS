@@ -38,7 +38,7 @@ export default function Sidebar({ kategori, tampilKuota, tampilBagan, tampilAkun
         tertutup ? "md:w-20 md:px-3" : "md:w-64"
       }`}
     >
-      <div className={`flex items-center ${tertutup ? "justify-between md:flex-col md:gap-3" : "justify-between gap-2"}`}>
+      <div className={`relative flex items-center ${tertutup ? "justify-between md:flex-col md:gap-3" : "justify-between gap-2 md:justify-center"}`}>
         <Link href="/dashboard" aria-label="Peruri, ke Dashboard" className="flex items-center">
           {/* Logo penuh (selalu di layar kecil; saat sidebar tertutup disembunyikan di layar lebar) */}
           <span className={tertutup ? "md:hidden" : ""}>
@@ -58,7 +58,7 @@ export default function Sidebar({ kategori, tampilKuota, tampilBagan, tampilAkun
           aria-label={tertutup ? "Buka sidebar" : "Tutup sidebar"}
           aria-expanded={!tertutup}
           title={tertutup ? "Buka sidebar" : "Tutup sidebar"}
-          className="hidden rounded-lg p-2 text-muted transition hover:bg-soft hover:text-ink md:inline-flex"
+          className={`hidden rounded-lg p-2 text-muted transition hover:bg-soft hover:text-ink md:inline-flex ${tertutup ? "" : "md:absolute md:right-0"}`}
         >
           {tertutup ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
         </button>
