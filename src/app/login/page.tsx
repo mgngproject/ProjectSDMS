@@ -4,6 +4,7 @@ import Link from "next/link";
 import AsciiBackground from "@/components/AsciiBackground";
 import PasswordInput from "@/components/PasswordInput";
 import { login } from "./actions";
+import TombolKirim from "@/components/TombolKirim";
 
 const PESAN: Record<string, string> = {
   kredensial: "Email atau password salah.",
@@ -52,7 +53,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
             <Link href="/login/ganti-password" className="text-xs text-primary hover:underline">Ganti password</Link>
           </div>
         </div>
-        <button className="btn w-full py-2.5" type="submit">Masuk</button>
+        <TombolKirim className="btn w-full py-2.5">Masuk</TombolKirim>
       </form>
     </main>
   );

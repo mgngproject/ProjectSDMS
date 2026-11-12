@@ -1,5 +1,6 @@
 import { FileSpreadsheet } from "lucide-react";
 import type { Kategori } from "@/lib/types";
+import TombolKirim from "@/components/TombolKirim";
 
 type Props = {
   action: (formData: FormData) => void | Promise<void>;
@@ -34,7 +35,7 @@ export default function ImporForm({ action, kategori, kategoriDipilih }: Props) 
           <input className="input" id="impor_file" name="file" type="file" accept=".xlsx,.xls,.csv" required />
         </div>
         <div className="flex items-center justify-between gap-2">
-          <button className="btn" type="submit">Import</button>
+          <TombolKirim className="btn">Import</TombolKirim>
           <a className="link text-sm" href={templateHref}>Unduh template</a>
         </div>
       </form>

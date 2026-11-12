@@ -1,4 +1,5 @@
 import { FileSpreadsheet } from "lucide-react";
+import TombolKirim from "@/components/TombolKirim";
 
 /** Tombol import laporan perpanjangan kontrak (hanya ditampilkan untuk Super Admin). */
 export default function ImporPerpanjanganForm({ action }: { action: (formData: FormData) => void | Promise<void> }) {
@@ -17,7 +18,7 @@ export default function ImporPerpanjanganForm({ action }: { action: (formData: F
           <input className="input" id="impor_perpanjangan" name="file" type="file" accept=".xlsx,.xls,.csv" required />
         </div>
         <div className="flex items-center justify-between gap-2">
-          <button className="btn" type="submit">Import</button>
+          <TombolKirim className="btn">Import</TombolKirim>
           <a className="link text-sm" href="/api/template/perpanjangan">Unduh template</a>
         </div>
       </form>

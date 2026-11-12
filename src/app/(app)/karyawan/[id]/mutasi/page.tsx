@@ -10,6 +10,7 @@ import { formatTanggal, hariIni } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import type { Mutasi } from "@/lib/types";
 import { catatMutasi, hapusMutasi, ubahMutasi } from "../../../mutasi/actions";
+import TombolKirim from "@/components/TombolKirim";
 
 export default async function RiwayatMutasiKaryawanPage({
   params,
@@ -70,7 +71,7 @@ export default async function RiwayatMutasiKaryawanPage({
                         <input className="input" id={`ket-${m.id}`} name="keterangan" defaultValue={m.keterangan ?? ""} placeholder="mis. No. SK" />
                       </div>
                       <div className="flex items-center justify-between gap-2">
-                        <button className="btn" type="submit">Simpan</button>
+                        <TombolKirim className="btn">Simpan</TombolKirim>
                         <ConfirmSubmit
                           label="Hapus"
                           message="Hapus riwayat mutasi ini? Unit kerja karyawan saat ini tidak berubah."
@@ -114,7 +115,7 @@ export default async function RiwayatMutasiKaryawanPage({
           <input className="input" id="keterangan" name="keterangan" placeholder="mis. No. SK, alasan mutasi" />
         </div>
         <div className="sm:col-span-2">
-          <button className="btn" type="submit">Simpan mutasi</button>
+          <TombolKirim className="btn">Simpan mutasi</TombolKirim>
         </div>
       </form>
       <p className="text-xs text-muted">Perubahan kode bagan lewat menu Ubah data atau Import Excel juga tercatat otomatis di riwayat ini dengan tanggal hari itu.</p>

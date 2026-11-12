@@ -4,6 +4,7 @@ import Link from "next/link";
 import AsciiBackground from "@/components/AsciiBackground";
 import PasswordInput from "@/components/PasswordInput";
 import { gantiPassword } from "../actions";
+import TombolKirim from "@/components/TombolKirim";
 
 export default async function GantiPasswordPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   const { error } = await searchParams;
@@ -45,7 +46,7 @@ export default async function GantiPasswordPage({ searchParams }: { searchParams
           <label className="label" htmlFor="password_ulang">Ulangi password baru</label>
           <PasswordInput id="password_ulang" name="password_ulang" autoComplete="new-password" minLength={8} />
         </div>
-        <button className="btn w-full py-2.5" type="submit">Ganti password</button>
+        <TombolKirim className="btn w-full py-2.5">Ganti password</TombolKirim>
         <Link href="/login" className="flex items-center justify-center gap-1 text-sm text-muted hover:text-ink">
           <ArrowLeft size={14} /> Kembali ke halaman masuk
         </Link>

@@ -3,6 +3,7 @@ import Flash from "@/components/Flash";
 import { getProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { createTerminate } from "../actions";
+import TombolKirim from "@/components/TombolKirim";
 
 const FIELDS: [string, string, string?, boolean?][] = [
   ["np", "NP", "text", true],
@@ -56,7 +57,7 @@ export default async function NewTerminatePage({ searchParams }: { searchParams:
           <textarea className="input" id="alasan_keluar" name="alasan_keluar" rows={2} maxLength={500} required />
         </div>
         <div className="flex gap-2 sm:col-span-2">
-          <button className="btn" type="submit">Simpan</button>
+          <TombolKirim className="btn">Simpan</TombolKirim>
           <a className="btn-secondary" href="/terminate">Batal</a>
         </div>
       </form>

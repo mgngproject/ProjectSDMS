@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import Flash from "@/components/Flash";
 import { createClient } from "@/lib/supabase/server";
 import { saveDataDiri } from "../../../datadiri/actions";
+import TombolKirim from "@/components/TombolKirim";
 
 const FIELDS: [string, string, string?][] = [
   ["ktp", "No. KTP (16 digit)"],
@@ -62,7 +63,7 @@ export default async function DataDiriFormPage({
             />
           </div>
         ))}
-        <div className="sm:col-span-2"><button className="btn" type="submit">Simpan</button></div>
+        <div className="sm:col-span-2"><TombolKirim className="btn">Simpan</TombolKirim></div>
       </form>
     </div>
   );

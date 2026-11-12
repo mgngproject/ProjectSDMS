@@ -3,6 +3,7 @@
 import { CalendarDays, Moon, RefreshCw, Sun } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
+import KembangLoading from "@/components/KembangLoading";
 
 const tombol = "inline-flex h-10 items-center justify-center rounded-xl border border-line bg-card text-ink shadow-card transition hover:bg-soft";
 
@@ -36,7 +37,7 @@ export default function HeaderTools() {
         {tanggal || " "}
       </span>
       <button type="button" className={`${tombol} w-10`} onClick={() => mulai(() => router.refresh())} aria-label="Muat ulang">
-        <RefreshCw size={16} className={segar ? "animate-spin" : ""} />
+        {segar ? <KembangLoading lebar={26} label="Memuat ulang" /> : <RefreshCw size={16} />}
       </button>
       <button type="button" className={`${tombol} w-10`} onClick={gantiTema} aria-label="Ganti tema">
         {gelap ? <Sun size={16} /> : <Moon size={16} />}

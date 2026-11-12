@@ -10,6 +10,7 @@ import { cariBagan, normKode } from "@/lib/bagan";
 import { ambilBagan } from "@/lib/bagan-data";
 import { createClient } from "@/lib/supabase/server";
 import { gantiKodeBagan, hapusBagan, importBagan, samakanSemuaUnit, tambahBagan, ubahBagan, ubahStatusBagan } from "./actions";
+import TombolKirim from "@/components/TombolKirim";
 
 type Pegawai = { id: number; np: string; nama: string; status: string; kode_bagan: string | null; unit_kerja: string | null; kategori: { nama: string } | null };
 
@@ -82,7 +83,7 @@ export default async function BaganPage({ searchParams }: { searchParams: Promis
           <div className="text-sm text-muted">Unit kerja beda dari daftar</div>
           <div className="mt-2 text-3xl font-bold tabular-nums">{unitBeda}</div>
           {unitBeda > 0 && (
-            <form action={samakanSemuaUnit} className="mt-1"><button className="link text-sm" type="submit">Samakan sekarang</button></form>
+            <form action={samakanSemuaUnit} className="mt-1"><TombolKirim className="link text-sm">Samakan sekarang</TombolKirim></form>
           )}
         </div>
       </div>
@@ -95,12 +96,12 @@ export default async function BaganPage({ searchParams }: { searchParams: Promis
           <input className="input !w-36 uppercase" name="induk_kode" list="kode-bagan" />
           <datalist id="kode-bagan">{daftar.map((b) => <option key={b.id} value={b.kode}>{b.nama_unit}</option>)}</datalist>
         </label>
-        <button className="btn" type="submit">Tambah kode</button>
+        <TombolKirim className="btn">Tambah kode</TombolKirim>
       </form>
 
       <form className="flex gap-2" role="search">
         <input className="input max-w-sm" name="q" defaultValue={sp.q ?? ""} placeholder="Cari kode atau nama unit" aria-label="Cari kode atau nama unit" />
-        <button className="btn" type="submit">Cari</button>
+        <TombolKirim className="btn">Cari</TombolKirim>
         <Link className="btn-secondary" href="/bagan">Reset</Link>
       </form>
 
@@ -117,7 +118,7 @@ export default async function BaganPage({ searchParams }: { searchParams: Promis
                   <form action={ubahBagan.bind(null, b.id)} className="flex flex-wrap items-center gap-2">
                     <input className="input min-w-48 flex-1" name="nama_unit" defaultValue={b.nama_unit} aria-label={`Nama unit ${b.kode}`} required />
                     <input className="input !w-28 uppercase" name="induk_kode" defaultValue={b.induk_kode ?? ""} list="kode-bagan" placeholder="Atasan" aria-label={`Atasan ${b.kode}`} />
-                    <button className="btn-secondary !px-3 !py-1.5" type="submit">Simpan</button>
+                    <TombolKirim className="btn-secondary !px-3 !py-1.5">Simpan</TombolKirim>
                   </form>
                 </td>
                 <td className="td tabular-nums">{pemakai.get(b.kode) ?? 0}</td>

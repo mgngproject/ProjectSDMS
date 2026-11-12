@@ -63,3 +63,11 @@
   .pill-warning { @apply pill bg-warning-soft text-warning; }
   .pill-danger { @apply pill bg-danger-soft text-danger; }
 }
+
+/* Kembang loading: tiap sinar memanjang dan memendek bergantian (lihat KembangLoading) */
+@keyframes kembang-mekar {
+  0%, 100% { transform: scale(0.72); opacity: 0.7; }
+  50% { transform: scale(1.08); opacity: 1; }
+}
+.kembang-sinar { transform-box: view-box; animation: kembang-mekar 1.8s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .kembang-sinar { animation: none; } }

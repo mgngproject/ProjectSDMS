@@ -1,5 +1,6 @@
 import KaryawanFields from "@/components/KaryawanFields";
 import type { Detail, Karyawan, Kategori } from "@/lib/types";
+import TombolKirim from "@/components/TombolKirim";
 
 type Props = {
   action: (formData: FormData) => void | Promise<void>;
@@ -23,7 +24,7 @@ export default function KaryawanForm({ action, batal, ...fields }: Props) {
       <KaryawanFields {...fields} />
       {/* Tombol menempel di bawah layar saat form panjang digulir */}
       <div className="sticky bottom-0 -mx-5 -mb-5 mt-5 flex gap-2 rounded-b-2xl border-t border-line bg-card/90 px-5 py-3 backdrop-blur">
-        <button className="btn" type="submit">Simpan</button>
+        <TombolKirim className="btn">Simpan</TombolKirim>
         <a className="btn-secondary" href={batal}>Batal</a>
       </div>
     </form>

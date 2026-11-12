@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import Flash from "@/components/Flash";
 import { createClient } from "@/lib/supabase/server";
 import { terminateKaryawan } from "../../actions";
+import TombolKirim from "@/components/TombolKirim";
 
 export default async function TerminateKaryawanPage({
   params,
@@ -34,7 +35,7 @@ export default async function TerminateKaryawanPage({
           <label className="label" htmlFor="alasan_keluar">Alasan Keluar</label>
           <textarea className="input" id="alasan_keluar" name="alasan_keluar" rows={3} maxLength={500} required />
         </div>
-        <div><button className="btn-danger px-4 py-2 text-sm" type="submit">Terminate Karyawan</button></div>
+        <div><TombolKirim className="btn-danger px-4 py-2 text-sm">Terminate Karyawan</TombolKirim></div>
       </form>
     </div>
   );

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Flash from "@/components/Flash";
 import { createClient } from "@/lib/supabase/server";
 import { updateTerminate } from "../../actions";
+import TombolKirim from "@/components/TombolKirim";
 
 export default async function EditTerminatePage({
   params,
@@ -35,7 +36,7 @@ export default async function EditTerminatePage({
           <textarea className="input" id="alasan_keluar" name="alasan_keluar" rows={3} maxLength={500} defaultValue={k.alasan_keluar ?? ""} required />
         </div>
         <div className="flex gap-2">
-          <button className="btn" type="submit">Simpan</button>
+          <TombolKirim className="btn">Simpan</TombolKirim>
           <a className="btn-secondary" href="/terminate">Batal</a>
         </div>
       </form>

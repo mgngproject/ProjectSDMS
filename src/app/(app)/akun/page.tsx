@@ -6,6 +6,7 @@ import { getProfile } from "@/lib/auth";
 import { adminTersedia, createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { ubahAkun, tambahAkun, ubahStatusAkun } from "./actions";
+import TombolKirim from "@/components/TombolKirim";
 
 type Baris = { id: string; email: string; nonaktif: boolean; nama: string; role: "admin" | "superadmin"; kategori_id: number | null; terakhir: string | null; adaProfil: boolean };
 
@@ -77,7 +78,7 @@ export default async function AkunPage({ searchParams }: { searchParams: Promise
             <label className="flex flex-col gap-1 text-sm"><span className="text-xs text-muted">Nama</span><input className="input" name="nama" required /></label>
             <label className="flex flex-col gap-1 text-sm"><span className="text-xs text-muted">Akses</span><select className="input" name="akses" required defaultValue="">{opsiAkses}</select></label>
             <label className="flex flex-col gap-1 text-sm"><span className="text-xs text-muted">Password (min. 8 karakter)</span><input className="input" name="password" type="password" minLength={8} autoComplete="new-password" required /></label>
-            <div className="flex items-end"><button className="btn w-full" type="submit">Buat akun</button></div>
+            <div className="flex items-end"><TombolKirim className="btn w-full">Buat akun</TombolKirim></div>
           </form>
 
           <div className="card overflow-x-auto">
@@ -97,7 +98,7 @@ export default async function AkunPage({ searchParams }: { searchParams: Promise
                       <form action={ubahAkun.bind(null, r.id)} className="flex flex-wrap items-center gap-2">
                         <input className="input min-w-40 flex-1" name="nama" defaultValue={r.nama} aria-label={`Nama ${r.email}`} required />
                         <select className="input !w-auto" name="akses" defaultValue={r.adaProfil ? aksesNilai(r) : ""} aria-label={`Akses ${r.email}`} required>{opsiAkses}</select>
-                        <button className="btn-secondary !px-3 !py-1.5" type="submit">Simpan</button>
+                        <TombolKirim className="btn-secondary !px-3 !py-1.5">Simpan</TombolKirim>
                       </form>
                     </td>
                     <td className="td"><span className={r.nonaktif ? "pill-danger" : "pill-success"}>{r.nonaktif ? "Nonaktif" : "Aktif"}</span></td>

@@ -2,6 +2,7 @@
 
 import { FileSpreadsheet } from "lucide-react";
 import { useState } from "react";
+import TombolKirim from "@/components/TombolKirim";
 
 /** Form import daftar bagan. Pilihan "ganti seluruh daftar" menghapus kode lama yang tidak ada di file, jadi meminta konfirmasi. */
 export default function ImporBaganForm({ action, jumlahKode }: { action: (formData: FormData) => void | Promise<void>; jumlahKode: number }) {
@@ -27,7 +28,7 @@ export default function ImporBaganForm({ action, jumlahKode }: { action: (formDa
             <span className="block text-xs text-muted">Kode lama yang tidak ada di file ikut dihapus, dan semua kode di file diaktifkan. Data karyawan tidak dihapus.</span>
           </span>
         </label>
-        <button className={ganti ? "btn-danger !px-4 !py-2 !text-sm" : "btn"} type="submit">{ganti ? "Ganti seluruh daftar" : "Import"}</button>
+        <TombolKirim className={ganti ? "btn-danger !px-4 !py-2 !text-sm" : "btn"}>{ganti ? "Ganti seluruh daftar" : "Import"}</TombolKirim>
       </form>
     </details>
   );

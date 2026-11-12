@@ -74,6 +74,9 @@ Karyawan, Kontrak, Data Diri, Monitoring, dan Terminate memakai baris filter yan
 ### Kecepatan pindah halaman
 Setiap halaman membaca data dari Supabase, jadi kecepatannya dipengaruhi jarak antara server Vercel dan database Supabase. Atur **Function Region** di Vercel (Project Settings, Functions) ke wilayah yang sama atau terdekat dengan wilayah proyek Supabase. Di aplikasi: halaman memakai `loading.tsx` agar kerangka tampil seketika saat pindah menu; `getProfile()` dibungkus `cache` agar layout dan halaman hanya sekali bertanya; pemeriksaan login di middleware dan `getProfile()` memakai `getClaims()` (tanpa bertanya ke Supabase bila proyek memakai kunci asimetris, selain itu kembali ke `getUser()`); jumlah karyawan di sidebar dihitung per kategori di database.
 
+### Animasi loading
+Setiap waktu tunggu memakai kembang logo Peruri yang bergerak (`src/components/KembangLoading.tsx`, bentuknya di `kembang-data.ts`): sinarnya memanjang dan memendek bergantian. Dipakai di halaman loading saat berpindah menu (`(app)/loading.tsx`), tombol Muat ulang di header, dan tombol simpan atau import lewat `TombolKirim` (menjadi nonaktif dan menampilkan kembang selama server action berjalan, sehingga tidak terkirim dua kali). Animasi mati bila pengguna memilih mengurangi gerakan. Form pencarian dan filter (GET) tidak memakainya karena memuat ulang halaman, yang sudah ditangani halaman loading.
+
 ### Ikon tab
 Ikon tab browser memakai kembang logo Peruri saja, tanpa latar (`src/app/icon.png` dan `favicon.ico`, transparan). `apple-icon.png` tetap berlatar putih karena iOS tidak menerima ikon transparan. Ikon tab dianimasikan oleh `src/components/IkonTabBergerak.tsx`: 16 bingkai dari `public/kembang-frames.png` (sinar kembang memanjang bergelombang bergantian) dipasang ke `<link rel="icon">` tiap 120 ms. Animasi berhenti saat tab tidak terlihat dan tidak jalan bila pengguna memilih mengurangi gerakan; tanpa itu, ikon statis dipakai.
 

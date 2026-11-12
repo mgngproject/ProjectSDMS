@@ -1,4 +1,5 @@
 import type { Kontrak } from "@/lib/types";
+import TombolKirim from "@/components/TombolKirim";
 
 type Props = {
   action: (formData: FormData) => void | Promise<void>;
@@ -46,7 +47,7 @@ export default function KontrakForm({ action, np, kontrak: c, kontrakKeDefault, 
         <textarea className="input" id="penilaian" name="penilaian" rows={2} defaultValue={c?.penilaian ?? ""} />
       </div>
       <div className="flex gap-2 sm:col-span-2">
-        <button className="btn" type="submit">Simpan</button>
+        <TombolKirim className="btn">Simpan</TombolKirim>
         <a className="btn-secondary" href={batal}>Batal</a>
       </div>
     </form>
