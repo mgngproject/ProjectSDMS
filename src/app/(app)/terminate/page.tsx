@@ -2,6 +2,8 @@ import PageHeader from "@/components/PageHeader";
 import Link from "next/link";
 import ConfirmSubmit from "@/components/ConfirmSubmit";
 import FilterBar from "@/components/FilterBar";
+import RiwayatTerminateView from "@/components/RiwayatTerminate";
+import TabTerminate from "@/components/TabTerminate";
 import Flash from "@/components/Flash";
 import { getProfile } from "@/lib/auth";
 import { cocokDasar, cocokTerminate, paramFilter, queryString } from "@/lib/filter";
@@ -18,6 +20,7 @@ export default async function TerminatePage({ searchParams }: { searchParams: Pr
   const profile = await getProfile();
   const isSuperAdmin = profile.role === "superadmin";
   const supabase = await createClient();
+  if (sp.tab === "riwayat") return <RiwayatTerminateView sp={sp} isSuperAdmin={isSuperAdmin} supabase={supabase} />;
   const { data: daftarKategori } = await supabase.from("kategori").select("id, nama").order("id");
   const { data } = await supabase
     .from("karyawan")
@@ -33,6 +36,7 @@ export default async function TerminatePage({ searchParams }: { searchParams: Pr
         <a className="btn-secondary" href={`/api/pdf/terminate${queryString(p)}`} target="_blank" rel="noreferrer">Export PDF</a>
           <Link className="btn" href="/terminate/new">Tambah Data Terminate</Link>
         </PageHeader>
+      <TabTerminate aktif="sekarang" />
       <Flash ok={sp.ok} error={sp.error} />
       <FilterBar key={JSON.stringify(p)} p={p} kategori={isSuperAdmin ? daftarKategori ?? [] : undefined} periode={["keluar", "masuk", "habis"]} resetHref="/terminate">
         <input className="input max-w-[200px]" name="alasan" defaultValue={p.alasan ?? ""} placeholder="Alasan keluar" aria-label="Alasan keluar" />
