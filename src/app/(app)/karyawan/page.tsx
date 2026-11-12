@@ -1,4 +1,5 @@
 import Link from "next/link";
+import AksiBaris from "@/components/AksiBaris";
 import ConfirmSubmit from "@/components/ConfirmSubmit";
 import FilterBar, { PilihanFilter } from "@/components/FilterBar";
 import Flash from "@/components/Flash";
@@ -95,14 +96,7 @@ export default async function KaryawanPage({ searchParams }: { searchParams: Pro
                     {r.folder_link ? <a className="link" href={r.folder_link} target="_blank" rel="noreferrer">Buka</a> : "-"}
                   </td>
                   <td className="td whitespace-nowrap">
-                    <div className="flex items-center gap-3">
-                      <Link className="link" href={`/karyawan/${r.id}/edit`}>Ubah</Link>
-                      <Link className="link" href={`/karyawan/${r.id}/kontrak`}>Kontrak</Link>
-                      <Link className="link" href={`/karyawan/${r.id}/mutasi`}>Mutasi</Link>
-                      <Link className="link" href={`/karyawan/${r.id}/datadiri`}>Data Diri</Link>
-                      <Link className="link" href={`/karyawan/${r.id}/terminate`}>Terminate</Link>
-                      <ConfirmSubmit label="Hapus" message={`Hapus ${r.nama}?`} formAction={deleteKaryawan.bind(null, r.id)} />
-                    </div>
+                    <AksiBaris id={r.id} nama={r.nama} np={r.np} hapus={deleteKaryawan.bind(null, r.id)} />
                   </td>
                 </tr>
               ))}
