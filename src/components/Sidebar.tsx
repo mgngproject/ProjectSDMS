@@ -34,7 +34,7 @@ export default function Sidebar({ kategori, tampilKuota, tampilBagan, tampilAkun
 
   return (
     <aside
-      className={`flex flex-col gap-4 border-b border-line bg-card p-4 transition-[width] duration-200 md:sticky md:top-0 md:h-screen md:shrink-0 md:overflow-y-auto md:border-b-0 md:border-r md:p-5 ${
+      className={`flex flex-col gap-4 border-b border-line bg-card p-4 transition-[width] duration-200 md:sticky md:top-0 md:h-[calc(100vh/var(--zoom))] md:shrink-0 md:overflow-y-auto md:border-b-0 md:border-r md:p-5 ${
         tertutup ? "md:w-20 md:px-3" : "md:w-64"
       }`}
     >

@@ -74,6 +74,9 @@ Karyawan, Kontrak, Data Diri, Monitoring, dan Terminate memakai baris filter yan
 ### Kecepatan pindah halaman
 Setiap halaman membaca data dari Supabase, jadi kecepatannya dipengaruhi jarak antara server Vercel dan database Supabase. Atur **Function Region** di Vercel (Project Settings, Functions) ke wilayah yang sama atau terdekat dengan wilayah proyek Supabase. Di aplikasi: halaman memakai `loading.tsx` agar kerangka tampil seketika saat pindah menu; `getProfile()` dibungkus `cache` agar layout dan halaman hanya sekali bertanya; pemeriksaan login di middleware dan `getProfile()` memakai `getClaims()` (tanpa bertanya ke Supabase bila proyek memakai kunci asimetris, selain itu kembali ke `getUser()`); jumlah karyawan di sidebar dihitung per kategori di database.
 
+### Zoom awal 75%
+Di layar lebar (1024 px ke atas), semua halaman termasuk login tampil di 75% lewat CSS `zoom` di `globals.css`, supaya tidak terasa terlalu besar saat pertama dibuka. Di layar kecil (ponsel dan tablet kecil) tidak diubah. Pengguna tetap bisa mengatur zoom browser sendiri (Ctrl dan + atau -); angka 75% hanya titik awalnya. Karena satuan `vh` ikut mengecil bersama zoom, tinggi layar penuh ditulis `min-h-[calc(100vh/var(--zoom))]`, dan posisi tooltip grafik di `DashboardSA` dibagi zoom. Untuk mengubah angkanya, ganti `0.75` di dua tempat dalam blok itu.
+
 ### Ikon tab
 Ikon tab browser memakai kembang logo Peruri saja, tanpa latar (`src/app/icon.png` dan `favicon.ico`, transparan). `apple-icon.png` tetap berlatar putih karena iOS tidak menerima ikon transparan. Ikon tab dianimasikan oleh `src/components/IkonTabBergerak.tsx`: 16 bingkai dari `public/kembang-frames.png` (sinar kembang memanjang bergelombang bergantian) dipasang ke `<link rel="icon">` tiap 120 ms. Animasi berhenti saat tab tidak terlihat dan tidak jalan bila pengguna memilih mengurangi gerakan; tanpa itu, ikon statis dipakai.
 

@@ -43,6 +43,14 @@
   --chart-grid: #2c2c2a; --chart-axis: #383835; --chart-tick: #898781;
 }
 
+/* Tampilan awal 75% di layar lebar supaya tidak terasa terlalu besar. Pengguna tetap bisa mengubah zoom browser.
+   Satuan vh ikut mengecil bersama zoom, jadi tinggi layar penuh dibagi --zoom (lihat min-h-[calc(100vh/var(--zoom))]). */
+:root { --zoom: 1; }
+@media (min-width: 1024px) {
+  :root { --zoom: 0.75; }
+  html { zoom: 0.75; }
+}
+
 @layer base {
   body { @apply bg-bg font-sans text-ink antialiased; }
   a { @apply transition-colors; }

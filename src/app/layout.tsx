@@ -20,7 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <script dangerouslySetInnerHTML={{ __html: TEMA }} />
       </head>
-      <body className="min-h-screen">
+      <body className="min-h-[calc(100vh/var(--zoom))]">
         <IkonTabBergerak />
         {children}
       </body>
