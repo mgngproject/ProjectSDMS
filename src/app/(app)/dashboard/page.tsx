@@ -33,6 +33,16 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     );
   }
 
+  // PIC Magang memakai dashboard analitik seperti Super Admin, dengan sebaran khas Magang
+  if (profile.kategori?.nama === "Magang") {
+    return (
+      <div className="space-y-5">
+        <PageHeader title="Dashboard" />
+        <DashboardSuperAdmin supabase={supabase} magang />
+      </div>
+    );
+  }
+
   await supabase.rpc("expire_kontrak");
 
   const sekarang = hariIni();

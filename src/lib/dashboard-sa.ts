@@ -20,6 +20,9 @@ export type Orang = {
   lahir: string | null;
   jenjang: string | null;
   dataDiri: boolean;
+  /** Hanya diisi di dashboard PIC Magang: kolom Kategori (jenis) dan Status pada data Magang. */
+  jenis?: string | null;
+  statusMagang?: string | null;
   direktorat: string;
   divisi: string;
 };
