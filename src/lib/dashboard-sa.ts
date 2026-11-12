@@ -1,4 +1,5 @@
 // Perhitungan dashboard Super Admin. Semua fungsi murni (tanggal diberikan lewat parameter `hari`, format YYYY-MM-DD).
+import { DIREKTORAT_KHUSUS } from "@/lib/bagan";
 import { selisihHari, tambahHari } from "@/lib/format";
 
 export type Orang = {
@@ -19,6 +20,9 @@ export type Orang = {
   lahir: string | null;
   jenjang: string | null;
   dataDiri: boolean;
+  /** Hanya diisi di dashboard PIC Magang: kolom Kategori (jenis) dan Status pada data Magang. */
+  jenis?: string | null;
+  statusMagang?: string | null;
   direktorat: string;
   divisi: string;
 };
@@ -233,6 +237,8 @@ export function peta(bagan: BaganRow[]) {
     const kode = normKode(kodeAsli);
     const b = kode ? byKode.get(kode) : undefined;
     if (!b) return { direktorat: TANPA_BAGAN, divisi: unit?.trim() || (kode ? kode : "Tanpa unit kerja") };
+    const khusus = DIREKTORAT_KHUSUS.includes(kode) ? kode : DIREKTORAT_KHUSUS.includes(normKode(b.induk_kode)) ? normKode(b.induk_kode) : null;
+    if (khusus) return { direktorat: byKode.get(khusus)?.nama_unit ?? b.nama_unit, divisi: b.nama_unit };
     const dir = cari(/^\d0+$/, kode.slice(0, 1));
     const div = cari(/^\d[1-9]0+$/, kode.slice(0, 2));
     if (dir || div) {

@@ -24,11 +24,12 @@ type KaryawanRow = {
   tanggal_keluar: string | null; alasan_keluar: string | null; awal_kontrak: string | null; akhir_kontrak: string | null; kategori: { nama: string } | null;
 };
 
-export default async function DashboardSuperAdmin({ supabase }: { supabase: Klien }) {
+/** `magang`: tampilan untuk PIC Magang (hanya kategorinya sendiri, dengan sebaran Status dan Kategori magang). */
+export default async function DashboardSuperAdmin({ supabase, magang = false }: { supabase: Klien; magang?: boolean }) {
   await supabase.rpc("expire_kontrak");
   const hari = hariIni();
 
-  const [kategori, karyawan, kontrak, dataDiri, monitoring, bagan] = await Promise.all([
+  const [kategori, karyawan, kontrak, dataDiri, monitoring, bagan, detailMagang] = await Promise.all([
     supabase.from("kategori").select("id, nama").order("id").then((r) => (r.data ?? []) as { id: number; nama: string }[]),
     semua<KaryawanRow>((a, b) =>
       supabase.from("karyawan").select("id, np, nama, kode_bagan, unit_kerja, status, tanggal_keluar, alasan_keluar, awal_kontrak, akhir_kontrak, kategori:kategori_id(nama)").order("id").range(a, b)),
@@ -39,7 +40,11 @@ export default async function DashboardSuperAdmin({ supabase }: { supabase: Klie
     semua<{ karyawan_id: number; status: string | null }>((a, b) => supabase.from("monitoring").select("karyawan_id, status").order("id").range(a, b)),
     // Tabel bagan baru ada setelah migrasi 0011; bila belum, dashboard tetap jalan tanpa pemetaan divisi
     semua<BaganRow>((a, b) => supabase.from("bagan").select("kode, nama_unit, induk_kode").eq("aktif", true).order("id").range(a, b)),
+    magang
+      ? semua<{ karyawan_id: number; jenis: string | null; status_magang: string | null }>((a, b) => supabase.from("karyawan_magang").select("karyawan_id, jenis, status_magang").order("karyawan_id").range(a, b))
+      : Promise.resolve([] as { karyawan_id: number; jenis: string | null; status_magang: string | null }[]),
   ]);
+  const magangPer = new Map(detailMagang.map((m) => [m.karyawan_id, m]));
 
   const kontrakPer = new Map<number, string[]>();
   for (const k of [...kontrak].sort((x, y) => (x.awal_kontrak ?? "").localeCompare(y.awal_kontrak ?? ""))) {
@@ -50,7 +55,7 @@ export default async function DashboardSuperAdmin({ supabase }: { supabase: Klie
   const selesai = new Set(monitoring.filter((m) => (m.status ?? "").trim().toLowerCase() === "selesai").map((m) => m.karyawan_id));
   const unit = peta(bagan);
 
-  const orang: Orang[] = karyawan.map((k) => {
+  const orang: Orang[] = karyawan.filter((k) => !magang || k.kategori?.nama === "Magang").map((k) => {
     const d = diri.get(k.id);
     const { direktorat, divisi } = unit(k.kode_bagan, k.unit_kerja);
     const jenjang = d?.jenjang_2 || d?.jenjang_1 || null;
@@ -63,6 +68,7 @@ export default async function DashboardSuperAdmin({ supabase }: { supabase: Klie
       jenjang: jenjang && JENJANG.includes(jenjang) ? jenjang : jenjang ? "Lainnya" : null,
       dataDiri: d ? dataDiriLengkap(d) : false,
       direktorat, divisi,
+      ...(magang ? { jenis: magangPer.get(k.id)?.jenis ?? null, statusMagang: magangPer.get(k.id)?.status_magang ?? null } : {}),
     };
   });
 
@@ -73,5 +79,5 @@ export default async function DashboardSuperAdmin({ supabase }: { supabase: Klie
     jendela[k.nama] = { label: j.label, sampai: j.sampai(hari) };
   }
 
-  return <DashboardSA orang={orang} hari={hari} kategori={kategori.map((k) => k.nama)} jendela={jendela} baganTerisi={bagan.length > 0} />;
+  return <DashboardSA orang={orang} hari={hari} kategori={kategori.map((k) => k.nama)} jendela={jendela} baganTerisi={bagan.length > 0} magang={magang} />;
 }

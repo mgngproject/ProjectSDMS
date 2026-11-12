@@ -15,6 +15,8 @@ type Props = {
   kategori: string[];
   jendela: Record<string, { label: string; sampai: string }>;
   baganTerisi: boolean;
+  /** Dashboard PIC Magang: tanpa filter kategori dan tab Profil, sebaran Status dan Kategori magang menggantikan Risiko dan Corong. */
+  magang?: boolean;
 };
 
 // ---------- tooltip ----------
@@ -150,7 +152,8 @@ function kurva(pts: number[][]): string {
   return d;
 }
 
-function Tren({ orang, hari, buka, judulBagian }: { orang: Orang[]; hari: string; buka: Buka; judulBagian: string }) {
+function Tren({ orang, hari, buka, judulBagian, istilah = "karyawan" }: { orang: Orang[]; hari: string; buka: Buka; judulBagian: string; istilah?: string }) {
+  const Istilah = istilah.charAt(0).toUpperCase() + istilah.slice(1);
   const t = useContext(TipCtx);
   const gid = useId().replace(/:/g, "");
   const [ref, W] = useLebar<HTMLDivElement>();
@@ -170,13 +173,13 @@ function Tren({ orang, hari, buka, judulBagian }: { orang: Orang[]; hari: string
   return (
     <KartuGrafik
       kelas="lg:col-span-2"
-      judul="Tren karyawan"
+      judul={`Tren ${istilah}`}
       tanya={judulBagian}
-      legenda={<div className="mb-2 flex flex-wrap items-center justify-between gap-2"><Legend items={[{ warna: C(1), label: "Karyawan aktif", garis: true }]} /><Legend items={[{ warna: C(1), label: "Masuk" }, { warna: C(2), label: "Keluar" }]} /></div>}
+      legenda={<div className="mb-2 flex flex-wrap items-center justify-between gap-2"><Legend items={[{ warna: C(1), label: `${Istilah} aktif`, garis: true }]} /><Legend items={[{ warna: C(1), label: "Masuk" }, { warna: C(2), label: "Keluar" }]} /></div>}
       tabel={{ kolom: ["Bulan", "Aktif", "Masuk", "Keluar"], baris: data.map((d) => [labelBulan(d.ym), d.aktif, d.masuk.length, d.keluar.length]) }}
     >
       <div ref={ref} className="w-full">
-        <svg viewBox={`0 0 ${W} ${H}`} className="block h-auto w-full overflow-visible" role="img" aria-label="Tren karyawan aktif, masuk, dan keluar 12 bulan terakhir">
+        <svg viewBox={`0 0 ${W} ${H}`} className="block h-auto w-full overflow-visible" role="img" aria-label={`Tren ${istilah} aktif, masuk, dan keluar 12 bulan terakhir`}>
           <defs>
             <linearGradient id={`g${gid}`} x1="0" y1="0" x2="0" y2="1">
               <stop offset="0" stopColor={C(1)} stopOpacity=".32" />
@@ -208,7 +211,7 @@ function Tren({ orang, hari, buka, judulBagian }: { orang: Orang[]; hari: string
           {hover != null && <line x1={pts[hover][0]} x2={pts[hover][0]} y1={top} y2={top + ph + g + bh} stroke="var(--chart-axis)" pointerEvents="none" />}
           {data.map((d, i) => {
             const aksi = () => { t.sembunyi(); buka(`Masuk dan keluar ${labelBulan(d.ym)}`, [...d.masuk, ...d.keluar]); };
-            const tip = pasangTip(labelBulan(d.ym), [{ label: "Karyawan aktif", nilai: d.aktif, warna: C(1) }, { label: "Masuk", nilai: d.masuk.length, warna: C(1), kotak: true }, { label: "Keluar", nilai: d.keluar.length, warna: C(2), kotak: true }], t);
+            const tip = pasangTip(labelBulan(d.ym), [{ label: `${Istilah} aktif`, nilai: d.aktif, warna: C(1) }, { label: "Masuk", nilai: d.masuk.length, warna: C(1), kotak: true }, { label: "Keluar", nilai: d.keluar.length, warna: C(2), kotak: true }], t);
             return (
               <rect
                 key={d.ym} x={L + step * i} y={top} width={step} height={H - top - 18} fill="transparent" tabIndex={0} role="button" className="cursor-pointer outline-none focus-visible:stroke-[rgb(var(--primary))]"
@@ -295,15 +298,138 @@ function Corong({ orang, hari, buka }: { orang: Orang[]; hari: string; buka: Buk
   );
 }
 
-function Alasan({ orang, hari, buka }: { orang: Orang[]; hari: string; buka: Buka }) {
+/** Pie chart sebaran peserta aktif; legenda hanya nama dan persentase. */
+function Pie({ judul, tanya, irisan, buka, kelompok }: { judul: string; tanya: string; irisan: { nama: string; orang: Orang[]; warna: string }[]; buka: Buka; kelompok: string }) {
+  const t = useContext(TipCtx);
+  const total = irisan.reduce((n, x) => n + x.orang.length, 0);
+  const ada = irisan.filter((x) => x.orang.length > 0);
+  const cx = 100, cy = 100, R = 92;
+  let a0 = -Math.PI / 2;
+  const potong = ada.map((x) => {
+    const f = x.orang.length / total, a1 = a0 + f * 2 * Math.PI;
+    const p = (a: number, r: number) => [cx + r * Math.cos(a), cy + r * Math.sin(a)];
+    const [x0, y0] = p(a0, R), [x1, y1] = p(a1, R), [tx, ty] = p((a0 + a1) / 2, R * 0.62);
+    const d = ada.length === 1 ? "" : `M${cx} ${cy} L${x0} ${y0} A${R} ${R} 0 ${f > 0.5 ? 1 : 0} 1 ${x1} ${y1}Z`;
+    a0 = a1;
+    return { ...x, f, d, tx, ty };
+  });
+  return (
+    <KartuGrafik
+      judul={judul} tanya={tanya}
+      tabel={{ kolom: [kelompok, "Orang", "Persen"], baris: irisan.map((x) => [x.nama, x.orang.length, `${persen(x.orang.length, total)}%`]) }}
+    >
+      {total === 0 ? <p className="text-sm text-muted">Belum ada data.</p> : (
+        <div className="flex flex-wrap items-center gap-5">
+          <svg viewBox="0 0 200 200" className="h-[190px] w-[190px] flex-none" role="img" aria-label={judul}>
+            {potong.map((x) => {
+              const aksi = () => { t.sembunyi(); buka(`${judul}: ${x.nama}`, x.orang); };
+              const props = {
+                fill: x.warna, stroke: "rgb(var(--card))", strokeWidth: 2, tabIndex: 0, role: "button", className: "cursor-pointer outline-none hover:brightness-110 focus-visible:brightness-110",
+                "aria-label": `${x.nama}: ${x.orang.length} orang (${persen(x.orang.length, total)}%). Buka daftar`,
+                onClick: aksi, onKeyDown: (e: React.KeyboardEvent) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); aksi(); } },
+                ...pasangTip(x.nama, [{ label: "Orang", nilai: x.orang.length, warna: x.warna, kotak: true }, { label: "Persen", nilai: `${persen(x.orang.length, total)}%` }], t),
+              };
+              return (
+                <g key={x.nama}>
+                  {ada.length === 1 ? <circle cx={cx} cy={cy} r={R} {...props} /> : <path d={x.d} {...props} />}
+                  {x.f >= 0.08 && <text x={x.tx} y={x.ty + 4} textAnchor="middle" fontSize="13" fontWeight="700" fill="#fff" pointerEvents="none">{persen(x.orang.length, total)}%</text>}
+                </g>
+              );
+            })}
+          </svg>
+          <ul className="flex min-w-[140px] flex-1 flex-col gap-1">
+            {irisan.map((x) => (
+              <li key={x.nama}>
+                <button type="button" className="flex w-full items-center gap-2 py-1 text-left text-sm hover:text-primary" onClick={() => buka(`${judul}: ${x.nama}`, x.orang)} aria-label={`${x.nama}: ${persen(x.orang.length, total)}%. Buka daftar`}>
+                  <i className="inline-block h-2.5 w-2.5 flex-none rounded-full" style={{ background: x.warna }} />
+                  <span className="min-w-0 flex-1">{x.nama}</span>
+                  <b className="tabular-nums">{persen(x.orang.length, total)}%</b>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </KartuGrafik>
+  );
+}
+
+/** Bar mendatar sederhana: satu batang per kelompok. */
+function BarKelompok({ judul, tanya, baris, buka, kelompok }: { judul: string; tanya: string; baris: { nama: string; orang: Orang[] }[]; buka: Buka; kelompok: string }) {
+  const total = baris.reduce((n, x) => n + x.orang.length, 0);
+  const mx = Math.max(1, ...baris.map((x) => x.orang.length));
+  return (
+    <KartuGrafik judul={judul} tanya={tanya} tabel={{ kolom: [kelompok, "Orang"], baris: baris.map((x) => [x.nama, x.orang.length]) }}>
+      {baris.length === 0 ? <p className="text-sm text-muted">Belum ada data.</p> : (
+        <div className="flex flex-col gap-2.5">
+          {baris.map((x) => (
+            <div key={x.nama} className="grid grid-cols-[76px_minmax(0,1fr)] items-center gap-2.5">
+              <div className="text-[12.5px] text-muted">{x.nama}</div>
+              <div className="flex h-6 items-center">
+                <Segmen
+                  lebar={`calc((100% - 40px) * ${x.orang.length / mx})`} warna={C(1)} akhir minLebar={6} label={`${x.nama}: ${x.orang.length} orang. Buka daftar`} judul={x.nama}
+                  baris={[{ label: "Orang", nilai: x.orang.length, warna: C(1), kotak: true }, { label: "Dari yang terisi", nilai: `${persen(x.orang.length, total)}%` }]}
+                  klik={() => buka(`${judul}: ${x.nama}`, x.orang)}
+                />
+                <span className="ml-2 text-xs font-semibold">{x.orang.length}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </KartuGrafik>
+  );
+}
+
+/** Mengelompokkan menurut nilai; yang kosong masuk "Belum diisi". Urutan mengikuti `urutan`, nilai tak dikenal ditaruh sesudahnya. */
+function kelompokkan(aktif: Orang[], ambil: (o: Orang) => string | null | undefined, urutan: string[]) {
+  const peta = new Map<string, Orang[]>(urutan.map((n) => [n, []]));
+  const kosong: Orang[] = [];
+  for (const o of aktif) {
+    const v = ambil(o)?.trim();
+    if (!v) { kosong.push(o); continue; }
+    peta.set(v, [...(peta.get(v) ?? []), o]);
+  }
+  return { daftar: [...peta.entries()].map(([nama, orang]) => ({ nama, orang })), kosong };
+}
+
+function SebaranMagang({ aktif, buka }: { aktif: Orang[]; buka: Buka }) {
+  const warnaPie = [C(1), C(2), C(3)];
+  const irisan = (g: ReturnType<typeof kelompokkan>) => [
+    ...g.daftar.map((x, i) => ({ nama: x.nama, orang: x.orang, warna: warnaPie[i % warnaPie.length] })),
+    ...(g.kosong.length ? [{ nama: "Belum diisi", orang: g.kosong, warna: "var(--chart-lain)" }] : []),
+  ];
+  const status = useMemo(() => kelompokkan(aktif, (o) => o.statusMagang, ["Baru", "Alih Status", "Perpanjangan Maganghub"]), [aktif]);
+  const jenis = useMemo(() => kelompokkan(aktif, (o) => o.jenis, ["Magenta", "PKL", "Maganghub"]), [aktif]);
+  return (
+    <>
+      <Pie judul="Sebaran status" tanya="Peserta aktif menurut status magang." irisan={irisan(status)} buka={buka} kelompok="Status" />
+      <Pie judul="Sebaran kategori" tanya="Peserta aktif menurut kategori magang." irisan={irisan(jenis)} buka={buka} kelompok="Kategori" />
+    </>
+  );
+}
+
+function PendidikanTerakhir({ aktif, buka }: { aktif: Orang[]; buka: Buka }) {
+  const g = useMemo(() => kelompokkan(aktif, (o) => o.jenjang, [...JENJANG, "Lainnya"]), [aktif]);
+  const baris = g.daftar.filter((x) => x.orang.length > 0);
+  return (
+    <BarKelompok
+      judul="Pendidikan terakhir"
+      tanya={`Peserta aktif menurut jenjang.${g.kosong.length ? ` ${g.kosong.length} peserta belum punya data pendidikan di Data Diri.` : ""}`}
+      baris={baris} buka={buka} kelompok="Pendidikan"
+    />
+  );
+}
+
+function Alasan({ orang, hari, buka, istilah = "Karyawan", lebar = true }: { orang: Orang[]; hari: string; buka: Buka; istilah?: string; lebar?: boolean }) {
   const daftar = useMemo(() => alasanKeluar(orang, hari), [orang, hari]);
   const total = daftar.reduce((t, x) => t + x.orang.length, 0);
   const mx = Math.max(1, ...daftar.map((x) => x.orang.length));
   return (
     <KartuGrafik
-      kelas="lg:col-span-2"
+      kelas={lebar ? "lg:col-span-2" : ""}
       judul="Alasan keluar"
-      tanya="Karyawan yang keluar dalam 12 bulan terakhir."
+      tanya={`${istilah} yang keluar dalam 12 bulan terakhir.`}
       tabel={{ kolom: ["Alasan", "Orang"], baris: daftar.map((x) => [x.alasan, x.orang.length]) }}
     >
       {daftar.length === 0 ? (
@@ -523,14 +649,16 @@ function Daftar({ d, hari, tutup }: { d: { judul: string; orang: Orang[]; link?:
 }
 
 // ---------- halaman ----------
-export default function DashboardSA({ orang, hari, kategori, jendela, baganTerisi }: Props) {
-  const [filter, setFilter] = useState("");
+export default function DashboardSA({ orang, hari, kategori, jendela, baganTerisi, magang = false }: Props) {
+  const [filter, setFilter] = useState(magang ? "Magang" : "");
+  const istilah = magang ? "peserta" : "karyawan";
+  const Istilah = magang ? "Peserta" : "Karyawan";
   const [tab, setTab] = useState<"ringkasan" | "profil">("ringkasan");
   const [daftar, setDaftar] = useState<{ judul: string; orang: Orang[]; link?: { href: string; label: string } } | null>(null);
   const [tip, setTip] = useState<Tip>(null);
   const daftarRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => { if (window.location.hash === "#profil") setTab("profil"); }, []);
+  useEffect(() => { if (!magang && window.location.hash === "#profil") setTab("profil"); }, [magang]);
   const pilihTab = (t: "ringkasan" | "profil") => { setTab(t); setDaftar(null); try { history.replaceState(null, "", `#${t}`); } catch { /* abaikan */ } };
 
   const data = useMemo(() => (filter ? orang.filter((o) => o.kat === filter) : orang), [orang, filter]);
@@ -566,36 +694,36 @@ export default function DashboardSA({ orang, hari, kategori, jendela, baganTeris
 
   return (
     <TipCtx.Provider value={ctx}>
-      <div className="flex items-center gap-2">
+      {!magang && <div className="flex items-center gap-2">
         <label htmlFor="sa-kat" className="text-sm text-muted">Kategori</label>
         <select id="sa-kat" className="input !w-auto" value={filter} onChange={(e) => { setFilter(e.target.value); setDaftar(null); }}>
           <option value="">Semua kategori</option>
           {kategori.map((k) => <option key={k} value={k}>{k}</option>)}
         </select>
-      </div>
+      </div>}
 
-      <div role="tablist" aria-label="Tampilan dashboard" className="flex gap-1 border-b border-line">{tabBtn("ringkasan", "Ringkasan")}{tabBtn("profil", "Profil")}</div>
+      {!magang && <div role="tablist" aria-label="Tampilan dashboard" className="flex gap-1 border-b border-line">{tabBtn("ringkasan", "Ringkasan")}{tabBtn("profil", "Profil")}</div>}
 
-      {tab === "ringkasan" ? (
+      {tab === "ringkasan" || magang ? (
         <div className="space-y-4" role="tabpanel">
           <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-            <div className="card p-4"><div className="text-xs text-muted">Karyawan aktif</div><div className="mt-1 text-3xl font-semibold">{kt.aktif}</div><div className="mt-0.5 text-xs font-semibold text-ink/80">{filter || "Semua kategori"}</div><Spark nilai={kt.sparkAktif} warna={C(1)} /></div>
+            <div className="card p-4"><div className="text-xs text-muted">{Istilah} aktif</div><div className="mt-1 text-3xl font-semibold">{kt.aktif}</div><div className="mt-0.5 text-xs font-semibold text-ink/80">{magang ? "Magang" : filter || "Semua kategori"}</div><Spark nilai={kt.sparkAktif} warna={C(1)} /></div>
             <div className="card p-4"><div className="text-xs text-muted">Masuk bulan ini</div><div className="mt-1 text-3xl font-semibold">{kt.masuk}</div><Delta skr={kt.masuk} lalu={kt.masukLalu} /><Spark nilai={kt.sparkMasuk} warna={C(1)} /></div>
             <div className="card p-4"><div className="text-xs text-muted">Kontrak berakhir bulan ini</div><div className="mt-1 text-3xl font-semibold">{kt.berakhir}</div><Delta skr={kt.berakhir} lalu={kt.berakhirLalu} /><Spark nilai={kt.sparkBerakhir} warna={C(2)} /></div>
             <div className="card p-4"><div className="text-xs text-muted">Turnover 12 bulan</div><div className="mt-1 text-3xl font-semibold">{Math.round(kt.turnover.persen)}%</div><div className="mt-0.5 text-xs text-muted"><b className="font-semibold text-ink/80">{kt.turnover.keluar} orang keluar</b> (12 bulan sebelumnya {Math.round(kt.turnoverLalu.persen)}%)</div><Spark nilai={kt.sparkTurnover} warna={C(2)} /></div>
           </div>
 
           <div className="grid gap-4 lg:grid-cols-2">
-            <Tren orang={data} hari={hari} buka={buka} judulBagian={`Jumlah karyawan aktif tiap akhir bulan${lingkup}, dan berapa yang masuk dan keluar.`} />
+            <Tren orang={data} hari={hari} buka={buka} judulBagian={`Jumlah ${istilah} aktif tiap akhir bulan${lingkup}, dan berapa yang masuk dan keluar.`} istilah={istilah} />
 
             <section className="card p-5">
               <h2 className="font-semibold">Perlu tindak lanjut</h2>
               <p className="mb-2 text-xs text-muted">Pekerjaan yang menunggu, dengan jalan pintas ke daftarnya.</p>
               <ul className="divide-y divide-line">
                 {([
-                  ["Berkas karyawan belum lengkap", belum, { href: `/monitoring?status=Belum%20Lengkap${filter ? `&kategori=${encodeURIComponent(filter)}` : ""}`, label: "Buka di Monitoring" }],
+                  [`Berkas ${istilah} belum lengkap`, belum, { href: `/monitoring?status=Belum%20Lengkap${filter ? `&kategori=${encodeURIComponent(filter)}` : ""}`, label: "Buka di Monitoring" }],
                   [`Kontrak habis dalam ${j.label}`, segera, undefined],
-                  ["Karyawan terminate", keluar, { href: "/terminate", label: "Buka di Terminate" }],
+                  [`${Istilah} terminate`, keluar, { href: "/terminate", label: "Buka di Terminate" }],
                 ] as [string, Orang[], { href: string; label: string } | undefined][]).map(([label, L, link]) => (
                   <li key={label} className="flex items-center gap-3 py-3">
                     <span className="flex-1 text-sm">{label}</span>
@@ -610,7 +738,7 @@ export default function DashboardSA({ orang, hari, kategori, jendela, baganTeris
               <div className="mb-2 flex items-start justify-between gap-2">
                 <div>
                   <h2 className="font-semibold">Kontrak habis dalam {j.label} ({segera.length})</h2>
-                  <p className="text-xs text-muted">Jendela mengikuti kategori: Magang 30 hari, IDE 1 bulan, lainnya 2 bulan atau 60 hari.</p>
+                  <p className="text-xs text-muted">{magang ? "Jendela untuk Magang adalah 30 hari." : "Jendela mengikuti kategori: Magang 30 hari, IDE 1 bulan, lainnya 2 bulan atau 60 hari."}</p>
                 </div>
                 <button type="button" className="btn-secondary !px-3 !py-1 !text-xs" onClick={() => buka(`Kontrak habis dalam ${j.label}`, segera)}>Lihat semua</button>
               </div>
@@ -633,9 +761,18 @@ export default function DashboardSA({ orang, hari, kategori, jendela, baganTeris
               </ul>
             </section>
 
-            <Risiko orang={data} hari={hari} kategori={kategoriTampil} buka={buka} />
-            <Corong orang={data} hari={hari} buka={buka} />
-            <Alasan orang={data} hari={hari} buka={buka} />
+            {magang ? (
+              <>
+                <SebaranMagang aktif={aktif} buka={buka} />
+                <PendidikanTerakhir aktif={aktif} buka={buka} />
+              </>
+            ) : (
+              <>
+                <Risiko orang={data} hari={hari} kategori={kategoriTampil} buka={buka} />
+                <Corong orang={data} hari={hari} buka={buka} />
+              </>
+            )}
+            <Alasan orang={data} hari={hari} buka={buka} istilah={Istilah} lebar={!magang} />
           </div>
         </div>
       ) : (
